@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TRUST — CS:GO Partners</title>
+  <meta name="description" content="TRUST is a competitive launcher and matchmaking platform for CS:GO 2x2 and 5x5." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <div class="site-shell">
+    <header class="topbar">
+      <div class="brand">TRUST</div>
+
+      <nav class="topnav">
+        <a href="#modes" data-i18n="navModes">Modes</a>
+        <a href="#status" data-i18n="navStatus">Status</a>
+        <a href="#account" data-i18n="navAccount">Account</a>
+        <a href="#download" data-i18n="navDownload">Download</a>
+        <a href="#roadmap" data-i18n="navRoadmap">Roadmap</a>
+        <a href="#faq" data-i18n="navFaq">FAQ</a>
+      </nav>
+
+      <div class="topbar-actions">
+        <button class="ghost-btn" id="langToggle">RU</button>
+        <a class="ghost-btn" href="#download" data-i18n="downloadBtnTop">Download</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-left">
+          <div class="hero-badge" data-i18n="heroBadge">Competitive launcher for CS:GO duos and teams</div>
+
+          <h1 data-i18n="heroTitle">
+            Queue smarter.<br />
+            Play better.<br />
+            Win with TRUST.
+          </h1>
+
+          <p class="hero-text" data-i18n="heroText">
+            TRUST brings launcher UX, live queue flow, real match accept, and focused 2x2 / 5x5 matchmaking into one
+            competitive platform.
+          </p>
+
+          <div class="hero-actions">
+            <a class="primary-btn" href="#download" data-i18n="heroPrimaryBtn">Download launcher</a>
+            <a class="ghost-btn large" href="#status" data-i18n="heroSecondaryBtn">Live status</a>
+          </div>
+
+          <div class="hero-stats">
+            <div class="stat-card">
+              <span class="stat-label" data-i18n="statOnlineLabel">Players online</span>
+              <strong class="stat-value" id="onlineCount">0</strong>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label" data-i18n="statServerLabel">Server</span>
+              <strong class="stat-value" id="serverState">Checking...</strong>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label" data-i18n="statModesLabel">Modes</span>
+              <strong class="stat-value">2x2 / 5x5</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-right">
+          <div class="hero-visual">
+            <div class="glow glow-a"></div>
+            <div class="glow glow-b"></div>
+
+            <div class="launcher-preview">
+              <div class="preview-topbar">
+                <span class="preview-brand">TRUST</span>
+                <div class="preview-controls"><span></span><span></span></div>
+              </div>
+
+              <div class="preview-body">
+                <aside class="preview-sidebar">
+                  <div class="preview-nav-item active">Main</div>
+                  <div class="preview-nav-item">Settings</div>
+                  <div class="preview-profile">
+                    <div class="avatar"></div>
+                    <div>
+                      <strong>trust_user</strong>
+                      <span>1478 ELO</span>
+                    </div>
+                  </div>
+                </aside>
+
+                <div class="preview-content">
+                  <div class="preview-hero-card">
+                    <h3>TRUST // CS:GO PARTNERS</h3>
+                    <p data-i18n="previewText">
+                      Real queue flow, accept / decline, live lobby, online count, and focused competitive modes.
+                    </p>
+                  </div>
+
+                  <div class="preview-mode-grid">
+                    <div class="preview-mode active">
+                      <strong>2x2</strong>
+                      <span data-i18n="previewMode2">Partners queue</span>
+                    </div>
+                    <div class="preview-mode">
+                      <strong>5x5</strong>
+                      <span data-i18n="previewMode5">Classic team queue</span>
+                    </div>
+                  </div>
+
+                  <button class="preview-search-btn" data-i18n="previewSearchBtn">Start Search</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-card" id="status">
+        <div class="section-head">
+          <span class="section-kicker" data-i18n="statusKicker">Live backend status</span>
+          <h2 data-i18n="statusTitle">Current platform status</h2>
+        </div>
+
+        <div class="live-status-grid">
+          <div class="status-box">
+            <span class="status-label" data-i18n="statusServer">Server status</span>
+            <strong class="status-main" id="statusServerText">Checking...</strong>
+            <span class="status-sub" id="statusServerSub">...</span>
+          </div>
+
+          <div class="status-box">
+            <span class="status-label" data-i18n="statusPlayers">Players online</span>
+            <strong class="status-main" id="statusPlayersText">0</strong>
+            <span class="status-sub" data-i18n="statusPlayersSub">Real-time online from backend</span>
+          </div>
+
+          <div class="status-box">
+            <span class="status-label" data-i18n="statusMotdLabel">Message of the day</span>
+            <strong class="status-main motd" id="statusMotd">Loading...</strong>
+            <span class="status-sub" data-i18n="statusMotdSub">Live config from TRUST backend</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-card" id="modes">
+        <div class="section-head">
+          <span class="section-kicker" data-i18n="modesKicker">Focused matchmaking</span>
+          <h2 data-i18n="modesTitle">Two clear competitive modes</h2>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature-card">
+            <h3 data-i18n="mode2Title">2x2 Partners</h3>
+            <p data-i18n="mode2Text">
+              Fast competitive queue built around partner play, tight coordination, and repeatable matchmaking.
+            </p>
+          </article>
+
+          <article class="feature-card">
+            <h3 data-i18n="mode5Title">5x5 Classic</h3>
+            <p data-i18n="mode5Text">
+              Standard team-based competitive format for full squads and structured matches.
+            </p>
+          </article>
+
+          <article class="feature-card">
+            <h3 data-i18n="modeFlowTitle">Live match flow</h3>
+            <p data-i18n="modeFlowText">
+              Search, find match, accept or decline, wait for players, and move into a live lobby state.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section-card trust-account-section" id="account">
+        <div class="section-head">
+          <span class="section-kicker">TRUST account</span>
+          <h2>Steam login & launcher linking</h2>
+        </div>
+
+        <section class="trust-account-card" id="trustAccountCard">
+          <div class="trust-account-head">
+            <div class="trust-account-title">TRUST ACCOUNT</div>
+            <div class="trust-account-subtitle">Steam login & launcher link</div>
+          </div>
+
+          <div id="authGuestBlock">
+            <a class="steam-login-btn" href="https://trust-backend-production-e1d1.up.railway.app/auth/steam">
+              <span>Sign in through Steam</span>
+            </a>
+          </div>
+
+          <div id="authUserBlock" style="display:none;">
+            <div class="trust-user-row">
+              <img id="trustUserAvatar" class="trust-user-avatar" src="" alt="avatar" />
+              <div class="trust-user-meta">
+                <div id="trustUserName" class="trust-user-name">Unknown</div>
+                <a id="trustUserProfile" class="trust-user-link" href="#" target="_blank" rel="noopener">
+                  Open Steam profile
+                </a>
+              </div>
+            </div>
+
+            <div class="trust-linker">
+              <label class="trust-linker-label" for="launcherLinkCodeInput">
+                Link launcher by code
+              </label>
+              <div class="trust-linker-row">
+                <input id="launcherLinkCodeInput" type="text" maxlength="16" placeholder="ENTER CODE"
+                  autocomplete="off" />
+                <button id="launcherLinkConfirmBtn" type="button">LINK</button>
+              </div>
+              <div id="launcherLinkStatus" class="trust-linker-status"></div>
+            </div>
+
+            <button id="trustLogoutBtn" class="trust-logout-btn" type="button">
+              Logout
+            </button>
+          </div>
+        </section>
+      </section>
+
+      <section class="section-card" id="download">
+        <div class="section-head">
+          <span class="section-kicker" data-i18n="downloadKicker">Launcher build</span>
+          <h2 data-i18n="downloadTitle">Download TRUST launcher</h2>
+        </div>
+
+        <div class="download-grid">
+          <div class="download-card">
+            <h3 data-i18n="downloadCardTitle">Windows launcher</h3>
+            <p data-i18n="downloadCardText">
+              Download the current TRUST launcher build and start testing 2x2 / 5x5 matchmaking.
+            </p>
+
+            <div class="download-meta">
+              <div>
+                <span data-i18n="downloadVersionLabel">Latest version</span>
+                <strong id="latestVersion">0.1.0</strong>
+              </div>
+              <div>
+                <span data-i18n="downloadSupportLabel">Min supported</span>
+                <strong id="minVersion">0.1.0</strong>
+              </div>
+            </div>
+
+            <div class="download-actions">
+              <a class="primary-btn" href="#" id="downloadLauncherBtn" data-i18n="downloadLauncherBtn">Download .zip</a>
+              <button class="ghost-btn" id="copyBackendBtn" data-i18n="copyBackendBtn">Copy backend URL</button>
+            </div>
+          </div>
+
+          <div class="download-card">
+            <h3 data-i18n="installTitle">Install guide</h3>
+            <ol class="install-list">
+              <li data-i18n="install1">Download the launcher archive.</li>
+              <li data-i18n="install2">Extract it into a separate folder.</li>
+              <li data-i18n="install3">Run the launcher and choose 2x2 or 5x5.</li>
+              <li data-i18n="install4">Start queue and test live matchmaking.</li>
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-card" id="roadmap">
+        <div class="section-head">
+          <span class="section-kicker" data-i18n="roadmapKicker">Roadmap</span>
+          <h2 data-i18n="roadmapTitle">What comes next</h2>
+        </div>
+
+        <div class="steps roadmap-grid">
+          <div class="step-card">
+            <div class="step-num">01</div>
+            <h3 data-i18n="road1Title">Launcher identity</h3>
+            <p data-i18n="road1Text">Persistent nickname, permanent client ID, and cleaner lobby flow.</p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-num">02</div>
+            <h3 data-i18n="road2Title">Website account layer</h3>
+            <p data-i18n="road2Text">Steam login, profile dashboard, launcher linking, and account sync.</p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-num">03</div>
+            <h3 data-i18n="road3Title">Competitive systems</h3>
+            <p data-i18n="road3Text">Ratings, profile stats, history, and stronger matchmaking logic.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="faq section-card" id="faq">
+        <div class="section-head">
+          <span class="section-kicker">FAQ</span>
+          <h2 data-i18n="faqTitle">Common questions</h2>
+        </div>
+
+        <div class="faq-list">
+          <div class="faq-item">
+            <button class="faq-question" type="button">
+              <span data-i18n="q1">Does the website already require Steam login?</span>
+              <span>+</span>
+            </button>
+            <div class="faq-answer" data-i18n="a1">
+              Not yet. The current stage focuses on launcher UX, backend queue flow, and live matchmaking.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question" type="button">
+              <span data-i18n="q2">Is the online counter real?</span>
+              <span>+</span>
+            </button>
+            <div class="faq-answer" data-i18n="a2">
+              Yes. The website reads live health and online data from the TRUST backend.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question" type="button">
+              <span data-i18n="q3">What modes are available now?</span>
+              <span>+</span>
+            </button>
+            <div class="faq-answer" data-i18n="a3">
+              Right now the platform is focused on two modes only: 2x2 and 5x5.
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
