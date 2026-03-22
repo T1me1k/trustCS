@@ -1,7 +1,15 @@
 const API_BASE = "https://trust-backend-production-e1d1.up.railway.app";
 
-const healthValue = document.getElementById("healthValue");
-const onlineValue = document.getElementById("onlineValue");
+const onlineCountEl = document.getElementById("onlineCount");
+const serverStateEl = document.getElementById("serverState");
+
+const statusServerTextEl = document.getElementById("statusServerText");
+const statusServerSubEl = document.getElementById("statusServerSub");
+const statusPlayersTextEl = document.getElementById("statusPlayersText");
+const statusMotdEl = document.getElementById("statusMotd");
+const latestVersionEl = document.getElementById("latestVersion");
+const minVersionEl = document.getElementById("minVersion");
+const copyBackendBtn = document.getElementById("copyBackendBtn");
 
 const authGuestBlock = document.getElementById("authGuestBlock");
 const authUserBlock = document.getElementById("authUserBlock");
@@ -40,22 +48,52 @@ async function updateLiveStatus() {
   try {
     const data = await fetchJson(`${API_BASE}/health`);
 
-    if (healthValue) {
-      healthValue.textContent = data.status === "online" ? "ONLINE" : "DEGRADED";
+    const onlineCount = String(data.onlineCount ?? 0);
+    const serverText = data.status === "online" ? "ONLINE" : "DEGRADED";
+
+    if (onlineCountEl) onlineCountEl.textContent = onlineCount;
+    if (serverStateEl) serverStateEl.textContent = serverText;
+
+    if (statusServerTextEl) statusServerTextEl.textContent = serverText;
+    if (statusServerSubEl) {
+      statusServerSubEl.textContent =
+        data.database === "connected" ? "Database connected" : "Database disconnected";
     }
 
-    if (onlineValue) {
-      onlineValue.textContent = String(data.onlineCount ?? 0);
-    }
+    if (statusPlayersTextEl) statusPlayersTextEl.textContent = onlineCount;
   } catch (err) {
     console.error("updateLiveStatus error:", err);
 
-    if (healthValue) {
-      healthValue.textContent = "OFFLINE";
+    if (onlineCountEl) onlineCountEl.textContent = "0";
+    if (serverStateEl) serverStateEl.textContent = "OFFLINE";
+
+    if (statusServerTextEl) statusServerTextEl.textContent = "OFFLINE";
+    if (statusServerSubEl) statusServerSubEl.textContent = "Backend unreachable";
+    if (statusPlayersTextEl) statusPlayersTextEl.textContent = "0";
+  }
+}
+
+async function updateConfig() {
+  try {
+    const data = await fetchJson(`${API_BASE}/config`);
+    const config = data.config || {};
+
+    if (statusMotdEl) {
+      statusMotdEl.textContent = config.motd || "Welcome to TRUST";
     }
 
-    if (onlineValue) {
-      onlineValue.textContent = "0";
+    if (latestVersionEl) {
+      latestVersionEl.textContent = config.latestVersion || "0.1.0";
+    }
+
+    if (minVersionEl) {
+      minVersionEl.textContent = config.minSupportedVersion || "0.1.0";
+    }
+  } catch (err) {
+    console.error("updateConfig error:", err);
+
+    if (statusMotdEl) {
+      statusMotdEl.textContent = "Config unavailable";
     }
   }
 }
@@ -172,6 +210,20 @@ function bindLinkCodeActions() {
       }
     });
   }
+
+  if (copyBackendBtn) {
+    copyBackendBtn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(API_BASE);
+        copyBackendBtn.textContent = "Copied";
+        setTimeout(() => {
+          copyBackendBtn.textContent = "Copy backend URL";
+        }, 1500);
+      } catch (err) {
+        console.error("copy backend error:", err);
+      }
+    });
+  }
 }
 
 function handleLoginQueryStatus() {
@@ -210,7 +262,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   initSmoothScroll();
 
   await updateLiveStatus();
+  await updateConfig();
   await initAuthUi();
 
   setInterval(updateLiveStatus, 10000);
+  setInterval(updateConfig, 30000);
 });
