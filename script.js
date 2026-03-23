@@ -10,6 +10,7 @@ const statusMotdEl = document.getElementById("statusMotd");
 const latestVersionEl = document.getElementById("latestVersion");
 const minVersionEl = document.getElementById("minVersion");
 const copyBackendBtn = document.getElementById("copyBackendBtn");
+const downloadLauncherBtn = document.getElementById("downloadLauncherBtn");
 
 const authGuestBlock = document.getElementById("authGuestBlock");
 const authUserBlock = document.getElementById("authUserBlock");
@@ -44,7 +45,8 @@ const translations = {
     downloadBtnTop: "Download",
     heroBadge: "Competitive launcher for CS:GO duos and teams",
     heroTitle: "Queue smarter.<br />Play better.<br />Win with TRUST.",
-    heroText: "TRUST brings launcher UX, live queue flow, real match accept, and focused 2x2 / 5x5 matchmaking into one competitive platform.",
+    heroText:
+      "TRUST brings launcher UX, live queue flow, real match accept, and focused 2x2 / 5x5 matchmaking into one competitive platform.",
     heroPrimaryBtn: "Download launcher",
     heroSecondaryBtn: "Live status",
     statOnlineLabel: "Players online",
@@ -60,19 +62,22 @@ const translations = {
     modesKicker: "Focused matchmaking",
     modesTitle: "Two clear competitive modes",
     mode2Title: "2x2 Partners",
-    mode2Text: "Fast competitive queue built around partner play, tight coordination, and repeatable matchmaking.",
+    mode2Text:
+      "Fast competitive queue built around partner play, tight coordination, and repeatable matchmaking.",
     mode5Title: "5x5 Classic",
     mode5Text: "Standard team-based competitive format for full squads and structured matches.",
     modeFlowTitle: "Live match flow",
     modeFlowText: "Search, find match, accept or decline, wait for players, and move into a live lobby state.",
-    previewText: "Real queue flow, accept / decline, live lobby, online count, and focused competitive modes.",
+    previewText:
+      "Real queue flow, accept / decline, live lobby, online count, and focused competitive modes.",
     previewMode2: "Partners queue",
     previewMode5: "Classic team queue",
     previewSearchBtn: "Start Search",
     downloadKicker: "Launcher build",
     downloadTitle: "Download TRUST launcher",
     downloadCardTitle: "Windows launcher",
-    downloadCardText: "Download the current TRUST launcher build and start testing 2x2 / 5x5 matchmaking.",
+    downloadCardText:
+      "Download the current TRUST launcher build and start testing 2x2 / 5x5 matchmaking.",
     downloadVersionLabel: "Latest version",
     downloadSupportLabel: "Min supported",
     downloadLauncherBtn: "Download .zip",
@@ -108,7 +113,8 @@ const translations = {
     downloadBtnTop: "Скачать",
     heroBadge: "Соревновательный лаунчер для CS:GO 2x2 и 5x5",
     heroTitle: "Ищи матч умнее.<br />Играй лучше.<br />Побеждай с TRUST.",
-    heroText: "TRUST объединяет лаунчер, живой поиск матча, accept / decline и соревновательные режимы 2x2 / 5x5 в одной платформе.",
+    heroText:
+      "TRUST объединяет лаунчер, живой поиск матча, accept / decline и соревновательные режимы 2x2 / 5x5 в одной платформе.",
     heroPrimaryBtn: "Скачать лаунчер",
     heroSecondaryBtn: "Live статус",
     statOnlineLabel: "Игроков онлайн",
@@ -164,6 +170,11 @@ const translations = {
   }
 };
 
+function t(key) {
+  const dict = translations[currentLang] || translations.en;
+  return dict[key] || translations.en[key] || key;
+}
+
 function applyTranslations() {
   const dict = translations[currentLang] || translations.en;
 
@@ -171,7 +182,7 @@ function applyTranslations() {
     const key = el.dataset.i18n;
     if (!dict[key]) return;
 
-    if (el.tagName === "H1" || el.innerHTML.includes("<br")) {
+    if (el.tagName === "H1" || dict[key].includes("<br")) {
       el.innerHTML = dict[key];
     } else {
       el.textContent = dict[key];
@@ -192,14 +203,13 @@ function bindLanguageToggle() {
     currentLang = currentLang === "en" ? "ru" : "en";
     localStorage.setItem("trust_lang", currentLang);
     applyTranslations();
-  });
-}
 
-async function startLauncherLink() {
-  return fetchJson(`${API_BASE}/launcher/link/start`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
+    if (copyBackendBtn) {
+      copyBackendBtn.textContent = t("copyBackendBtn");
+    }
+
+    if (downloadLauncherBtn) {
+      downloadLauncherBtn.textContent = t("downloadLauncherBtn");
     }
   });
 }
@@ -215,7 +225,9 @@ async function fetchJson(url, options = {}) {
 
   if (!isJson) {
     const text = await response.text();
-    throw new Error(text || `HTTP ${response.status}`);
+    const err = new Error(text || `HTTP ${response.status}`);
+    err.status = response.status;
+    throw err;
   }
 
   const data = await response.json();
@@ -230,41 +242,35 @@ async function fetchJson(url, options = {}) {
   return data;
 }
 
-async function updateLiveStatus() {
+async function safeFetchJson(url, options = {}, fallback = null) {
   try {
-    const data = await fetchJson(`${API_BASE}/health`);
-    const onlineCount = String(data.onlineCount ?? 0);
-    const serverText = data.status === "online" ? "ONLINE" : "DEGRADED";
-
-    if (onlineCountEl) onlineCountEl.textContent = onlineCount;
-    if (serverStateEl) serverStateEl.textContent = serverText;
-    if (statusServerTextEl) statusServerTextEl.textContent = serverText;
-    if (statusServerSubEl) {
-      statusServerSubEl.textContent =
-        data.database === "connected" ? "Database connected" : "Database disconnected";
-    }
-    if (statusPlayersTextEl) statusPlayersTextEl.textContent = onlineCount;
+    return await fetchJson(url, options);
   } catch (err) {
-    console.error("updateLiveStatus error:", err);
-    if (onlineCountEl) onlineCountEl.textContent = "0";
-    if (serverStateEl) serverStateEl.textContent = "OFFLINE";
-    if (statusServerTextEl) statusServerTextEl.textContent = "OFFLINE";
-    if (statusServerSubEl) statusServerSubEl.textContent = "Backend unreachable";
-    if (statusPlayersTextEl) statusPlayersTextEl.textContent = "0";
+    console.error("API ERROR:", url, err);
+    return fallback;
   }
 }
 
-async function updateConfig() {
-  try {
-    const data = await fetchJson(`${API_BASE}/config`);
-    const config = data.config || {};
+async function startLauncherLink() {
+  return fetchJson(`${API_BASE}/launcher/link/start`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    }
+  });
+}
 
-    if (statusMotdEl) statusMotdEl.textContent = config.motd || "Welcome to TRUST";
-    if (latestVersionEl) latestVersionEl.textContent = config.latestVersion || "0.1.0";
-    if (minVersionEl) minVersionEl.textContent = config.minSupportedVersion || "0.1.0";
-  } catch (err) {
-    console.error("updateConfig error:", err);
-    if (statusMotdEl) statusMotdEl.textContent = "Config unavailable";
+async function fetchAuthMe() {
+  return fetchJson(`${API_BASE}/auth/me`);
+}
+
+async function logoutTrust() {
+  return fetchJson(`${API_BASE}/auth/logout`, { method: "POST" });
+}
+
+function setLinkStatus(text) {
+  if (launcherLinkStatus) {
+    launcherLinkStatus.textContent = text || "";
   }
 }
 
@@ -274,11 +280,26 @@ function setGuestMode(reason = "") {
   if (authGuestBlock) authGuestBlock.style.display = "";
   if (authUserBlock) authUserBlock.style.display = "none";
 
-  if (authStateBadge) authStateBadge.textContent = reason ? `Guest session (${reason})` : "Guest session";
+  if (authStateBadge) {
+    authStateBadge.textContent = reason ? `Guest session (${reason})` : "Guest session";
+  }
+
   if (launcherStateBadge) launcherStateBadge.textContent = "Launcher link unavailable";
   if (accountSessionValue) accountSessionValue.textContent = "Guest";
   if (accountLauncherValue) accountLauncherValue.textContent = "Login required";
   if (accountProfileValue) accountProfileValue.textContent = "Hidden";
+
+  if (trustUserAvatar) {
+    trustUserAvatar.src = "";
+    trustUserAvatar.style.display = "none";
+  }
+
+  if (trustUserName) trustUserName.textContent = "Unknown";
+  if (trustUserSteamId) trustUserSteamId.textContent = "Steam ID: —";
+
+  if (trustUserProfile) {
+    trustUserProfile.href = "#";
+  }
 }
 
 function setUserMode(user) {
@@ -295,15 +316,23 @@ function setUserMode(user) {
       trustUserAvatar.src = user.avatar_full_url;
       trustUserAvatar.style.display = "block";
     } else {
+      trustUserAvatar.src = "";
       trustUserAvatar.style.display = "none";
     }
   }
 
-  if (trustUserName) trustUserName.textContent = user.persona_name || `Steam ${user.steam_id}`;
-  if (trustUserSteamId) trustUserSteamId.textContent = `Steam ID: ${user.steam_id || "—"}`;
+  if (trustUserName) {
+    trustUserName.textContent = user.persona_name || `Steam ${user.steam_id || ""}`.trim();
+  }
+
+  if (trustUserSteamId) {
+    trustUserSteamId.textContent = `Steam ID: ${user.steam_id || "—"}`;
+  }
 
   if (trustUserProfile) {
-    trustUserProfile.href = user.profile_url || `https://steamcommunity.com/profiles/${user.steam_id}`;
+    trustUserProfile.href =
+      user.profile_url ||
+      (user.steam_id ? `https://steamcommunity.com/profiles/${user.steam_id}` : "#");
   }
 
   if (accountSessionValue) accountSessionValue.textContent = "Authorized";
@@ -311,29 +340,64 @@ function setUserMode(user) {
   if (accountProfileValue) accountProfileValue.textContent = "Steam synced";
 }
 
-async function fetchAuthMe() {
-  return fetchJson(`${API_BASE}/auth/me`);
+async function updateLiveStatus() {
+  const data = await safeFetchJson(`${API_BASE}/health`, {}, null);
+
+  if (!data) {
+    if (onlineCountEl) onlineCountEl.textContent = "0";
+    if (serverStateEl) serverStateEl.textContent = "OFFLINE";
+    if (statusServerTextEl) statusServerTextEl.textContent = "OFFLINE";
+    if (statusServerSubEl) statusServerSubEl.textContent = "Backend unreachable";
+    if (statusPlayersTextEl) statusPlayersTextEl.textContent = "0";
+    return;
+  }
+
+  const onlineCount = String(data.onlineCount ?? 0);
+  const serverText = data.status === "online" ? "ONLINE" : "DEGRADED";
+
+  if (onlineCountEl) onlineCountEl.textContent = onlineCount;
+  if (serverStateEl) serverStateEl.textContent = serverText;
+  if (statusServerTextEl) statusServerTextEl.textContent = serverText;
+
+  if (statusServerSubEl) {
+    statusServerSubEl.textContent =
+      data.database === "connected" ? "Database connected" : "Database disconnected";
+  }
+
+  if (statusPlayersTextEl) statusPlayersTextEl.textContent = onlineCount;
 }
 
-async function logoutTrust() {
-  return fetchJson(`${API_BASE}/auth/logout`, { method: "POST" });
-}
+async function updateConfig() {
+  const data = await safeFetchJson(`${API_BASE}/config`, {}, null);
 
-function setLinkStatus(text) {
-  if (launcherLinkStatus) launcherLinkStatus.textContent = text || "";
+  if (!data) {
+    if (statusMotdEl) statusMotdEl.textContent = "Config unavailable";
+    if (latestVersionEl) latestVersionEl.textContent = "0.1.0";
+    if (minVersionEl) minVersionEl.textContent = "0.1.0";
+    return;
+  }
+
+  const config = data.config || {};
+
+  if (statusMotdEl) statusMotdEl.textContent = config.motd || "Welcome to TRUST";
+  if (latestVersionEl) latestVersionEl.textContent = config.latestVersion || "0.1.0";
+  if (minVersionEl) minVersionEl.textContent = config.minSupportedVersion || "0.1.0";
 }
 
 async function initAuthUi() {
   try {
     if (authStateBadge) authStateBadge.textContent = "Checking session...";
+
     const data = await fetchAuthMe();
 
-    if (!data.user) {
+    if (!data || !data.user) {
       setGuestMode("no user");
+      setLinkStatus("Not logged in.");
       return;
     }
 
     setUserMode(data.user);
+    setLinkStatus("");
   } catch (err) {
     console.error("initAuthUi error:", err);
 
@@ -347,16 +411,22 @@ async function initAuthUi() {
   }
 }
 
-function bindLinkCodeActions() {
+function bindAccountActions() {
   if (linkLauncherBtn) {
     linkLauncherBtn.addEventListener("click", async () => {
+      if (!currentUser) {
+        setLinkStatus("Login through Steam first.");
+        return;
+      }
+
       setLinkStatus("Preparing launcher link...");
 
       try {
         const result = await startLauncherLink();
 
-        if (!result.ok || !result.launchUrl) {
+        if (!result || !result.ok || !result.launchUrl) {
           setLinkStatus("Failed to start launcher linking.");
+          if (launcherStateBadge) launcherStateBadge.textContent = "Launcher link failed";
           return;
         }
 
@@ -381,23 +451,12 @@ function bindLinkCodeActions() {
     trustLogoutBtn.addEventListener("click", async () => {
       try {
         await logoutTrust();
+        setGuestMode("logout");
+        setLinkStatus("Logged out.");
         window.location.href = window.location.pathname;
       } catch (err) {
         console.error("logout error:", err);
-      }
-    });
-  }
-
-  if (copyBackendBtn) {
-    copyBackendBtn.addEventListener("click", async () => {
-      try {
-        await navigator.clipboard.writeText(API_BASE);
-        copyBackendBtn.textContent = "Copied";
-        setTimeout(() => {
-          copyBackendBtn.textContent = currentLang === "ru" ? "Скопировать backend URL" : "Copy backend URL";
-        }, 1500);
-      } catch (err) {
-        console.error("copy backend error:", err);
+        setLinkStatus("Logout failed.");
       }
     });
   }
@@ -406,15 +465,68 @@ function bindLinkCodeActions() {
     copySteamIdBtn.addEventListener("click", async () => {
       if (!currentUser?.steam_id) return;
 
+      const originalText = "Copy Steam ID";
+
       try {
         await navigator.clipboard.writeText(currentUser.steam_id);
         copySteamIdBtn.textContent = "Copied";
-        setTimeout(() => {
-          copySteamIdBtn.textContent = "Copy Steam ID";
-        }, 1500);
       } catch (err) {
         console.error("copy steam id error:", err);
+        copySteamIdBtn.textContent = "Copy failed";
       }
+
+      setTimeout(() => {
+        copySteamIdBtn.textContent = originalText;
+      }, 1500);
+    });
+  }
+}
+
+function bindDownloadActions() {
+  if (copyBackendBtn) {
+    copyBackendBtn.addEventListener("click", async () => {
+      const originalText = t("copyBackendBtn");
+
+      try {
+        await navigator.clipboard.writeText(API_BASE);
+        copyBackendBtn.textContent = "Copied";
+      } catch (err) {
+        console.error("copy backend error:", err);
+        copyBackendBtn.textContent = "Copy failed";
+      }
+
+      setTimeout(() => {
+        copyBackendBtn.textContent = originalText;
+      }, 1500);
+    });
+  }
+
+  if (downloadLauncherBtn) {
+    downloadLauncherBtn.addEventListener("click", async (e) => {
+      e.preventDefault();
+
+      const originalText = t("downloadLauncherBtn");
+      downloadLauncherBtn.textContent = "Loading...";
+
+      try {
+        const configData = await safeFetchJson(`${API_BASE}/config`, {}, null);
+        const config = configData?.config || {};
+
+        const directUrl =
+          config.launcherDownloadUrl ||
+          config.downloadUrl ||
+          `${API_BASE}/download/latest`;
+
+        window.open(directUrl, "_blank", "noopener");
+        downloadLauncherBtn.textContent = "Started";
+      } catch (err) {
+        console.error("download open error:", err);
+        downloadLauncherBtn.textContent = "Failed";
+      }
+
+      setTimeout(() => {
+        downloadLauncherBtn.textContent = originalText;
+      }, 1500);
     });
   }
 }
@@ -444,17 +556,33 @@ function bindFaq() {
   });
 }
 
+function startPolling() {
+  setInterval(() => {
+    updateLiveStatus().catch((err) => console.error("live status poll error:", err));
+  }, 10000);
+
+  setInterval(() => {
+    updateConfig().catch((err) => console.error("config poll error:", err));
+  }, 30000);
+
+  setInterval(() => {
+    initAuthUi().catch((err) => console.error("auth poll error:", err));
+  }, 60000);
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   applyTranslations();
   bindLanguageToggle();
-  bindLinkCodeActions();
+  bindAccountActions();
+  bindDownloadActions();
   initSmoothScroll();
   bindFaq();
 
-  await updateLiveStatus();
-  await updateConfig();
-  await initAuthUi();
+  await Promise.allSettled([
+    updateLiveStatus(),
+    updateConfig(),
+    initAuthUi()
+  ]);
 
-  setInterval(updateLiveStatus, 10000);
-  setInterval(updateConfig, 30000);
+  startPolling();
 });
