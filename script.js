@@ -16,10 +16,20 @@ const authUserBlock = document.getElementById("authUserBlock");
 const trustUserAvatar = document.getElementById("trustUserAvatar");
 const trustUserName = document.getElementById("trustUserName");
 const trustUserProfile = document.getElementById("trustUserProfile");
-const launcherLinkCodeInput = document.getElementById("launcherLinkCodeInput");
-const launcherLinkConfirmBtn = document.getElementById("launcherLinkConfirmBtn");
+const linkLauncherBtn = document.getElementById("linkLauncherBtn");
 const launcherLinkStatus = document.getElementById("launcherLinkStatus");
 const trustLogoutBtn = document.getElementById("trustLogoutBtn");
+
+
+async function startLauncherLink() {
+  return fetchJson(`${API_BASE}/launcher/link/start`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    }
+  });
+}
+
 
 async function fetchJson(url, options = {}) {
   const response = await fetch(url, {
@@ -165,37 +175,28 @@ async function initAuthUi() {
 }
 
 function bindLinkCodeActions() {
-  if (launcherLinkConfirmBtn && launcherLinkCodeInput) {
-    launcherLinkConfirmBtn.addEventListener("click", async () => {
-      const code = launcherLinkCodeInput.value.trim().toUpperCase();
-
-      if (!code) {
-        setLinkStatus("Enter launcher code first.");
-        return;
-      }
-
-      setLinkStatus("Linking...");
+  if (linkLauncherBtn) {
+    linkLauncherBtn.addEventListener("click", async () => {
+      setLinkStatus("Preparing launcher link...");
 
       try {
-        const result = await confirmLauncherLink(code);
+        const result = await startLauncherLink();
 
-        if (result.alreadyLinked) {
-          setLinkStatus("This launcher is already linked.");
-        } else {
-          setLinkStatus("Launcher linked successfully.");
+        if (!result.ok || !result.launchUrl) {
+          setLinkStatus("Failed to start launcher linking.");
+          return;
         }
 
-        launcherLinkCodeInput.value = "";
-      } catch (err) {
-        console.error("confirmLauncherLink error:", err);
-        setLinkStatus(err.message || "Link failed.");
-      }
-    });
+        setLinkStatus("Opening TRUST launcher...");
 
-    launcherLinkCodeInput.addEventListener("keydown", async (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        launcherLinkConfirmBtn.click();
+        window.location.href = result.launchUrl;
+
+        setTimeout(() => {
+          setLinkStatus("If nothing opened, make sure TRUST launcher is installed.");
+        }, 1500);
+      } catch (err) {
+        console.error("startLauncherLink error:", err);
+        setLinkStatus(err.message || "Failed to start launcher linking.");
       }
     });
   }

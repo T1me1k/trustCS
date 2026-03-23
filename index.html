@@ -204,21 +204,24 @@
             </div>
 
             <div class="trust-linker">
-              <label class="trust-linker-label" for="launcherLinkCodeInput">
-                Link launcher by code
-              </label>
-              <div class="trust-linker-row">
-                <input id="launcherLinkCodeInput" type="text" maxlength="16" placeholder="ENTER CODE"
-                  autocomplete="off" />
-                <button id="launcherLinkConfirmBtn" type="button">LINK</button>
-              </div>
-              <div id="launcherLinkStatus" class="trust-linker-status"></div>
-            </div>
+              <div class="trust-linker">
+                <label class="trust-linker-label">
+                  Link TRUST launcher
+                </label>
 
-            <button id="trustLogoutBtn" class="trust-logout-btn" type="button">
-              Logout
-            </button>
-          </div>
+                <div class="trust-linker-actions">
+                  <button id="linkLauncherBtn" type="button" class="trust-link-launch-btn">
+                    Link launcher
+                  </button>
+                </div>
+
+                <div id="launcherLinkStatus" class="trust-linker-status"></div>
+              </div>
+
+              <button id="trustLogoutBtn" class="trust-logout-btn" type="button">
+                Logout
+              </button>
+            </div>
         </section>
       </section>
 
