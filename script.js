@@ -1,4 +1,6 @@
 const API_BASE = "https://trust-backend-production-e1d1.up.railway.app";
+const INSTALLER_URL = "https://t1me1k.github.io/trustCS/downloads/TRUST-Setup-0.1.0.exe";
+const INSTALLER_FILENAME = "TRUST-Setup-0.1.0.exe";
 
 const onlineCountEl = document.getElementById("onlineCount");
 const serverStateEl = document.getElementById("serverState");
@@ -80,7 +82,7 @@ const translations = {
       "Download the current TRUST launcher build and start testing 2x2 / 5x5 matchmaking.",
     downloadVersionLabel: "Latest version",
     downloadSupportLabel: "Min supported",
-    downloadLauncherBtn: "Download .zip",
+    downloadLauncherBtn: "Download setup",
     copyBackendBtn: "Copy backend URL",
     installTitle: "Install guide",
     install1: "Download the launcher archive.",
@@ -145,7 +147,7 @@ const translations = {
     downloadCardText: "Скачай текущую сборку TRUST launcher и начни тестировать matchmaking 2x2 / 5x5.",
     downloadVersionLabel: "Последняя версия",
     downloadSupportLabel: "Минимальная версия",
-    downloadLauncherBtn: "Скачать .zip",
+    downloadLauncherBtn: "Скачать установщик",
     copyBackendBtn: "Скопировать backend URL",
     installTitle: "Инструкция по установке",
     install1: "Скачай архив лаунчера.",
@@ -191,6 +193,11 @@ function applyTranslations() {
 
   if (langToggleBtn) {
     langToggleBtn.textContent = currentLang === "en" ? "RU" : "EN";
+  }
+
+  if (downloadLauncherBtn) {
+    downloadLauncherBtn.setAttribute("href", INSTALLER_URL);
+    downloadLauncherBtn.setAttribute("download", INSTALLER_FILENAME);
   }
 
   document.documentElement.lang = currentLang;
@@ -482,6 +489,16 @@ function bindAccountActions() {
   }
 }
 
+function triggerInstallerDownload() {
+  const link = document.createElement("a");
+  link.href = INSTALLER_URL;
+  link.download = INSTALLER_FILENAME;
+  link.rel = "noopener";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
 function bindDownloadActions() {
   if (copyBackendBtn) {
     copyBackendBtn.addEventListener("click", async () => {
@@ -502,26 +519,20 @@ function bindDownloadActions() {
   }
 
   if (downloadLauncherBtn) {
-    downloadLauncherBtn.addEventListener("click", async (e) => {
+    downloadLauncherBtn.setAttribute("href", INSTALLER_URL);
+    downloadLauncherBtn.setAttribute("download", INSTALLER_FILENAME);
+
+    downloadLauncherBtn.addEventListener("click", (e) => {
       e.preventDefault();
 
       const originalText = t("downloadLauncherBtn");
-      downloadLauncherBtn.textContent = "Loading...";
+      downloadLauncherBtn.textContent = currentLang === "ru" ? "Запуск..." : "Starting...";
 
       try {
-        const configData = await safeFetchJson(`${API_BASE}/config`, {}, null);
-        const config = configData?.config || {};
-
-        const directUrl =
-          config.launcherDownloadUrl ||
-          config.downloadUrl ||
-          `${API_BASE}/download/latest`;
-
-        window.open(directUrl, "_blank", "noopener");
-        downloadLauncherBtn.textContent = "Started";
+        triggerInstallerDownload();
       } catch (err) {
         console.error("download open error:", err);
-        downloadLauncherBtn.textContent = "Failed";
+        downloadLauncherBtn.textContent = currentLang === "ru" ? "Ошибка" : "Failed";
       }
 
       setTimeout(() => {
