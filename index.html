@@ -177,49 +177,139 @@
       <section class="section-card trust-account-section" id="account">
         <div class="section-head">
           <span class="section-kicker">TRUST account</span>
-          <h2>Steam login & launcher linking</h2>
+          <h2>My account</h2>
         </div>
 
         <section class="trust-account-card" id="trustAccountCard">
-          <div class="trust-account-head">
-            <div class="trust-account-title">TRUST ACCOUNT</div>
-            <div class="trust-account-subtitle">Steam login & launcher link</div>
+          <div class="trust-account-head trust-account-head-grid">
+            <div>
+              <div class="trust-account-title">TRUST ACCOUNT</div>
+              <div class="trust-account-subtitle">Steam login, launcher link, and account state</div>
+            </div>
+
+            <div class="trust-account-badge-row">
+              <div class="trust-mini-badge" id="authStateBadge">Checking session...</div>
+              <div class="trust-mini-badge" id="launcherStateBadge">Launcher link unknown</div>
+            </div>
           </div>
 
           <div id="authGuestBlock">
-            <a class="steam-login-btn" href="https://trust-backend-production-e1d1.up.railway.app/auth/steam">
-              <span>Sign in through Steam</span>
-            </a>
+            <div class="trust-empty-state">
+              <h3>Sign in to unlock your TRUST account</h3>
+              <p>
+                Use Steam login to access your account panel, launcher linking, and future competitive profile features.
+              </p>
+
+              <div class="trust-empty-actions">
+                <a class="steam-login-btn" href="https://trust-backend-production-e1d1.up.railway.app/auth/steam">
+                  <span>Sign in through Steam</span>
+                </a>
+              </div>
+
+              <div class="trust-info-grid">
+                <div class="trust-info-card">
+                  <span class="trust-info-label">Steam auth</span>
+                  <strong class="trust-info-value">Required</strong>
+                  <small>Needed before launcher linking</small>
+                </div>
+
+                <div class="trust-info-card">
+                  <span class="trust-info-label">Launcher link</span>
+                  <strong class="trust-info-value">Optional now</strong>
+                  <small>Required for account sync inside launcher</small>
+                </div>
+
+                <div class="trust-info-card">
+                  <span class="trust-info-label">Competitive profile</span>
+                  <strong class="trust-info-value">Expanding</strong>
+                  <small>MMR, stats, and history come next</small>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div id="authUserBlock" style="display:none;">
-            <div class="trust-user-row">
-              <img id="trustUserAvatar" class="trust-user-avatar" src="" alt="avatar" />
-              <div class="trust-user-meta">
-                <div id="trustUserName" class="trust-user-name">Unknown</div>
-                <a id="trustUserProfile" class="trust-user-link" href="#" target="_blank" rel="noopener">
-                  Open Steam profile
-                </a>
-              </div>
-            </div>
+            <div class="trust-user-panel">
+              <div class="trust-user-row">
+                <img id="trustUserAvatar" class="trust-user-avatar" src="" alt="avatar" />
+                <div class="trust-user-meta">
+                  <div id="trustUserName" class="trust-user-name">Unknown</div>
+                  <div id="trustUserSteamId" class="trust-user-steamid">Steam ID: —</div>
 
-            <div class="trust-linker">
-              <label class="trust-linker-label">
-                Link TRUST launcher
-              </label>
-
-              <div class="trust-linker-actions">
-                <button id="linkLauncherBtn" type="button" class="trust-link-launch-btn">
-                  Link launcher
-                </button>
+                  <div class="trust-user-links">
+                    <a id="trustUserProfile" class="trust-user-link" href="#" target="_blank" rel="noopener">
+                      Open Steam profile
+                    </a>
+                    <button id="copySteamIdBtn" class="trust-inline-btn" type="button">
+                      Copy Steam ID
+                    </button>
+                  </div>
+                </div>
               </div>
 
-              <div id="launcherLinkStatus" class="trust-linker-status"></div>
-            </div>
+              <div class="trust-account-stats">
+                <div class="trust-stat-box">
+                  <span class="trust-stat-label">Session</span>
+                  <strong class="trust-stat-value" id="accountSessionValue">Authorized</strong>
+                  <small class="trust-stat-sub">Steam session is active</small>
+                </div>
 
-            <button id="trustLogoutBtn" class="trust-logout-btn" type="button">
-              Logout
-            </button>
+                <div class="trust-stat-box">
+                  <span class="trust-stat-label">Launcher link</span>
+                  <strong class="trust-stat-value" id="accountLauncherValue">Available</strong>
+                  <small class="trust-stat-sub">Use TRUST protocol to open the launcher</small>
+                </div>
+
+                <div class="trust-stat-box">
+                  <span class="trust-stat-label">Profile</span>
+                  <strong class="trust-stat-value" id="accountProfileValue">Steam synced</strong>
+                  <small class="trust-stat-sub">Basic account data loaded from backend</small>
+                </div>
+              </div>
+
+              <div class="trust-linker">
+                <label class="trust-linker-label">
+                  Link TRUST launcher
+                </label>
+
+                <p class="trust-linker-copy">
+                  Click the button below to open the installed launcher through the TRUST protocol. The launcher will
+                  finish the link automatically.
+                </p>
+
+                <div class="trust-linker-actions">
+                  <button id="linkLauncherBtn" type="button" class="trust-link-launch-btn">
+                    Link launcher
+                  </button>
+                </div>
+
+                <div id="launcherLinkStatus" class="trust-linker-status"></div>
+              </div>
+
+              <div class="trust-account-help">
+                <div class="trust-help-card">
+                  <span class="trust-help-kicker">Step 1</span>
+                  <strong>Steam account connected</strong>
+                  <p>Your website session is already authenticated through Steam.</p>
+                </div>
+
+                <div class="trust-help-card">
+                  <span class="trust-help-kicker">Step 2</span>
+                  <strong>Open TRUST launcher</strong>
+                  <p>Use the link button above. If nothing opens, make sure the launcher is installed.</p>
+                </div>
+
+                <div class="trust-help-card">
+                  <span class="trust-help-kicker">Step 3</span>
+                  <strong>Finish account sync</strong>
+                  <p>After linking, your launcher can sync the Steam profile and future competitive data.</p>
+                </div>
+              </div>
+
+              <button id="trustLogoutBtn" class="trust-logout-btn" type="button">
+                Logout
+              </button>
+            </div>
           </div>
         </section>
       </section>

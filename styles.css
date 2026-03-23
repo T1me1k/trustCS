@@ -631,6 +631,14 @@ button {
   margin-bottom: 18px;
 }
 
+.trust-account-head-grid {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
 .trust-account-title {
   color: #ffffff;
   font-size: 18px;
@@ -642,6 +650,26 @@ button {
   margin-top: 6px;
   color: rgba(220, 212, 255, 0.72);
   font-size: 13px;
+}
+
+.trust-account-badge-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.trust-mini-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(170, 130, 255, 0.18);
+  color: #e7dcff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
 }
 
 .steam-login-btn {
@@ -666,17 +694,80 @@ button {
   box-shadow: 0 18px 40px rgba(113, 65, 255, 0.45);
 }
 
+.trust-empty-state h3 {
+  margin: 0 0 10px;
+  font-size: 24px;
+}
+
+.trust-empty-state p {
+  margin: 0;
+  color: var(--text-dim);
+  line-height: 1.65;
+  max-width: 760px;
+}
+
+.trust-empty-actions {
+  margin-top: 18px;
+}
+
+.trust-info-grid {
+  margin-top: 22px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.trust-info-card,
+.trust-stat-box,
+.trust-help-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(150, 104, 255, 0.18);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.trust-info-label,
+.trust-stat-label,
+.trust-help-kicker {
+  display: block;
+  color: rgba(220, 212, 255, 0.70);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.trust-info-value,
+.trust-stat-value {
+  display: block;
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.trust-info-card small,
+.trust-stat-sub,
+.trust-help-card p {
+  color: var(--text-dim);
+  line-height: 1.55;
+}
+
+.trust-user-panel {
+  display: grid;
+  gap: 18px;
+}
+
 .trust-user-row {
   display: flex;
   align-items: center;
   gap: 14px;
-  margin-bottom: 18px;
 }
 
 .trust-user-avatar {
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
   border: 1px solid rgba(170, 130, 255, 0.35);
   object-fit: cover;
   background: rgba(255, 255, 255, 0.05);
@@ -685,19 +776,48 @@ button {
 .trust-user-name {
   color: #ffffff;
   font-weight: 800;
-  font-size: 18px;
+  font-size: 22px;
+}
+
+.trust-user-steamid {
+  margin-top: 6px;
+  color: rgba(220, 212, 255, 0.76);
+  font-size: 13px;
+}
+
+.trust-user-links {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
 }
 
 .trust-user-link {
-  display: inline-block;
-  margin-top: 6px;
   color: #b995ff;
   text-decoration: none;
   font-size: 13px;
 }
 
+.trust-inline-btn {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(150, 104, 255, 0.20);
+  background: rgba(255, 255, 255, 0.04);
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.trust-account-stats,
+.trust-account-help {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
 .trust-linker {
-  margin-top: 8px;
+  margin-top: 4px;
   padding-top: 14px;
   border-top: 1px solid rgba(144, 90, 255, 0.16);
 }
@@ -710,69 +830,10 @@ button {
   letter-spacing: 0.08em;
 }
 
-.trust-linker-row {
-  display: flex;
-  gap: 10px;
-}
-
-.trust-linker-row input {
-  flex: 1;
-  height: 46px;
-  border-radius: 12px;
-  border: 1px solid rgba(150, 104, 255, 0.22);
-  background: rgba(255, 255, 255, 0.04);
-  color: #ffffff;
-  padding: 0 14px;
-  outline: none;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.trust-linker-row input::placeholder {
-  color: rgba(210, 197, 255, 0.34);
-}
-
-.trust-linker-row button,
-.trust-logout-btn {
-  height: 46px;
-  border: none;
-  border-radius: 12px;
-  padding: 0 16px;
-  color: #ffffff;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  cursor: pointer;
-  background: linear-gradient(135deg, #5127d7, #7a45ff);
-  transition: transform 0.18s ease, opacity 0.18s ease;
-}
-
-.trust-linker-row button:hover,
-.trust-logout-btn:hover {
-  transform: translateY(-1px);
-}
-
-.trust-linker-status {
-  margin-top: 10px;
-  min-height: 18px;
-  color: #d3c1ff;
-  font-size: 13px;
-}
-
-.trust-logout-btn {
-  margin-top: 16px;
-}
-
-@media (max-width: 720px) {
-  .trust-linker-row {
-    flex-direction: column;
-  }
-
-  .steam-login-btn,
-  .trust-linker-row button,
-  .trust-logout-btn {
-    width: 100%;
-  }
+.trust-linker-copy {
+  margin: 0 0 14px;
+  color: var(--text-dim);
+  line-height: 1.6;
 }
 
 .trust-linker-actions {
@@ -797,4 +858,60 @@ button {
 
 .trust-link-launch-btn:hover {
   transform: translateY(-1px);
+}
+
+.trust-linker-status {
+  margin-top: 10px;
+  min-height: 18px;
+  color: #d3c1ff;
+  font-size: 13px;
+}
+
+.trust-logout-btn {
+  height: 46px;
+  border: none;
+  border-radius: 12px;
+  padding: 0 16px;
+  color: #ffffff;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  background: linear-gradient(135deg, #5127d7, #7a45ff);
+  transition: transform 0.18s ease, opacity 0.18s ease;
+  justify-self: start;
+}
+
+.trust-logout-btn:hover {
+  transform: translateY(-1px);
+}
+
+@media (max-width: 900px) {
+
+  .trust-info-grid,
+  .trust-account-stats,
+  .trust-account-help {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .trust-user-row {
+    align-items: flex-start;
+  }
+
+  .trust-user-links {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .steam-login-btn,
+  .trust-link-launch-btn,
+  .trust-logout-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .trust-logout-btn {
+    justify-self: stretch;
+  }
 }
