@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TRUST App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="dashboard-shell">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-mark">T</div>
+        <div>
+          <div class="brand-name">TRUST</div>
+          <div class="brand-sub">release app</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a class="nav-link active" href="./app.html">Играть</a>
+        <a class="nav-link" href="./leaderboard.html">Лидерборд</a>
+        <a class="nav-link" href="./index.html">Главная</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button id="sidebarLogoutBtn" class="btn ghost block hidden">Выйти</button>
+      </div>
+    </aside>
+
+    <div class="dashboard-main">
+      <header class="dash-topbar">
+        <div>
+          <h1>Матчмейкинг 2x2</h1>
+          <p class="muted">Party, queue, current match и история в одном кабинете.</p>
+        </div>
+        <div class="dash-top-actions">
+          <button id="loginBtn" class="btn primary hidden">Войти через Steam</button>
+          <span id="queueBadge" class="status-pill idle">Не в очереди</span>
+        </div>
+      </header>
+
+      <div id="globalAlert" class="alert hidden"></div>
+
+      <main class="dashboard-grid">
+        <section class="main-column">
+          <div class="card main-play-card">
+            <div class="section-head">
+              <div>
+                <h2>Поиск матча</h2>
+                <p class="muted">Искать можно только после Steam login и в готовой party 2x2.</p>
+              </div>
+              <span id="matchmakingState" class="status-pill idle">Ожидание</span>
+            </div>
+
+            <div id="searchingBanner" class="matchmaking-banner hidden">
+              <div>
+                <strong>Поиск активен</strong>
+                <p class="muted">Твоя party сейчас в очереди. Как только матч будет найден — здесь появится информация.</p>
+              </div>
+              <button id="cancelQueueBtn" class="btn ghost">Отменить</button>
+            </div>
+
+            <div id="playCta" class="play-cta">
+              <button id="joinQueueBtn" class="btn primary btn-xl">НАЙТИ МАТЧ</button>
+              <p id="playCtaText" class="muted center-text">Войди в Steam и собери party из 2 игроков.</p>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-head">
+              <div>
+                <h2>Текущий матч</h2>
+                <p class="muted">Если backend уже создал матч, connect-данные появятся здесь.</p>
+              </div>
+              <span id="currentMatchBadge" class="status-pill idle">Нет матча</span>
+            </div>
+
+            <div id="currentMatchEmpty" class="empty-state">
+              <p>Сейчас активного матча нет.</p>
+            </div>
+
+            <div id="currentMatchCard" class="hidden match-card">
+              <div class="match-head">
+                <div>
+                  <div id="currentMatchId" class="match-id">—</div>
+                  <div id="currentMatchMeta" class="muted">—</div>
+                </div>
+                <span id="currentMatchStatus" class="status-pill ok">—</span>
+              </div>
+
+              <div class="match-server-box">
+                <div>
+                  <div class="muted small-label">Сервер</div>
+                  <strong id="serverConnectLine">—</strong>
+                </div>
+                <button id="copyConnectBtn" class="btn secondary">Копировать connect</button>
+              </div>
+
+              <div class="teams-grid">
+                <div class="team-box">
+                  <div class="team-title">Team A</div>
+                  <div id="teamAPlayers" class="player-list"></div>
+                </div>
+                <div class="team-box">
+                  <div class="team-title">Team B</div>
+                  <div id="teamBPlayers" class="player-list"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-head">
+              <div>
+                <h2>История матчей</h2>
+                <p class="muted">Последние игры и изменения рейтинга.</p>
+              </div>
+            </div>
+            <div id="historyList" class="history-list"></div>
+          </div>
+        </section>
+
+        <aside class="side-column">
+          <div class="card profile-side-card">
+            <div class="section-head compact">
+              <h3>Профиль</h3>
+              <span id="authBadge" class="status-pill idle">Гость</span>
+            </div>
+
+            <div id="profileGuest" class="empty-state soft">
+              <p>Войди через Steam, чтобы открыть party, очередь и матчмейкинг.</p>
+            </div>
+
+            <div id="profileCard" class="hidden">
+              <div class="profile-row">
+                <img id="profileAvatar" class="avatar xl" alt="avatar" />
+                <div>
+                  <div id="profileNickname" class="profile-name">—</div>
+                  <div id="profileSteamId" class="profile-sub">—</div>
+                </div>
+              </div>
+
+              <div class="stats-grid">
+                <div class="stat-tile">
+                  <span>Elo</span>
+                  <strong id="profileElo">100</strong>
+                </div>
+                <div class="stat-tile">
+                  <span>Матчи</span>
+                  <strong id="profileMatches">0</strong>
+                </div>
+                <div class="stat-tile">
+                  <span>Победы</span>
+                  <strong id="profileWins">0</strong>
+                </div>
+                <div class="stat-tile">
+                  <span>Поражения</span>
+                  <strong id="profileLosses">0</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-head compact">
+              <h3>Party</h3>
+              <span id="partyBadge" class="status-pill idle">Нет party</span>
+            </div>
+
+            <div class="stack gap-12">
+              <button id="createPartyBtn" class="btn secondary block">Создать party</button>
+              <button id="leavePartyBtn" class="btn ghost block hidden">Покинуть party</button>
+              <button id="disbandPartyBtn" class="btn ghost block hidden">Распустить party</button>
+            </div>
+
+            <div class="invite-box top-space-16">
+              <label for="userSearchInput">Пригласить друга по нику</label>
+              <div class="search-row">
+                <input id="userSearchInput" type="text" placeholder="Например: T1me1k" />
+                <button id="userSearchBtn" class="btn secondary">Найти</button>
+              </div>
+              <div id="userSearchResults" class="search-results"></div>
+            </div>
+
+            <div class="top-space-16">
+              <div class="muted small-label">Состав party</div>
+              <div id="partyMembers" class="party-members-list"></div>
+            </div>
+
+            <div class="top-space-16">
+              <div class="muted small-label">Входящие инвайты</div>
+              <div id="partyInvites" class="invite-list"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-head compact">
+              <h3>Launcher</h3>
+            </div>
+            <div class="stack gap-12">
+              <input id="launcherClientId" type="text" placeholder="Client ID launcher" />
+              <button id="startLauncherLinkBtn" class="btn secondary block">Создать код привязки</button>
+              <div id="launcherLinkResult" class="muted"></div>
+            </div>
+          </div>
+        </aside>
+      </main>
+    </div>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>

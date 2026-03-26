@@ -1,391 +1,137 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="ru">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TRUST — CS:GO Partners</title>
-  <meta name="description" content="TRUST is a competitive launcher and matchmaking platform for CS:GO 2x2 and 5x5." />
-  <link rel="stylesheet" href="styles.css" />
+  <title>TRUST — Competitive 2x2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css" />
 </head>
-
-<body>
-  <div class="site-shell">
+<body class="landing-page">
+  <div class="app-shell landing-shell">
     <header class="topbar">
-      <div class="brand">TRUST</div>
+      <div class="brand-wrap">
+        <div class="brand-mark">T</div>
+        <div>
+          <div class="brand-name">TRUST</div>
+          <div class="brand-sub">Competitive 2x2 platform</div>
+        </div>
+      </div>
 
-      <nav class="topnav">
-        <a href="#modes" data-i18n="navModes">Modes</a>
-        <a href="#status" data-i18n="navStatus">Status</a>
-        <a href="#account" data-i18n="navAccount">Account</a>
-        <a href="#download" data-i18n="navDownload">Download</a>
-        <a href="#roadmap" data-i18n="navRoadmap">Roadmap</a>
-        <a href="#faq" data-i18n="navFaq">FAQ</a>
+      <nav class="top-nav">
+        <a href="#features">Возможности</a>
+        <a href="#status">Статус</a>
+        <a href="./leaderboard.html">Лидерборд</a>
       </nav>
 
-      <div class="topbar-actions">
-        <button class="ghost-btn" id="langToggle">RU</button>
-        <a class="ghost-btn" href="#download" data-i18n="downloadBtnTop">Download</a>
+      <div class="top-actions">
+        <button id="headerDashboardBtn" class="btn ghost hidden">Кабинет</button>
+        <button id="headerLoginBtn" class="btn primary">Войти через Steam</button>
+        <button id="headerLogoutBtn" class="btn ghost hidden">Выйти</button>
       </div>
     </header>
 
     <main>
-      <section class="hero">
-        <div class="hero-left">
-          <div class="hero-badge" data-i18n="heroBadge">Competitive launcher for CS:GO duos and teams</div>
-
-          <h1 data-i18n="heroTitle">
-            Queue smarter.<br />
-            Play better.<br />
-            Win with TRUST.
-          </h1>
-
-          <p class="hero-text" data-i18n="heroText">
-            TRUST brings launcher UX, live queue flow, real match accept, and focused 2x2 / 5x5 matchmaking into one
-            competitive platform.
+      <section class="hero-grid">
+        <div class="hero-copy card card-hero">
+          <span class="badge">TRUST RELEASE</span>
+          <h1>Чистый 2x2 матчмейкинг, party и Elo в одном месте.</h1>
+          <p class="muted hero-text">
+            Играй через сайт или launcher. Аккаунт привязан к Steam, ник берётся из Steam,
+            рейтинг хранится на backend и одинаково работает для всех игроков.
           </p>
 
           <div class="hero-actions">
-            <a class="primary-btn" href="https://t1me1k.github.io/trustCS/downloads/TRUST-Setup-0.1.0.exe"
-              id="downloadLauncherBtn" download="TRUST-Setup-0.1.0.exe" data-i18n="downloadLauncherBtn">Download
-              setup</a>
-            <a class="ghost-btn large" href="#status" data-i18n="heroSecondaryBtn">Live status</a>
+            <button id="heroLoginBtn" class="btn primary btn-large">Войти через Steam</button>
+            <a href="./app.html" class="btn ghost btn-large">Открыть кабинет</a>
           </div>
+
           <div class="hero-stats">
-            <div class="stat-card">
-              <span class="stat-label" data-i18n="statOnlineLabel">Players online</span>
-              <strong class="stat-value" id="onlineCount">0</strong>
+            <div class="metric-box">
+              <span class="metric-label">Режим</span>
+              <strong>2x2</strong>
             </div>
-            <div class="stat-card">
-              <span class="stat-label" data-i18n="statServerLabel">Server</span>
-              <strong class="stat-value" id="serverState">Checking...</strong>
+            <div class="metric-box">
+              <span class="metric-label">Elo</span>
+              <strong>100 / +25 / -25</strong>
             </div>
-            <div class="stat-card">
-              <span class="stat-label" data-i18n="statModesLabel">Modes</span>
-              <strong class="stat-value">2x2 / 5x5</strong>
-            </div>
-          </div>
-        </div>
-
-        <div class="hero-right">
-          <div class="hero-visual">
-            <div class="glow glow-a"></div>
-            <div class="glow glow-b"></div>
-
-            <div class="launcher-preview">
-              <div class="preview-topbar">
-                <span class="preview-brand">TRUST</span>
-                <div class="preview-controls"><span></span><span></span></div>
-              </div>
-
-              <div class="preview-body">
-                <aside class="preview-sidebar">
-                  <div class="preview-nav-item active">Main</div>
-                  <div class="preview-nav-item">Settings</div>
-                  <div class="preview-profile">
-                    <div class="avatar"></div>
-                    <div>
-                      <strong>trust_user</strong>
-                      <span>1478 ELO</span>
-                    </div>
-                  </div>
-                </aside>
-
-                <div class="preview-content">
-                  <div class="preview-hero-card">
-                    <h3>TRUST // CS:GO PARTNERS</h3>
-                    <p data-i18n="previewText">
-                      Real queue flow, accept / decline, live lobby, online count, and focused competitive modes.
-                    </p>
-                  </div>
-
-                  <div class="preview-mode-grid">
-                    <div class="preview-mode active">
-                      <strong>2x2</strong>
-                      <span data-i18n="previewMode2">Partners queue</span>
-                    </div>
-                    <div class="preview-mode">
-                      <strong>5x5</strong>
-                      <span data-i18n="previewMode5">Classic team queue</span>
-                    </div>
-                  </div>
-
-                  <button class="preview-search-btn" data-i18n="previewSearchBtn">Start Search</button>
-                </div>
-              </div>
+            <div class="metric-box">
+              <span class="metric-label">Платформы</span>
+              <strong>Web + Launcher</strong>
             </div>
           </div>
         </div>
-      </section>
 
-      <section class="section-card" id="status">
-        <div class="section-head">
-          <span class="section-kicker" data-i18n="statusKicker">Live backend status</span>
-          <h2 data-i18n="statusTitle">Current platform status</h2>
-        </div>
-
-        <div class="live-status-grid">
-          <div class="status-box">
-            <span class="status-label" data-i18n="statusServer">Server status</span>
-            <strong class="status-main" id="statusServerText">Checking...</strong>
-            <span class="status-sub" id="statusServerSub">...</span>
+        <div class="hero-panel card card-hero-side">
+          <div class="section-head compact">
+            <h3>Аккаунт</h3>
+            <span id="authStateBadge" class="status-pill idle">Проверка...</span>
           </div>
 
-          <div class="status-box">
-            <span class="status-label" data-i18n="statusPlayers">Players online</span>
-            <strong class="status-main" id="statusPlayersText">0</strong>
-            <span class="status-sub" data-i18n="statusPlayersSub">Real-time online from backend</span>
-          </div>
-
-          <div class="status-box">
-            <span class="status-label" data-i18n="statusMotdLabel">Message of the day</span>
-            <strong class="status-main motd" id="statusMotd">Loading...</strong>
-            <span class="status-sub" data-i18n="statusMotdSub">Live config from TRUST backend</span>
-          </div>
-        </div>
-      </section>
-
-      <section class="section-card" id="modes">
-        <div class="section-head">
-          <span class="section-kicker" data-i18n="modesKicker">Focused matchmaking</span>
-          <h2 data-i18n="modesTitle">Two clear competitive modes</h2>
-        </div>
-
-        <div class="feature-grid">
-          <article class="feature-card">
-            <h3 data-i18n="mode2Title">2x2 Partners</h3>
-            <p data-i18n="mode2Text">
-              Fast competitive queue built around partner play, tight coordination, and repeatable matchmaking.
-            </p>
-          </article>
-
-          <article class="feature-card">
-            <h3 data-i18n="mode5Title">5x5 Classic</h3>
-            <p data-i18n="mode5Text">
-              Standard team-based competitive format for full squads and structured matches.
-            </p>
-          </article>
-
-          <article class="feature-card">
-            <h3 data-i18n="modeFlowTitle">Live match flow</h3>
-            <p data-i18n="modeFlowText">
-              Search, find match, accept or decline, wait for players, and move into a live lobby state.
-            </p>
-          </article>
-        </div>
-      </section>
-
-      <section class="section-card trust-account-section" id="account">
-        <div class="section-head">
-          <span class="section-kicker">TRUST account</span>
-          <h2>My account</h2>
-        </div>
-
-        <section class="trust-account-card" id="trustAccountCard">
-          <div class="trust-account-head trust-account-head-grid">
+          <div id="landingUserCard" class="profile-card hidden">
+            <img id="landingAvatar" class="avatar xl" alt="avatar" />
             <div>
-              <div class="trust-account-title">TRUST ACCOUNT</div>
-              <div class="trust-account-subtitle">Steam login, launcher link, and account state</div>
-            </div>
-
-            <div class="trust-account-badge-row">
-              <div class="trust-mini-badge" id="authStateBadge">Checking session...</div>
-              <div class="trust-mini-badge" id="launcherStateBadge">Launcher link unknown</div>
+              <div id="landingNickname" class="profile-name">—</div>
+              <div id="landingSteamId" class="profile-sub">—</div>
             </div>
           </div>
 
-          <div id="authGuestBlock">
-            <div class="trust-empty-state">
-              <h3>Sign in to unlock your TRUST account</h3>
-              <p>
-                Use Steam login to access your account panel, launcher linking, and future competitive profile features.
-              </p>
-
-              <div class="trust-empty-actions">
-                <a class="steam-login-btn" href="https://trust-backend-production-e1d1.up.railway.app/auth/steam">
-                  <span>Sign in through Steam</span>
-                </a>
-              </div>
-
-              <div class="trust-info-grid">
-                <div class="trust-info-card">
-                  <span class="trust-info-label">Steam auth</span>
-                  <strong class="trust-info-value">Required</strong>
-                  <small>Needed before launcher linking</small>
-                </div>
-
-                <div class="trust-info-card">
-                  <span class="trust-info-label">Launcher link</span>
-                  <strong class="trust-info-value">Optional now</strong>
-                  <small>Required for account sync inside launcher</small>
-                </div>
-
-                <div class="trust-info-card">
-                  <span class="trust-info-label">Competitive profile</span>
-                  <strong class="trust-info-value">Expanding</strong>
-                  <small>MMR, stats, and history come next</small>
-                </div>
-              </div>
-            </div>
+          <div id="landingGuestCard" class="empty-state soft">
+            <p>Для поиска игры, party и рейтинга нужен вход через Steam.</p>
           </div>
 
-          <div id="authUserBlock" style="display:none;">
-            <div class="trust-user-panel">
-              <div class="trust-user-row">
-                <img id="trustUserAvatar" class="trust-user-avatar" src="" alt="avatar" />
-                <div class="trust-user-meta">
-                  <div id="trustUserName" class="trust-user-name">Unknown</div>
-                  <div id="trustUserSteamId" class="trust-user-steamid">Steam ID: —</div>
-
-                  <div class="trust-user-links">
-                    <a id="trustUserProfile" class="trust-user-link" href="#" target="_blank" rel="noopener">
-                      Open Steam profile
-                    </a>
-                    <button id="copySteamIdBtn" class="trust-inline-btn" type="button">
-                      Copy Steam ID
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div class="trust-account-stats">
-                <div class="trust-stat-box">
-                  <span class="trust-stat-label">Session</span>
-                  <strong class="trust-stat-value" id="accountSessionValue">Authorized</strong>
-                  <small class="trust-stat-sub">Steam session is active</small>
-                </div>
-
-                <div class="trust-stat-box">
-                  <span class="trust-stat-label">Launcher link</span>
-                  <strong class="trust-stat-value" id="accountLauncherValue">Available</strong>
-                  <small class="trust-stat-sub">Use TRUST protocol to open the launcher</small>
-                </div>
-
-                <div class="trust-stat-box">
-                  <span class="trust-stat-label">Profile</span>
-                  <strong class="trust-stat-value" id="accountProfileValue">Steam synced</strong>
-                  <small class="trust-stat-sub">Basic account data loaded from backend</small>
-                </div>
-              </div>
-
-              <div class="trust-linker">
-                <label class="trust-linker-label">
-                  Link TRUST launcher
-                </label>
-
-                <p class="trust-linker-copy">
-                  Click the button below to open the installed launcher through the TRUST protocol. The launcher will
-                  finish the link automatically.
-                </p>
-
-                <div class="trust-linker-actions">
-                  <button id="linkLauncherBtn" type="button" class="trust-link-launch-btn">
-                    Link launcher
-                  </button>
-                </div>
-
-                <div id="launcherLinkStatus" class="trust-linker-status"></div>
-              </div>
-
-              <div class="trust-account-help">
-                <div class="trust-help-card">
-                  <span class="trust-help-kicker">Step 1</span>
-                  <strong>Steam account connected</strong>
-                  <p>Your website session is already authenticated through Steam.</p>
-                </div>
-
-                <div class="trust-help-card">
-                  <span class="trust-help-kicker">Step 2</span>
-                  <strong>Open TRUST launcher</strong>
-                  <p>Use the link button above. If nothing opens, make sure the launcher is installed.</p>
-                </div>
-
-                <div class="trust-help-card">
-                  <span class="trust-help-kicker">Step 3</span>
-                  <strong>Finish account sync</strong>
-                  <p>After linking, your launcher can sync the Steam profile and future competitive data.</p>
-                </div>
-              </div>
-
-              <button id="trustLogoutBtn" class="trust-logout-btn" type="button">
-                Logout
-              </button>
-            </div>
-          </div>
-        </section>
-      </section>
-
-
-
-      <section class="section-card" id="roadmap">
-        <div class="section-head">
-          <span class="section-kicker" data-i18n="roadmapKicker">Roadmap</span>
-          <h2 data-i18n="roadmapTitle">What comes next</h2>
-        </div>
-
-        <div class="steps roadmap-grid">
-          <div class="step-card">
-            <div class="step-num">01</div>
-            <h3 data-i18n="road1Title">Launcher identity</h3>
-            <p data-i18n="road1Text">Persistent nickname, permanent client ID, and cleaner lobby flow.</p>
-          </div>
-
-          <div class="step-card">
-            <div class="step-num">02</div>
-            <h3 data-i18n="road2Title">Website account layer</h3>
-            <p data-i18n="road2Text">Steam login, profile dashboard, launcher linking, and account sync.</p>
-          </div>
-
-          <div class="step-card">
-            <div class="step-num">03</div>
-            <h3 data-i18n="road3Title">Competitive systems</h3>
-            <p data-i18n="road3Text">Ratings, profile stats, history, and stronger matchmaking logic.</p>
+          <div class="stack gap-12 top-space-16">
+            <a href="./app.html" class="btn secondary block">Открыть app</a>
+            <a href="./leaderboard.html" class="btn ghost block">Смотреть лидерборд</a>
           </div>
         </div>
       </section>
 
-      <section class="faq section-card" id="faq">
-        <div class="section-head">
-          <span class="section-kicker">FAQ</span>
-          <h2 data-i18n="faqTitle">Common questions</h2>
+      <section id="status" class="status-grid">
+        <div class="card">
+          <div class="section-head compact">
+            <h3>Backend</h3>
+            <span id="backendStatus" class="status-pill idle">Проверка...</span>
+          </div>
+          <p id="backendStatusText" class="muted">Подключаемся к TRUST backend...</p>
         </div>
 
-        <div class="faq-list">
-          <div class="faq-item">
-            <button class="faq-question" type="button">
-              <span data-i18n="q1">Does the website already require Steam login?</span>
-              <span>+</span>
-            </button>
-            <div class="faq-answer" data-i18n="a1">
-              Not yet. The current stage focuses on launcher UX, backend queue flow, and live matchmaking.
-            </div>
+        <div class="card">
+          <div class="section-head compact">
+            <h3>Конфиг</h3>
+            <span id="configStatus" class="status-pill idle">Ожидание</span>
           </div>
-
-          <div class="faq-item">
-            <button class="faq-question" type="button">
-              <span data-i18n="q2">Is the online counter real?</span>
-              <span>+</span>
-            </button>
-            <div class="faq-answer" data-i18n="a2">
-              Yes. The website reads live health and online data from the TRUST backend.
-            </div>
-          </div>
-
-          <div class="faq-item">
-            <button class="faq-question" type="button">
-              <span data-i18n="q3">What modes are available now?</span>
-              <span>+</span>
-            </button>
-            <div class="faq-answer" data-i18n="a3">
-              Right now the platform is focused on two modes only: 2x2 and 5x5.
-            </div>
-          </div>
+          <p id="configText" class="muted">Читаем настройки матчмейкинга...</p>
         </div>
+
+        <div class="card">
+          <div class="section-head compact">
+            <h3>Launcher</h3>
+            <span class="status-pill ok">Готов</span>
+          </div>
+          <p class="muted">Launcher можно связать с аккаунтом через TRUST backend.</p>
+        </div>
+      </section>
+
+      <section id="features" class="features-grid">
+        <article class="card feature-card">
+          <h3>Steam-only вход</h3>
+          <p class="muted">Ник берётся из Steam. Нет ручной смены ника и лишней путаницы между сайтом, launcher и матчем.</p>
+        </article>
+        <article class="card feature-card">
+          <h3>Party и инвайты</h3>
+          <p class="muted">Создавай duo-party, зови друга по нику и запускай поиск только в корректном составе.</p>
+        </article>
+        <article class="card feature-card">
+          <h3>Единый Elo</h3>
+          <p class="muted">Рейтинг хранится на backend, а не локально. Победа +25, поражение -25, старт 100.</p>
+        </article>
       </section>
     </main>
   </div>
 
-  <script src="script.js"></script>
+  <script src="./landing.js"></script>
 </body>
-
 </html>
