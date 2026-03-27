@@ -9,129 +9,85 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css" />
 </head>
-<body class="landing-page">
-  <div class="app-shell landing-shell">
-    <header class="topbar">
-      <div class="brand-wrap">
+<body>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <div class="brand">
         <div class="brand-mark">T</div>
         <div>
           <div class="brand-name">TRUST</div>
           <div class="brand-sub">Competitive 2x2 platform</div>
         </div>
       </div>
-
-      <nav class="top-nav">
-        <a href="#features">Возможности</a>
+      <nav class="nav">
+        <a href="#about">Платформа</a>
         <a href="#status">Статус</a>
         <a href="./leaderboard.html">Лидерборд</a>
       </nav>
-
-      <div class="top-actions">
-        <button id="headerDashboardBtn" class="btn ghost hidden">Кабинет</button>
-        <button id="headerLoginBtn" class="btn primary">Войти через Steam</button>
-        <button id="headerLogoutBtn" class="btn ghost hidden">Выйти</button>
+      <div class="actions">
+        <a class="btn ghost hidden" id="landingAppBtn" href="./app.html">Кабинет</a>
+        <button class="btn primary" id="landingLoginBtn">Войти через Steam</button>
+        <button class="btn ghost hidden" id="landingLogoutBtn">Выйти</button>
       </div>
-    </header>
-
-    <main>
-      <section class="hero-grid">
-        <div class="hero-copy card card-hero">
-          <span class="badge">TRUST RELEASE</span>
-          <h1>Чистый 2x2 матчмейкинг, party и Elo в одном месте.</h1>
-          <p class="muted hero-text">
-            Играй через сайт или launcher. Аккаунт привязан к Steam, ник берётся из Steam,
-            рейтинг хранится на backend и одинаково работает для всех игроков.
-          </p>
-
-          <div class="hero-actions">
-            <button id="heroLoginBtn" class="btn primary btn-large">Войти через Steam</button>
-            <a href="./app.html" class="btn ghost btn-large">Открыть кабинет</a>
-          </div>
-
-          <div class="hero-stats">
-            <div class="metric-box">
-              <span class="metric-label">Режим</span>
-              <strong>2x2</strong>
-            </div>
-            <div class="metric-box">
-              <span class="metric-label">Elo</span>
-              <strong>100 / +25 / -25</strong>
-            </div>
-            <div class="metric-box">
-              <span class="metric-label">Платформы</span>
-              <strong>Web + Launcher</strong>
-            </div>
-          </div>
+    </div>
+  </header>
+  <main class="hero">
+    <div class="container hero-grid">
+      <section class="card">
+        <span class="badge">TRUST RELEASE</span>
+        <h1>Лёгкий 2x2 матчмейкинг<br>без лишнего шума.</h1>
+        <p class="muted">
+          Играй через сайт или launcher. Ник и аккаунт берутся из Steam, party и очередь живут на backend,
+          рейтинг один и тот же для всех игроков.
+        </p>
+        <div class="hero-cta">
+          <button class="btn primary" id="heroLoginBtn">Войти через Steam</button>
+          <a class="btn ghost" href="./app.html">Открыть app</a>
+          <a class="btn ghost" href="./leaderboard.html">Лидерборд</a>
         </div>
-
-        <div class="hero-panel card card-hero-side">
-          <div class="section-head compact">
-            <h3>Аккаунт</h3>
-            <span id="authStateBadge" class="status-pill idle">Проверка...</span>
-          </div>
-
-          <div id="landingUserCard" class="profile-card hidden">
-            <img id="landingAvatar" class="avatar xl" alt="avatar" />
+        <div class="metrics">
+          <div class="metric"><span>Формат</span><strong>2x2</strong></div>
+          <div class="metric"><span>Elo</span><strong>100 / +25 / -25</strong></div>
+          <div class="metric"><span>Платформы</span><strong>Web + Launcher</strong></div>
+        </div>
+      </section>
+      <aside class="card">
+        <div class="section-title"><h3>Аккаунт</h3><span class="pill idle" id="landingAuthBadge">Проверка...</span></div>
+        <div class="empty" id="landingGuestCard">Войди через Steam, чтобы открыть party, поиск матча и профиль.</div>
+        <div class="hidden" id="landingUserCard">
+          <div class="profile-box">
+            <img id="landingAvatar" class="avatar" alt="avatar">
             <div>
-              <div id="landingNickname" class="profile-name">—</div>
-              <div id="landingSteamId" class="profile-sub">—</div>
+              <div id="landingNickname" style="font-weight:700;font-size:20px">—</div>
+              <div id="landingSteamId" class="muted">—</div>
             </div>
           </div>
-
-          <div id="landingGuestCard" class="empty-state soft">
-            <p>Для поиска игры, party и рейтинга нужен вход через Steam.</p>
-          </div>
-
-          <div class="stack gap-12 top-space-16">
-            <a href="./app.html" class="btn secondary block">Открыть app</a>
-            <a href="./leaderboard.html" class="btn ghost block">Смотреть лидерборд</a>
+          <div class="grid-3" style="margin-top:18px">
+            <div class="stat"><span>Elo</span><strong id="landingElo">100</strong></div>
+            <div class="stat"><span>Матчи</span><strong id="landingMatches">0</strong></div>
+            <div class="stat"><span>Победы</span><strong id="landingWins">0</strong></div>
           </div>
         </div>
-      </section>
-
-      <section id="status" class="status-grid">
+      </aside>
+    </div>
+    <section id="status" class="section">
+      <div class="container grid-3">
         <div class="card">
-          <div class="section-head compact">
-            <h3>Backend</h3>
-            <span id="backendStatus" class="status-pill idle">Проверка...</span>
-          </div>
-          <p id="backendStatusText" class="muted">Подключаемся к TRUST backend...</p>
+          <div class="section-title"><h3>Backend</h3><span id="backendBadge" class="pill idle">Проверка...</span></div>
+          <div class="muted" id="backendText">Проверяем подключение к TRUST backend.</div>
         </div>
-
         <div class="card">
-          <div class="section-head compact">
-            <h3>Конфиг</h3>
-            <span id="configStatus" class="status-pill idle">Ожидание</span>
-          </div>
-          <p id="configText" class="muted">Читаем настройки матчмейкинга...</p>
+          <div class="section-title"><h3>Конфиг</h3><span id="configBadge" class="pill idle">Ожидание</span></div>
+          <div class="muted" id="configText">Читаем настройки матчмейкинга.</div>
         </div>
-
-        <div class="card">
-          <div class="section-head compact">
-            <h3>Launcher</h3>
-            <span class="status-pill ok">Готов</span>
-          </div>
-          <p class="muted">Launcher можно связать с аккаунтом через TRUST backend.</p>
+        <div class="card" id="about">
+          <div class="section-title"><h3>Принцип</h3><span class="pill live">Steam-only</span></div>
+          <div class="muted">Ник берётся из Steam, поиск 2x2 запускается только из готовой duo-party.</div>
         </div>
-      </section>
-
-      <section id="features" class="features-grid">
-        <article class="card feature-card">
-          <h3>Steam-only вход</h3>
-          <p class="muted">Ник берётся из Steam. Нет ручной смены ника и лишней путаницы между сайтом, launcher и матчем.</p>
-        </article>
-        <article class="card feature-card">
-          <h3>Party и инвайты</h3>
-          <p class="muted">Создавай duo-party, зови друга по нику и запускай поиск только в корректном составе.</p>
-        </article>
-        <article class="card feature-card">
-          <h3>Единый Elo</h3>
-          <p class="muted">Рейтинг хранится на backend, а не локально. Победа +25, поражение -25, старт 100.</p>
-        </article>
-      </section>
-    </main>
-  </div>
-
+      </div>
+    </section>
+    <div class="footer-space"></div>
+  </main>
   <script src="./landing.js"></script>
 </body>
 </html>
