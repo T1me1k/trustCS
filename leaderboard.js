@@ -1,6 +1,8 @@
-const BACKEND_BASE_URL = 'https://trust-backend-production-e1d1.up.railway.app';
+const BACKEND_BASE_URL = localStorage.getItem('trust_api_base') || 'https://trust-backend-production-e1d1.up.railway.app';
+function authHeaders(headers = {}) { const token = localStorage.getItem('trust_auth_token'); return token ? { ...headers, Authorization: `Bearer ${token}` } : headers; }
+function consumeAuthTokenFromUrl(){ const hash = window.location.hash || ''; const match = hash.match(/auth_token=([^&]+)/); if (match){ localStorage.setItem('trust_auth_token', decodeURIComponent(match[1])); history.replaceState(null, '', window.location.pathname + window.location.search); } }
 async function api(path, options = {}) {
-  const response = await fetch(`${BACKEND_BASE_URL}${path}`, { credentials: 'include', headers: { ...(options.headers || {}) }, ...options });
+  const response = await fetch(`${BACKEND_BASE_URL}${path}`, { credentials: 'include', headers: authHeaders({ ...(options.headers || {}) }), ...options });
   const data = await response.json().catch(() => ({}));
   if (!response.ok || data.ok === false) throw new Error(data.error || `request_failed_${response.status}`);
   return data;
@@ -17,3 +19,5 @@ async function loadLeaderboard(){
   }catch{ root.innerHTML = '<div class="empty">Не удалось загрузить лидерборд.</div>'; }
 }
 window.addEventListener('DOMContentLoaded', ()=>{ document.getElementById('lbLoginBtn')?.addEventListener('click', ()=>{ window.location.href = `${BACKEND_BASE_URL}/auth/steam`; }); loadLeaderboard(); });
+
+consumeAuthTokenFromUrl();
