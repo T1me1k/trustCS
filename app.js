@@ -357,7 +357,7 @@ async function declineInvite(id) {
 
 async function startQueue() {
   try {
-    await api('/api/queue/join', { method: 'POST', body: JSON.stringify({ mode: 'auto' }) });
+    await api('/api/queue/join', { method: 'POST', body: JSON.stringify({ mode: '2x2' }) });
     await Promise.all([loadParty(), loadQueue()]);
     const members = state.party?.members?.length || 1;
     showAlert(members === 2 ? 'Поиск 2x2 для готовой пати запущен.' : 'Поиск 2x2 запущен. Система подберёт тебе тиммейта.');
