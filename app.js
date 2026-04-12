@@ -1,44 +1,417 @@
-const BACKEND_BASE_URL = localStorage.getItem('trust_api_base') || 'https://trust-backend-production-e1d1.up.railway.app';
-function authHeaders(headers = {}) { const token = localStorage.getItem('trust_auth_token'); return token ? { ...headers, Authorization: `Bearer ${token}` } : headers; }
-function consumeAuthTokenFromUrl(){ const hash = window.location.hash || ''; const match = hash.match(/auth_token=([^&]+)/); if (match){ localStorage.setItem('trust_auth_token', decodeURIComponent(match[1])); history.replaceState(null, '', window.location.pathname + window.location.search); } }
+const BACKEND_BASE_URL = (() => {
+  const fromWindow = window.TRUST_BACKEND_BASE_URL;
+  const fromMeta = document.querySelector('meta[name="trust-backend-url"]')?.content;
+  const fromStorage = window.localStorage.getItem('trust_backend_base_url');
+  return (fromWindow || fromMeta || fromStorage || 'https://YOUR-BACKEND.up.railway.app').replace(/\/+$/, '');
+})();
+
 async function api(path, options = {}) {
-  const response = await fetch(`${BACKEND_BASE_URL}${path}`, { credentials: 'include', headers: authHeaders({ 'Content-Type': 'application/json', ...(options.headers || {}) }), ...options });
+  const response = await fetch(`${BACKEND_BASE_URL}${path}`, {
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(options.headers || {})
+    },
+    ...options
+  });
   const data = await response.json().catch(() => ({}));
   if (!response.ok || data.ok === false) throw new Error(data.error || `request_failed_${response.status}`);
   return data;
 }
-const state = { user:null, party:null, queue:null, match:null, history:[] };
-function $(id){ return document.getElementById(id); }
-function hide(id, on){ $(id)?.classList.toggle('hidden', on); }
-function text(id, value){ const el = $(id); if (el) el.textContent = value; }
-function esc(v){ return String(v ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-function showAlert(message, kind='info'){ const el = $('globalAlert'); el.textContent = message; el.className = 'alert'; if (kind === 'error'){ el.style.borderColor='rgba(239,68,68,.35)'; el.style.background='rgba(239,68,68,.12)'; } else { el.style.borderColor='rgba(139,92,246,.24)'; el.style.background='rgba(139,92,246,.10)'; } el.classList.remove('hidden'); clearTimeout(showAlert._t); showAlert._t=setTimeout(()=>el.classList.add('hidden'),3400); }
-function applyAuthUI(){ const u = state.user; const authed = !!u; hide('appLoginBtn', authed); hide('appLogoutBtn', !authed); hide('profileGuest', authed); hide('profileCard', !authed); $('authBadge').textContent = authed ? 'Steam connected' : 'Гость'; $('authBadge').className = `pill ${authed ? 'ok' : 'idle'}`; if (!authed){ text('playCtaText','Сначала войди через Steam и собери duo-party.'); return; } $('profileAvatar').src = u.avatarUrl || ''; text('profileNickname', u.nickname || 'Unknown'); text('profileSteamId', u.steamId || u.steamId64 || ''); text('profileElo', u.elo2v2 ?? 100); text('profileMatches', u.matchesPlayed2v2 ?? 0); text('profileWins', u.wins2v2 ?? 0); text('profileLosses', u.losses2v2 ?? 0); text('playCtaText','Создай party на 2 игроков и запускай поиск.'); }
-function renderParty(){ const party = state.party; const membersEl=$('partyMembers'); const invitesEl=$('partyInvites'); membersEl.innerHTML=''; invitesEl.innerHTML=''; const hasParty=!!party; const count=party?.members?.length||0; $('partyBadge').textContent = hasParty ? `${count}/2` : 'Нет party'; $('partyBadge').className = `pill ${hasParty ? 'ok':'idle'}`; text('queuePartyStat', `${count}/2`); hide('leavePartyBtn', !hasParty); hide('disbandPartyBtn', !(hasParty && party.isLeader)); if (!hasParty){ membersEl.innerHTML='<div class="empty">Party пока нет.</div>'; invitesEl.innerHTML='<div class="empty">Входящих инвайтов нет.</div>'; return; } membersEl.innerHTML=(party.members||[]).map(m=>`<div class="member-item"><div class="member-main"><img class="avatar sm" src="${esc(m.avatarUrl||'')}" alt="avatar"><div><div>${esc(m.nickname||'Unknown')}</div><div class="muted">${esc(m.role||'member')} • Elo ${esc(m.elo2v2??100)}</div></div></div><span class="pill ${m.role==='leader'?'live':'idle'}">${m.role==='leader'?'Leader':'Member'}</span></div>`).join(''); const invites=party.pendingInvites||[]; invitesEl.innerHTML = invites.length ? invites.map(inv=>`<div class="invite-item"><div><div style="font-weight:700">${esc(inv.fromNickname||'Игрок')}</div><div class="muted">Приглашение в party</div></div><div class="actions"><button class="btn secondary" data-accept-invite="${esc(inv.id)}">Принять</button><button class="btn ghost" data-decline-invite="${esc(inv.id)}">Отклонить</button></div></div>`).join('') : '<div class="empty">Входящих инвайтов нет.</div>'; }
-function renderQueue(){ const queued = state.queue && state.queue.status === 'queued'; $('queueBadge').textContent = queued ? 'В очереди' : 'Не в очереди'; $('queueBadge').className = `pill ${queued ? 'live' : 'idle'}`; $('matchmakingState').textContent = queued ? 'Идёт поиск' : 'Ожидание'; $('matchmakingState').className = `pill ${queued ? 'live' : 'idle'}`; hide('cancelQueueBtn', !queued); $('joinQueueBtn').disabled = queued || !state.user; text('searchStateText', queued ? 'Твоя party сейчас в очереди. Как только матч будет найден — он появится ниже.' : 'Когда party готова, лидер может запустить поиск.'); }
-function playerChip(p){ const own = state.match?.team && p.team === state.match.team; return `<div class="row"><div><div style="font-weight:700">${esc(p.nickname||'Player')}</div><div class="muted">Elo ${esc(p.elo??100)}</div></div><span class="pill ${own ? 'ok' : 'idle'}">${esc(p.team||'')}</span></div>`; }
-function renderMatch(){ const match=state.match; const empty=!match; hide('currentMatchEmpty', !empty); hide('currentMatchCard', empty); $('currentMatchBadge').textContent = empty ? 'Нет матча' : (match.status || 'Матч'); $('currentMatchBadge').className = `pill ${empty ? 'idle':'ok'}`; if (empty) return; text('currentMatchId', match.matchId || match.publicMatchId || 'match'); text('currentMatchMeta', `${match.map || match.mapName || 'de_dust2'} • Твоя команда ${match.team || '—'}`); text('currentMatchStatus', match.status || 'server_assigned'); $('currentMatchStatus').className='pill live'; const connectLine = `${match.serverIp || '127.0.0.1'}:${match.serverPort || 27015}  password ${match.serverPassword || 'trust'}`; text('serverConnectLine', connectLine); $('copyConnectBtn').dataset.connect = `connect ${match.serverIp || '127.0.0.1'}:${match.serverPort || 27015}; password "${match.serverPassword || 'trust'}"`; const players=match.players||[]; $('teamAPlayers').innerHTML = players.filter(p=>p.team==='A').map(playerChip).join('') || '<div class="empty">Нет игроков</div>'; $('teamBPlayers').innerHTML = players.filter(p=>p.team==='B').map(playerChip).join('') || '<div class="empty">Нет игроков</div>'; }
-function renderHistory(){ const el=$('historyList'); const items=state.history||[]; if(!items.length){ el.innerHTML='<div class="empty">История пока пустая.</div>'; return; } el.innerHTML = items.map(item=>{ const result = item.result || ((Number(item.eloDelta || item.elo_delta || 0) > 0) ? 'win':'loss'); const delta = Number(item.eloDelta ?? item.elo_delta ?? 0); const when = item.finishedAt || item.finished_at || item.createdAt || ''; return `<div class="history-item"><div><div style="font-weight:700">${esc(item.matchId || item.publicMatchId || item.public_match_id || 'match')}</div><div class="muted">${esc(item.map || item.mapName || item.map_name || 'de_dust2')} • ${esc(when)}</div></div><div style="text-align:right"><span class="pill ${result==='win'?'ok':'warn'}">${result==='win'?'WIN':'LOSS'}</span><div class="muted" style="margin-top:6px">${delta>0?'+':''}${delta}</div></div></div>`; }).join(''); }
-function renderSearchResults(items){ const el=$('userSearchResults'); if(!items.length){ el.innerHTML='<div class="empty">Никого не нашли.</div>'; return; } el.innerHTML = items.map(item=>`<div class="search-item"><div class="search-main"><img class="avatar sm" src="${esc(item.avatarUrl || item.avatar_url || '')}" alt="avatar"><div><div>${esc(item.nickname || item.steam_persona_name || 'Unknown')}</div><div class="muted">Elo ${esc(item.elo2v2 ?? item.elo_2v2 ?? 100)}</div></div></div><button class="btn secondary" data-invite-user="${esc(item.id)}">Пригласить</button></div>`).join(''); }
-async function loadAuth(){ try { const data = await api('/auth/me'); state.user = data.user || null; } catch (err) { if (err.message === 'unauthorized') localStorage.removeItem('trust_auth_token'); state.user = null; } applyAuthUI(); }
-async function loadAccount(){ if(!state.user) return; const data=await api('/api/account/me'); state.user = data.user || state.user; applyAuthUI(); }
-async function loadParty(){ if(!state.user){ state.party=null; renderParty(); return; } const data=await api('/api/party/me'); state.party = data.party || null; renderParty(); }
-async function loadQueue(){ if(!state.user){ state.queue=null; renderQueue(); return; } const data=await api('/api/queue/me'); state.queue = data.queue || null; renderQueue(); }
-async function loadCurrentMatch(){ if(!state.user){ state.match=null; renderMatch(); return; } const data=await api('/api/matches/me/current'); state.match = data.match || null; renderMatch(); }
-async function loadHistory(){ if(!state.user){ state.history=[]; renderHistory(); return; } const data=await api('/api/matches/me/history?limit=8'); state.history = data.items || data.history || []; renderHistory(); }
-async function refreshAll(){ try{ await loadAuth(); if(!state.user){ renderParty(); renderQueue(); renderMatch(); renderHistory(); return; } await Promise.all([loadAccount(), loadParty(), loadQueue(), loadCurrentMatch(), loadHistory()]); }catch(err){ console.error(err); showAlert('Не удалось обновить данные app.','error'); } }
-function login(){ window.location.href = `${BACKEND_BASE_URL}/auth/steam`; }
-async function logout(){ localStorage.removeItem('trust_auth_token'); try{ await api('/auth/logout', { method:'POST' }); }catch{} window.location.href='./index.html'; }
-async function createParty(){ try{ await api('/api/party/create', { method:'POST' }); showAlert('Party создана.'); await loadParty(); }catch(err){ showAlert(`Не удалось создать party: ${err.message}`,'error'); } }
-async function leaveParty(){ try{ await api('/api/party/leave', { method:'POST' }); showAlert('Ты покинул party.'); await Promise.all([loadParty(), loadQueue()]); }catch(err){ showAlert(`Не удалось выйти из party: ${err.message}`,'error'); } }
-async function disbandParty(){ try{ await api('/api/party/disband', { method:'POST' }); showAlert('Party распущена.'); await Promise.all([loadParty(), loadQueue()]); }catch(err){ showAlert(`Не удалось распустить party: ${err.message}`,'error'); } }
-async function searchUsers(){ const q=$('userSearchInput').value.trim(); if(!q) return; try{ const data=await api(`/api/account/users/search?q=${encodeURIComponent(q)}`); renderSearchResults(data.items || []); }catch(err){ showAlert(`Поиск не удался: ${err.message}`,'error'); } }
-async function inviteUser(targetUserId){ try{ await api('/api/party/invite', { method:'POST', body: JSON.stringify({ targetUserId }) }); showAlert('Инвайт отправлен.'); await loadParty(); }catch(err){ showAlert(`Инвайт не отправлен: ${err.message}`,'error'); } }
-async function acceptInvite(id){ try{ await api(`/api/party/invite/${id}/accept`, { method:'POST' }); showAlert('Инвайт принят.'); await Promise.all([loadParty(), loadQueue()]); }catch(err){ showAlert(`Не удалось принять инвайт: ${err.message}`,'error'); } }
-async function declineInvite(id){ try{ await api(`/api/party/invite/${id}/decline`, { method:'POST' }); showAlert('Инвайт отклонён.'); await loadParty(); }catch(err){ showAlert(`Не удалось отклонить инвайт: ${err.message}`,'error'); } }
-async function joinQueue(){ try{ await api('/api/queue/join', { method:'POST', body: JSON.stringify({ mode:'2x2' }) }); showAlert('Поиск матча запущен.'); await loadQueue(); }catch(err){ showAlert(`Не удалось запустить поиск: ${err.message}`,'error'); } }
-async function cancelQueue(){ try{ await api('/api/queue/cancel', { method:'POST' }); showAlert('Поиск остановлен.'); await loadQueue(); }catch(err){ showAlert(`Не удалось отменить поиск: ${err.message}`,'error'); } }
-function bindDelegated(){ document.body.addEventListener('click', (e)=>{ const inviteBtn=e.target.closest('[data-invite-user]'); if(inviteBtn) inviteUser(inviteBtn.dataset.inviteUser); const acceptBtn=e.target.closest('[data-accept-invite]'); if(acceptBtn) acceptInvite(acceptBtn.dataset.acceptInvite); const declineBtn=e.target.closest('[data-decline-invite]'); if(declineBtn) declineInvite(declineBtn.dataset.declineInvite); }); }
-window.addEventListener('DOMContentLoaded', async ()=>{ $('appLoginBtn')?.addEventListener('click', login); $('appLogoutBtn')?.addEventListener('click', logout); $('createPartyBtn')?.addEventListener('click', createParty); $('leavePartyBtn')?.addEventListener('click', leaveParty); $('disbandPartyBtn')?.addEventListener('click', disbandParty); $('userSearchBtn')?.addEventListener('click', searchUsers); $('joinQueueBtn')?.addEventListener('click', joinQueue); $('cancelQueueBtn')?.addEventListener('click', cancelQueue); $('copyConnectBtn')?.addEventListener('click', async ()=>{ const value=$('copyConnectBtn').dataset.connect || ''; if(!value) return; try{ await navigator.clipboard.writeText(value); showAlert('Команда connect скопирована.'); }catch{ showAlert('Не удалось скопировать connect.','error'); } }); bindDelegated(); await refreshAll(); setInterval(async ()=>{ if(!state.user) return; try{ await Promise.all([loadQueue(), loadCurrentMatch()]); }catch{} }, 6000); });
 
-consumeAuthTokenFromUrl();
+const state = { user: null, party: null, queue: null, match: null, history: [] };
+function $(id) { return document.getElementById(id); }
+function hide(id, on) { $(id)?.classList.toggle('hidden', on); }
+function text(id, value) { const el = $(id); if (el) el.textContent = value; }
+function esc(v) { return String(v ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
+
+function showAlert(message, kind = 'info') {
+  const el = $('globalAlert');
+  el.textContent = message;
+  el.className = 'alert';
+  if (kind === 'error') {
+    el.style.borderColor = 'rgba(239,68,68,.35)';
+    el.style.background = 'rgba(239,68,68,.12)';
+  } else {
+    el.style.borderColor = 'rgba(139,92,246,.24)';
+    el.style.background = 'rgba(139,92,246,.10)';
+  }
+  el.classList.remove('hidden');
+  clearTimeout(showAlert._t);
+  showAlert._t = setTimeout(() => el.classList.add('hidden'), 3400);
+}
+
+function applyAuthUI() {
+  const u = state.user;
+  const authed = !!u;
+  hide('appLoginBtn', authed);
+  hide('appLogoutBtn', !authed);
+  hide('profileGuest', authed);
+  hide('profileCard', !authed);
+  $('authBadge').textContent = authed ? 'Steam connected' : 'Гость';
+  $('authBadge').className = `pill ${authed ? 'ok' : 'idle'}`;
+  if (!authed) {
+    text('playCtaText', 'Сначала войди через Steam. Потом можно искать матч в 2x2 даже соло.');
+    return;
+  }
+  $('profileAvatar').src = u.avatarUrl || '';
+  text('profileNickname', u.nickname || 'Unknown');
+  text('profileSteamId', u.steamId || u.steamId64 || '');
+  text('profileElo', u.elo2v2 ?? 100);
+  text('profileMatches', u.matchesPlayed2v2 ?? 0);
+  text('profileWins', u.wins2v2 ?? 0);
+  text('profileLosses', u.losses2v2 ?? 0);
+  text('playCtaText', 'Нажми «НАЙТИ МАТЧ». Если party нет, она создастся автоматически. Режим только 2x2: соло добирается тиммейтом, готовая пати из двух идёт вместе.');
+}
+
+function renderParty() {
+  const party = state.party;
+  const membersEl = $('partyMembers');
+  const invitesEl = $('partyInvites');
+  membersEl.innerHTML = '';
+  invitesEl.innerHTML = '';
+  const hasParty = !!party?.id;
+  const count = party?.members?.length || 0;
+  $('partyBadge').textContent = hasParty ? `${count}/2` : 'Нет party';
+  $('partyBadge').className = `pill ${hasParty ? 'ok' : 'idle'}`;
+  text('queuePartyStat', hasParty ? `${count}/2` : '1/2');
+  hide('leavePartyBtn', !hasParty);
+  hide('disbandPartyBtn', !(hasParty && party.isLeader));
+
+  if (!hasParty) {
+    membersEl.innerHTML = '<div class="empty">Party пока нет. Она создастся автоматически при поиске.</div>';
+    invitesEl.innerHTML = '<div class="empty">Входящих инвайтов нет.</div>';
+    return;
+  }
+
+  membersEl.innerHTML = (party.members || []).map((m) => `
+    <div class="member-item">
+      <div class="member-main">
+        <img class="avatar sm" src="${esc(m.avatarUrl || '')}" alt="avatar">
+        <div>
+          <div>${esc(m.nickname || 'Unknown')}</div>
+          <div class="muted">${esc(m.role || 'member')} • Elo ${esc(m.elo2v2 ?? 100)}</div>
+        </div>
+      </div>
+      <span class="pill ${m.role === 'leader' ? 'live' : 'idle'}">${m.role === 'leader' ? 'Leader' : 'Member'}</span>
+    </div>
+  `).join('');
+
+  const invites = party.pendingInvites || [];
+  invitesEl.innerHTML = invites.length
+    ? invites.map((inv) => `
+      <div class="invite-item">
+        <div>
+          <div style="font-weight:700">${esc(inv.fromNickname || 'Игрок')}</div>
+          <div class="muted">Приглашение в party</div>
+        </div>
+        <div class="actions">
+          <button class="btn secondary" data-accept-invite="${esc(inv.id)}">Принять</button>
+          <button class="btn ghost" data-decline-invite="${esc(inv.id)}">Отклонить</button>
+        </div>
+      </div>
+    `).join('')
+    : '<div class="empty">Входящих инвайтов нет.</div>';
+}
+
+function renderQueue() {
+  const queued = state.queue && state.queue.status === 'queued';
+  $('queueBadge').textContent = queued ? 'В очереди' : 'Не в очереди';
+  $('queueBadge').className = `pill ${queued ? 'live' : 'idle'}`;
+  $('matchmakingState').textContent = queued ? 'Идёт поиск' : 'Ожидание';
+  $('matchmakingState').className = `pill ${queued ? 'live' : 'idle'}`;
+  hide('cancelQueueBtn', !queued);
+  $('joinQueueBtn').disabled = queued || !state.user;
+  if (queued) {
+    text('searchStateText', 'Идёт поиск матча 2x2. Соло-игроку подберётся тиммейт, готовая пати из двух сохранится вместе.');
+  } else {
+    text('searchStateText', 'Режим только 2x2. Можно искать матч соло или вдвоём, лобби создаётся автоматически.');
+  }
+}
+
+function playerChip(p) {
+  const own = state.match?.team && p.team === state.match.team;
+  return `<div class="row"><div><div style="font-weight:700">${esc(p.nickname || p.persona_name || 'Player')}</div><div class="muted">Elo ${esc(p.elo ?? p.elo_2v2 ?? 100)}</div></div><span class="pill ${own ? 'ok' : 'idle'}">${esc(p.team || '')}</span></div>`;
+}
+
+function renderMatch() {
+  const match = state.match;
+  const empty = !match;
+  hide('currentMatchEmpty', !empty);
+  hide('currentMatchCard', empty);
+  $('currentMatchBadge').textContent = empty ? 'Нет матча' : (match.status || 'Матч');
+  $('currentMatchBadge').className = `pill ${empty ? 'idle' : 'ok'}`;
+  if (empty) return;
+  text('currentMatchId', match.matchId || match.publicMatchId || match.public_match_id || 'match');
+  text('currentMatchMeta', `${match.map || match.mapName || match.map_name || 'de_dust2'} • ${match.mode || 'match'} • Твоя команда ${match.team || '—'}`);
+  text('currentMatchStatus', match.status || 'server_assigned');
+  $('currentMatchStatus').className = 'pill live';
+  const connectLine = `${match.serverIp || match.server_ip || '127.0.0.1'}:${match.serverPort || match.server_port || 27015}  password ${match.serverPassword || match.server_password || 'trust'}`;
+  text('serverConnectLine', connectLine);
+  $('copyConnectBtn').dataset.connect = `connect ${match.serverIp || match.server_ip || '127.0.0.1'}:${match.serverPort || match.server_port || 27015}; password "${match.serverPassword || match.server_password || 'trust'}"`;
+  const players = match.players || [];
+  $('teamAPlayers').innerHTML = players.filter((p) => p.team === 'A').map(playerChip).join('') || '<div class="empty">Нет игроков</div>';
+  $('teamBPlayers').innerHTML = players.filter((p) => p.team === 'B').map(playerChip).join('') || '<div class="empty">Нет игроков</div>';
+}
+
+function renderHistory() {
+  const el = $('historyList');
+  const items = state.history || [];
+  if (!items.length) {
+    el.innerHTML = '<div class="empty">История пока пустая.</div>';
+    return;
+  }
+  el.innerHTML = items.map((item) => {
+    const result = item.result || ((Number(item.eloDelta || item.elo_delta || 0) > 0) ? 'win' : 'loss');
+    const delta = Number(item.eloDelta ?? item.elo_delta ?? 0);
+    const when = item.finishedAt || item.finished_at || item.createdAt || '';
+    return `
+      <div class="history-item">
+        <div>
+          <div style="font-weight:700">${esc(item.matchId || item.publicMatchId || item.public_match_id || 'match')}</div>
+          <div class="muted">${esc(item.map || item.mapName || item.map_name || 'de_dust2')} • ${esc(when)}</div>
+        </div>
+        <div style="text-align:right">
+          <span class="pill ${result === 'win' ? 'ok' : 'warn'}">${result === 'win' ? 'WIN' : 'LOSS'}</span>
+          <div class="muted" style="margin-top:6px">${delta > 0 ? '+' : ''}${delta}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderSearchResults(items) {
+  const el = $('userSearchResults');
+  if (!items.length) {
+    el.innerHTML = '<div class="empty">Никого не нашли.</div>';
+    return;
+  }
+  el.innerHTML = items.map((item) => `
+    <div class="search-item">
+      <div class="search-main">
+        <img class="avatar sm" src="${esc(item.avatarUrl || item.avatar_url || '')}" alt="avatar">
+        <div>
+          <div>${esc(item.nickname || item.steam_persona_name || 'Unknown')}</div>
+          <div class="muted">Elo ${esc(item.elo2v2 ?? item.elo_2v2 ?? 100)}</div>
+        </div>
+      </div>
+      <button class="btn secondary" data-invite-user="${esc(item.id)}">Пригласить</button>
+    </div>
+  `).join('');
+}
+
+async function loadAuth() {
+  const data = await api('/auth/me');
+  state.user = data.user || null;
+  applyAuthUI();
+}
+
+async function loadAccount() {
+  if (!state.user) return;
+  const data = await api('/api/account/me');
+  state.user = data.user || state.user;
+  applyAuthUI();
+}
+
+async function loadParty() {
+  if (!state.user) {
+    state.party = null;
+    renderParty();
+    return;
+  }
+  const data = await api('/api/party/me');
+  state.party = data.party || null;
+  renderParty();
+}
+
+async function loadQueue() {
+  if (!state.user) {
+    state.queue = null;
+    renderQueue();
+    return;
+  }
+  const data = await api('/api/queue/me');
+  state.queue = data.queue || null;
+  renderQueue();
+}
+
+async function loadCurrentMatch() {
+  if (!state.user) {
+    state.match = null;
+    renderMatch();
+    return;
+  }
+  const data = await api('/api/matches/me/current');
+  state.match = data.match || null;
+  renderMatch();
+}
+
+async function loadHistory() {
+  if (!state.user) {
+    state.history = [];
+    renderHistory();
+    return;
+  }
+  const data = await api('/api/matches/me/history?limit=8');
+  state.history = data.items || data.history || [];
+  renderHistory();
+}
+
+async function refreshAll() {
+  try {
+    await loadAuth();
+    if (!state.user) {
+      renderParty();
+      renderQueue();
+      renderMatch();
+      renderHistory();
+      return;
+    }
+    await Promise.all([loadAccount(), loadParty(), loadQueue(), loadCurrentMatch(), loadHistory()]);
+  } catch (err) {
+    console.error(err);
+    showAlert('Не удалось обновить данные app.', 'error');
+  }
+}
+
+function login() {
+  window.location.href = `${BACKEND_BASE_URL}/auth/steam`;
+}
+
+async function logout() {
+  try {
+    await api('/auth/logout', { method: 'POST' });
+  } catch (_) {}
+  window.location.href = './index.html';
+}
+
+async function createParty() {
+  try {
+    await api('/api/party/create', { method: 'POST' });
+    showAlert('Party готова.');
+    await loadParty();
+  } catch (err) {
+    showAlert(`Не удалось создать party: ${err.message}`, 'error');
+  }
+}
+
+async function leaveParty() {
+  try {
+    await api('/api/party/leave', { method: 'POST' });
+    showAlert('Ты покинул party.');
+    await Promise.all([loadParty(), loadQueue()]);
+  } catch (err) {
+    showAlert(`Не удалось выйти из party: ${err.message}`, 'error');
+  }
+}
+
+async function disbandParty() {
+  try {
+    await api('/api/party/disband', { method: 'POST' });
+    showAlert('Party распущена.');
+    await Promise.all([loadParty(), loadQueue()]);
+  } catch (err) {
+    showAlert(`Не удалось распустить party: ${err.message}`, 'error');
+  }
+}
+
+async function searchUsers() {
+  const q = $('userSearchInput').value.trim();
+  if (!q) return;
+  try {
+    const data = await api(`/api/account/users/search?q=${encodeURIComponent(q)}`);
+    renderSearchResults(data.items || []);
+  } catch (err) {
+    showAlert(`Поиск не удался: ${err.message}`, 'error');
+  }
+}
+
+async function inviteUser(targetUserId) {
+  try {
+    await api('/api/party/invite', { method: 'POST', body: JSON.stringify({ targetUserId }) });
+    showAlert('Инвайт отправлен.');
+    await loadParty();
+  } catch (err) {
+    showAlert(`Инвайт не отправлен: ${err.message}`, 'error');
+  }
+}
+
+async function acceptInvite(id) {
+  try {
+    await api(`/api/party/invite/${id}/accept`, { method: 'POST' });
+    showAlert('Инвайт принят.');
+    await Promise.all([loadParty(), loadQueue()]);
+  } catch (err) {
+    showAlert(`Не удалось принять инвайт: ${err.message}`, 'error');
+  }
+}
+
+async function declineInvite(id) {
+  try {
+    await api(`/api/party/invite/${id}/decline`, { method: 'POST' });
+    showAlert('Инвайт отклонён.');
+    await loadParty();
+  } catch (err) {
+    showAlert(`Не удалось отклонить инвайт: ${err.message}`, 'error');
+  }
+}
+
+async function startQueue() {
+  try {
+    await api('/api/queue/join', { method: 'POST', body: JSON.stringify({ mode: 'auto' }) });
+    await Promise.all([loadParty(), loadQueue()]);
+    const members = state.party?.members?.length || 1;
+    showAlert(members === 2 ? 'Поиск 2x2 для готовой пати запущен.' : 'Поиск 2x2 запущен. Система подберёт тебе тиммейта.');
+  } catch (err) {
+    showAlert(`Не удалось запустить поиск: ${err.message}`, 'error');
+  }
+}
+
+async function cancelQueue() {
+  try {
+    await api('/api/queue/cancel', { method: 'POST' });
+    showAlert('Поиск остановлен.');
+    await Promise.all([loadParty(), loadQueue()]);
+  } catch (err) {
+    showAlert(`Не удалось отменить поиск: ${err.message}`, 'error');
+  }
+}
+
+function bindDelegated() {
+  document.body.addEventListener('click', (e) => {
+    const inviteBtn = e.target.closest('[data-invite-user]');
+    if (inviteBtn) inviteUser(inviteBtn.dataset.inviteUser);
+    const acceptBtn = e.target.closest('[data-accept-invite]');
+    if (acceptBtn) acceptInvite(acceptBtn.dataset.acceptInvite);
+    const declineBtn = e.target.closest('[data-decline-invite]');
+    if (declineBtn) declineInvite(declineBtn.dataset.declineInvite);
+  });
+}
+
+window.addEventListener('DOMContentLoaded', async () => {
+  $('appLoginBtn')?.addEventListener('click', login);
+  $('appLogoutBtn')?.addEventListener('click', logout);
+  $('createPartyBtn')?.addEventListener('click', createParty);
+  $('leavePartyBtn')?.addEventListener('click', leaveParty);
+  $('disbandPartyBtn')?.addEventListener('click', disbandParty);
+  $('userSearchBtn')?.addEventListener('click', searchUsers);
+  $('joinQueueBtn')?.addEventListener('click', startQueue);
+  $('cancelQueueBtn')?.addEventListener('click', cancelQueue);
+  $('copyConnectBtn')?.addEventListener('click', async () => {
+    const value = $('copyConnectBtn').dataset.connect || '';
+    if (!value) return;
+    try {
+      await navigator.clipboard.writeText(value);
+      showAlert('Команда connect скопирована.');
+    } catch (_) {
+      showAlert('Не удалось скопировать connect.', 'error');
+    }
+  });
+  bindDelegated();
+  await refreshAll();
+  setInterval(async () => {
+    if (!state.user) return;
+    try {
+      await Promise.all([loadQueue(), loadCurrentMatch()]);
+    } catch (_) {}
+  }, 6000);
+});

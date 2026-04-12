@@ -1,4 +1,4 @@
-const API_BASE = localStorage.getItem("trust_api_base") || "https://trust-backend-production-e1d1.up.railway.app";
+const API_BASE = "https://trust-backend-production-e1d1.up.railway.app";
 const INSTALLER_URL = "https://t1me1k.github.io/trustCS/downloads/TRUST-Setup-0.1.0.exe";
 const INSTALLER_FILENAME = "TRUST-Setup-0.1.0.exe";
 
@@ -221,25 +221,10 @@ function bindLanguageToggle() {
   });
 }
 
-function getAuthHeaders(existing = {}) {
-  const token = localStorage.getItem("trust_auth_token");
-  return token ? { ...existing, Authorization: `Bearer ${token}` } : existing;
-}
-
-function consumeAuthTokenFromUrl() {
-  const hash = window.location.hash || "";
-  const match = hash.match(/auth_token=([^&]+)/);
-  if (match) {
-    localStorage.setItem("trust_auth_token", decodeURIComponent(match[1]));
-    history.replaceState(null, "", window.location.pathname + window.location.search);
-  }
-}
-
 async function fetchJson(url, options = {}) {
   const response = await fetch(url, {
     credentials: "include",
-    ...options,
-    headers: getAuthHeaders(options.headers || {})
+    ...options
   });
 
   const contentType = response.headers.get("content-type") || "";
@@ -283,18 +268,10 @@ async function startLauncherLink() {
 }
 
 async function fetchAuthMe() {
-  try {
-    return await fetchJson(`${API_BASE}/auth/me`);
-  } catch (err) {
-    if (err.status === 401) {
-      localStorage.removeItem("trust_auth_token");
-    }
-    throw err;
-  }
+  return fetchJson(`${API_BASE}/auth/me`);
 }
 
 async function logoutTrust() {
-  localStorage.removeItem("trust_auth_token");
   return fetchJson(`${API_BASE}/auth/logout`, { method: "POST" });
 }
 
@@ -620,4 +597,3 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   startPolling();
 });
-consumeAuthTokenFromUrl();
