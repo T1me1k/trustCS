@@ -1,1 +1,1 @@
-window.TRUST_BACKEND_BASE_URL = 'https://YOUR-BACKEND.up.railway.app';
+window.TRUST_BACKEND_BASE_URL = 'trust-backend-production-e1d1.up.railway.app';
