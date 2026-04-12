@@ -5,6 +5,20 @@ const BACKEND_BASE_URL = (() => {
   return (fromWindow || fromMeta || fromStorage || 'https://YOUR-BACKEND.up.railway.app').replace(/\/+$/, '');
 })();
 
+const state = {
+  user: null,
+  party: null,
+  queue: null,
+  match: null,
+  history: [],
+  mapPool: ['shortdust', 'lake', 'overpass', 'vertigo', 'nuke']
+};
+
+function $(id) { return document.getElementById(id); }
+function hide(id, on) { $(id)?.classList.toggle('hidden', on); }
+function text(id, value) { const el = $(id); if (el) el.textContent = value; }
+function esc(v) { return String(v ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
+
 async function api(path, options = {}) {
   const response = await fetch(`${BACKEND_BASE_URL}${path}`, {
     credentials: 'include',
@@ -19,14 +33,9 @@ async function api(path, options = {}) {
   return data;
 }
 
-const state = { user: null, party: null, queue: null, match: null, history: [] };
-function $(id) { return document.getElementById(id); }
-function hide(id, on) { $(id)?.classList.toggle('hidden', on); }
-function text(id, value) { const el = $(id); if (el) el.textContent = value; }
-function esc(v) { return String(v ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
-
 function showAlert(message, kind = 'info') {
   const el = $('globalAlert');
+  if (!el) return;
   el.textContent = message;
   el.className = 'alert';
   if (kind === 'error') {
@@ -38,22 +47,37 @@ function showAlert(message, kind = 'info') {
   }
   el.classList.remove('hidden');
   clearTimeout(showAlert._t);
-  showAlert._t = setTimeout(() => el.classList.add('hidden'), 3400);
+  showAlert._t = setTimeout(() => el.classList.add('hidden'), 3600);
 }
 
-function applyAuthUI() {
-  const u = state.user;
-  const authed = !!u;
+function setBusy(buttonId, busy, labelWhenBusy = '...') {
+  const el = $(buttonId);
+  if (!el) return;
+  if (busy) {
+    el.dataset.originalText = el.textContent;
+    el.textContent = labelWhenBusy;
+    el.disabled = true;
+  } else {
+    el.textContent = el.dataset.originalText || el.textContent;
+    el.disabled = false;
+  }
+}
+
+function renderAuth() {
+  const authed = !!state.user;
   hide('appLoginBtn', authed);
   hide('appLogoutBtn', !authed);
   hide('profileGuest', authed);
   hide('profileCard', !authed);
   $('authBadge').textContent = authed ? 'Steam connected' : 'Гость';
   $('authBadge').className = `pill ${authed ? 'ok' : 'idle'}`;
+
   if (!authed) {
-    text('playCtaText', 'Сначала войди через Steam. Потом можно искать матч в 2x2 даже соло.');
+    text('playCtaText', 'Сначала войди через Steam. Потом можно искать матч в 2x2 соло или вдвоём.');
     return;
   }
+
+  const u = state.user;
   $('profileAvatar').src = u.avatarUrl || '';
   text('profileNickname', u.nickname || 'Unknown');
   text('profileSteamId', u.steamId || u.steamId64 || '');
@@ -61,7 +85,7 @@ function applyAuthUI() {
   text('profileMatches', u.matchesPlayed2v2 ?? 0);
   text('profileWins', u.wins2v2 ?? 0);
   text('profileLosses', u.losses2v2 ?? 0);
-  text('playCtaText', 'Нажми «НАЙТИ МАТЧ». Если party нет, она создастся автоматически. Режим только 2x2: соло добирается тиммейтом, готовая пати из двух идёт вместе.');
+  text('playCtaText', 'Режим только 2x2: можно искать матч соло или вдвоём. Готовая пати из двух не разделяется, соло-игроку подбирается тиммейт.');
 }
 
 function renderParty() {
@@ -79,7 +103,7 @@ function renderParty() {
   hide('disbandPartyBtn', !(hasParty && party.isLeader));
 
   if (!hasParty) {
-    membersEl.innerHTML = '<div class="empty">Party пока нет. Она создастся автоматически при поиске.</div>';
+    membersEl.innerHTML = '<div class="empty">Party пока нет. Она создастся автоматически при поиске или по кнопке.</div>';
     invitesEl.innerHTML = '<div class="empty">Входящих инвайтов нет.</div>';
     return;
   }
@@ -103,9 +127,9 @@ function renderParty() {
       <div class="invite-item">
         <div>
           <div style="font-weight:700">${esc(inv.fromNickname || 'Игрок')}</div>
-          <div class="muted">Приглашение в party</div>
+          <div class="muted">Приглашает в party</div>
         </div>
-        <div class="actions">
+        <div class="inline">
           <button class="btn secondary" data-accept-invite="${esc(inv.id)}">Принять</button>
           <button class="btn ghost" data-decline-invite="${esc(inv.id)}">Отклонить</button>
         </div>
@@ -115,180 +139,192 @@ function renderParty() {
 }
 
 function renderQueue() {
-  const queued = state.queue && state.queue.status === 'queued';
-  $('queueBadge').textContent = queued ? 'В очереди' : 'Не в очереди';
-  $('queueBadge').className = `pill ${queued ? 'live' : 'idle'}`;
-  $('matchmakingState').textContent = queued ? 'Идёт поиск' : 'Ожидание';
-  $('matchmakingState').className = `pill ${queued ? 'live' : 'idle'}`;
-  hide('cancelQueueBtn', !queued);
-  $('joinQueueBtn').disabled = queued || !state.user;
-  if (queued) {
-    text('searchStateText', 'Идёт поиск матча 2x2. Соло-игроку подберётся тиммейт, готовая пати из двух сохранится вместе.');
-  } else {
-    text('searchStateText', 'Режим только 2x2. Можно искать матч соло или вдвоём, лобби создаётся автоматически.');
-  }
-}
-
-function playerChip(p) {
-  const own = state.match?.team && p.team === state.match.team;
-  return `<div class="row"><div><div style="font-weight:700">${esc(p.nickname || p.persona_name || 'Player')}</div><div class="muted">Elo ${esc(p.elo ?? p.elo_2v2 ?? 100)}</div></div><span class="pill ${own ? 'ok' : 'idle'}">${esc(p.team || '')}</span></div>`;
-}
-
-function renderMatch() {
-  const match = state.match;
-  const empty = !match;
-  hide('currentMatchEmpty', !empty);
-  hide('currentMatchCard', empty);
-  $('currentMatchBadge').textContent = empty ? 'Нет матча' : (match.status || 'Матч');
-  $('currentMatchBadge').className = `pill ${empty ? 'idle' : 'ok'}`;
-  if (empty) return;
-  text('currentMatchId', match.matchId || match.publicMatchId || match.public_match_id || 'match');
-  text('currentMatchMeta', `${match.map || match.mapName || match.map_name || 'de_dust2'} • ${match.mode || 'match'} • Твоя команда ${match.team || '—'}`);
-  text('currentMatchStatus', match.status || 'server_assigned');
-  $('currentMatchStatus').className = 'pill live';
-  const connectLine = `${match.serverIp || match.server_ip || '127.0.0.1'}:${match.serverPort || match.server_port || 27015}  password ${match.serverPassword || match.server_password || 'trust'}`;
-  text('serverConnectLine', connectLine);
-  $('copyConnectBtn').dataset.connect = `connect ${match.serverIp || match.server_ip || '127.0.0.1'}:${match.serverPort || match.server_port || 27015}; password "${match.serverPassword || match.server_password || 'trust'}"`;
-  const players = match.players || [];
-  $('teamAPlayers').innerHTML = players.filter((p) => p.team === 'A').map(playerChip).join('') || '<div class="empty">Нет игроков</div>';
-  $('teamBPlayers').innerHTML = players.filter((p) => p.team === 'B').map(playerChip).join('') || '<div class="empty">Нет игроков</div>';
+  const queue = state.queue;
+  const inQueue = !!queue;
+  $('queueBadge').textContent = inQueue ? 'В очереди' : 'Не в очереди';
+  $('queueBadge').className = `pill ${inQueue ? 'ok' : 'idle'}`;
+  $('matchmakingState').textContent = inQueue ? 'Поиск...' : 'Ожидание';
+  $('matchmakingState').className = `pill ${inQueue ? 'live' : 'idle'}`;
+  text('searchStateText', inQueue ? 'Матчмейкер подбирает 2x2 игру. Можно играть соло или вдвоём.' : 'Нажми «Найти матч». Если party нет, она создастся автоматически.');
+  hide('joinQueueBtn', inQueue);
+  hide('cancelQueueBtn', !inQueue);
 }
 
 function renderHistory() {
-  const el = $('historyList');
+  const root = $('historyList');
   const items = state.history || [];
   if (!items.length) {
-    el.innerHTML = '<div class="empty">История пока пустая.</div>';
+    root.innerHTML = '<div class="empty">История матчей пока пуста.</div>';
     return;
   }
-  el.innerHTML = items.map((item) => {
-    const result = item.result || ((Number(item.eloDelta || item.elo_delta || 0) > 0) ? 'win' : 'loss');
-    const delta = Number(item.eloDelta ?? item.elo_delta ?? 0);
-    const when = item.finishedAt || item.finished_at || item.createdAt || '';
-    return `
-      <div class="history-item">
-        <div>
-          <div style="font-weight:700">${esc(item.matchId || item.publicMatchId || item.public_match_id || 'match')}</div>
-          <div class="muted">${esc(item.map || item.mapName || item.map_name || 'de_dust2')} • ${esc(when)}</div>
-        </div>
-        <div style="text-align:right">
-          <span class="pill ${result === 'win' ? 'ok' : 'warn'}">${result === 'win' ? 'WIN' : 'LOSS'}</span>
-          <div class="muted" style="margin-top:6px">${delta > 0 ? '+' : ''}${delta}</div>
-        </div>
-      </div>`;
-  }).join('');
-}
-
-function renderSearchResults(items) {
-  const el = $('userSearchResults');
-  if (!items.length) {
-    el.innerHTML = '<div class="empty">Никого не нашли.</div>';
-    return;
-  }
-  el.innerHTML = items.map((item) => `
-    <div class="search-item">
-      <div class="search-main">
-        <img class="avatar sm" src="${esc(item.avatarUrl || item.avatar_url || '')}" alt="avatar">
-        <div>
-          <div>${esc(item.nickname || item.steam_persona_name || 'Unknown')}</div>
-          <div class="muted">Elo ${esc(item.elo2v2 ?? item.elo_2v2 ?? 100)}</div>
-        </div>
+  root.innerHTML = items.map((item) => `
+    <div class="history-item">
+      <div>
+        <div style="font-weight:700">${esc(item.public_match_id || item.matchId || 'match')}</div>
+        <div class="muted">${esc(item.map_name || '—')} • ${esc(item.team_a_score ?? 0)} : ${esc(item.team_b_score ?? 0)}</div>
       </div>
-      <button class="btn secondary" data-invite-user="${esc(item.id)}">Пригласить</button>
+      <span class="pill ${item.result === 'win' ? 'ok' : 'warn'}">${esc(item.result || item.winner_team || '—')}</span>
     </div>
   `).join('');
 }
 
-async function loadAuth() {
+function connectString(match) {
+  if (!match?.serverIp || !match?.serverPort) return 'Сервер ещё назначается';
+  return `connect ${match.serverIp}:${match.serverPort}; password ${match.serverPassword || ''}`.trim();
+}
+
+function renderCurrentMatch() {
+  const match = state.match;
+  const hasMatch = !!match;
+  hide('currentMatchEmpty', hasMatch);
+  hide('currentMatchCard', !hasMatch);
+  $('currentMatchBadge').textContent = hasMatch ? (match.status || 'Матч') : 'Нет матча';
+  $('currentMatchBadge').className = `pill ${hasMatch ? 'live' : 'idle'}`;
+  if (!hasMatch) return;
+
+  text('currentMatchId', match.publicMatchId || match.matchId || '—');
+  text('currentMatchMeta', `${match.mode || '2x2'} • карта: ${match.mapName || 'не выбрана'}`);
+  text('currentMatchStatus', match.status || '—');
+  $('currentMatchStatus').className = `pill ${match.status === 'live' ? 'live' : match.status === 'server_assigned' ? 'ok' : 'warn'}`;
+  text('serverConnectLine', connectString(match));
+
+  const teamA = (match.players || []).filter((p) => p.team === 'A');
+  const teamB = (match.players || []).filter((p) => p.team === 'B');
+  $('teamAPlayers').innerHTML = teamA.map(playerHtml).join('');
+  $('teamBPlayers').innerHTML = teamB.map(playerHtml).join('');
+
+  renderAcceptAndMapVoting(match);
+}
+
+function playerHtml(p) {
+  return `
+    <div class="member-item">
+      <div class="member-main">
+        <img class="avatar sm" src="${esc(p.avatarUrl || '')}" alt="avatar">
+        <div>
+          <div>${esc(p.nickname || 'Unknown')}</div>
+          <div class="muted">Elo ${esc(p.elo || 100)}${p.mapVote ? ` • vote: ${esc(p.mapVote)}` : ''}</div>
+        </div>
+      </div>
+      <span class="pill ${p.accepted ? 'ok' : 'idle'}">${p.accepted ? 'Accepted' : 'Waiting'}</span>
+    </div>
+  `;
+}
+
+function renderAcceptAndMapVoting(match) {
+  let box = $('matchActions');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'matchActions';
+    box.style.marginTop = '14px';
+    $('currentMatchCard').appendChild(box);
+  }
+
+  const canAccept = match.status === 'pending_acceptance' && !match.accepted;
+  const canVoteMap = match.acceptedCount === match.totalPlayers && ['map_voting', 'server_assigned'].includes(match.status) && !match.mapName;
+  const acceptedText = `${match.acceptedCount || 0}/${match.totalPlayers || 4} приняли матч`;
+
+  let html = `<div class="muted" style="margin-bottom:10px">${esc(acceptedText)}</div>`;
+  if (canAccept) {
+    html += `<button class="btn primary" id="acceptMatchBtn">ПРИНЯТЬ МАТЧ</button>`;
+  } else if (match.status === 'pending_acceptance') {
+    html += `<div class="empty">Ждём, пока все игроки примут матч.</div>`;
+  }
+
+  if (canVoteMap) {
+    html += `<div style="margin-top:14px"><div class="label">Выбор карты</div><div class="list">`;
+    html += state.mapPool.map((map) => `<button class="btn secondary block" data-map-vote="${esc(map)}">${esc(map)}</button>`).join('');
+    html += `</div></div>`;
+  } else if (match.status === 'map_voting' && !match.mapName) {
+    html += `<div class="empty" style="margin-top:12px">После принятия всеми игроками выбирается карта из пула: ${state.mapPool.join(', ')}.</div>`;
+  } else if (match.mapName) {
+    html += `<div class="empty" style="margin-top:12px">Выбрана карта: ${esc(match.mapName)}.</div>`;
+  }
+
+  box.innerHTML = html;
+
+  $('acceptMatchBtn')?.addEventListener('click', async () => {
+    try {
+      setBusy('acceptMatchBtn', true, 'ПРИНИМАЕМ...');
+      await api(`/api/matches/${encodeURIComponent(match.publicMatchId)}/accept`, { method: 'POST' });
+      await refreshAll();
+    } catch (err) {
+      showAlert(`Не удалось принять матч: ${err.message}`, 'error');
+    } finally {
+      setBusy('acceptMatchBtn', false);
+    }
+  });
+
+  box.querySelectorAll('[data-map-vote]').forEach((btn) => btn.addEventListener('click', async () => {
+    try {
+      btn.disabled = true;
+      await api(`/api/matches/${encodeURIComponent(match.publicMatchId)}/map-vote`, {
+        method: 'POST',
+        body: JSON.stringify({ mapName: btn.dataset.mapVote })
+      });
+      await refreshAll();
+    } catch (err) {
+      showAlert(`Не удалось выбрать карту: ${err.message}`, 'error');
+      btn.disabled = false;
+    }
+  }));
+}
+
+async function refreshAccount() {
   const data = await api('/auth/me');
   state.user = data.user || null;
-  applyAuthUI();
 }
 
-async function loadAccount() {
-  if (!state.user) return;
-  const data = await api('/api/account/me');
-  state.user = data.user || state.user;
-  applyAuthUI();
-}
-
-async function loadParty() {
-  if (!state.user) {
-    state.party = null;
-    renderParty();
-    return;
-  }
+async function refreshParty() {
   const data = await api('/api/party/me');
   state.party = data.party || null;
-  renderParty();
 }
 
-async function loadQueue() {
-  if (!state.user) {
-    state.queue = null;
-    renderQueue();
-    return;
-  }
+async function refreshQueue() {
   const data = await api('/api/queue/me');
   state.queue = data.queue || null;
-  renderQueue();
 }
 
-async function loadCurrentMatch() {
-  if (!state.user) {
-    state.match = null;
-    renderMatch();
-    return;
-  }
+async function refreshMatch() {
   const data = await api('/api/matches/me/current');
   state.match = data.match || null;
-  renderMatch();
+  if (Array.isArray(data.mapPool)) state.mapPool = data.mapPool;
 }
 
-async function loadHistory() {
-  if (!state.user) {
-    state.history = [];
-    renderHistory();
-    return;
-  }
-  const data = await api('/api/matches/me/history?limit=8');
-  state.history = data.items || data.history || [];
-  renderHistory();
+async function refreshHistory() {
+  const data = await api('/api/matches/me/history');
+  state.history = data.items || [];
 }
 
 async function refreshAll() {
-  try {
-    await loadAuth();
-    if (!state.user) {
-      renderParty();
-      renderQueue();
-      renderMatch();
-      renderHistory();
-      return;
-    }
-    await Promise.all([loadAccount(), loadParty(), loadQueue(), loadCurrentMatch(), loadHistory()]);
-  } catch (err) {
-    console.error(err);
-    showAlert('Не удалось обновить данные app.', 'error');
-  }
+  await Promise.allSettled([
+    refreshAccount(),
+    refreshParty(),
+    refreshQueue(),
+    refreshMatch(),
+    refreshHistory()
+  ]);
+  renderAuth();
+  renderParty();
+  renderQueue();
+  renderCurrentMatch();
+  renderHistory();
 }
 
-function login() {
+async function login() {
   window.location.href = `${BACKEND_BASE_URL}/auth/steam`;
 }
 
 async function logout() {
-  try {
-    await api('/auth/logout', { method: 'POST' });
-  } catch (_) {}
-  window.location.href = './index.html';
+  try { await api('/auth/logout', { method: 'POST' }); } catch (_) {}
+  window.location.reload();
 }
 
 async function createParty() {
   try {
     await api('/api/party/create', { method: 'POST' });
-    showAlert('Party готова.');
-    await loadParty();
+    await refreshAll();
+    showAlert('Party создана.');
   } catch (err) {
     showAlert(`Не удалось создать party: ${err.message}`, 'error');
   }
@@ -297,8 +333,8 @@ async function createParty() {
 async function leaveParty() {
   try {
     await api('/api/party/leave', { method: 'POST' });
+    await refreshAll();
     showAlert('Ты покинул party.');
-    await Promise.all([loadParty(), loadQueue()]);
   } catch (err) {
     showAlert(`Не удалось выйти из party: ${err.message}`, 'error');
   }
@@ -307,39 +343,63 @@ async function leaveParty() {
 async function disbandParty() {
   try {
     await api('/api/party/disband', { method: 'POST' });
+    await refreshAll();
     showAlert('Party распущена.');
-    await Promise.all([loadParty(), loadQueue()]);
   } catch (err) {
     showAlert(`Не удалось распустить party: ${err.message}`, 'error');
   }
 }
 
 async function searchUsers() {
-  const q = $('userSearchInput').value.trim();
-  if (!q) return;
+  const q = $('userSearchInput')?.value?.trim();
+  const root = $('userSearchResults');
+  if (!q) {
+    root.innerHTML = '<div class="empty">Введи ник игрока.</div>';
+    return;
+  }
   try {
     const data = await api(`/api/account/users/search?q=${encodeURIComponent(q)}`);
-    renderSearchResults(data.items || []);
+    const items = data.items || [];
+    if (!items.length) {
+      root.innerHTML = '<div class="empty">Игроки не найдены.</div>';
+      return;
+    }
+    root.innerHTML = items.map((item) => `
+      <div class="member-item">
+        <div class="member-main">
+          <img class="avatar sm" src="${esc(item.avatarUrl || '')}" alt="avatar">
+          <div>
+            <div>${esc(item.nickname || 'Unknown')}</div>
+            <div class="muted">Elo ${esc(item.elo2v2 ?? 100)}</div>
+          </div>
+        </div>
+        <button class="btn secondary" data-invite-user="${esc(item.id)}">Пригласить</button>
+      </div>
+    `).join('');
+    root.querySelectorAll('[data-invite-user]').forEach((btn) => btn.addEventListener('click', () => inviteUser(btn.dataset.inviteUser)));
   } catch (err) {
-    showAlert(`Поиск не удался: ${err.message}`, 'error');
+    root.innerHTML = `<div class="empty">Ошибка поиска: ${esc(err.message)}</div>`;
   }
 }
 
-async function inviteUser(targetUserId) {
+async function inviteUser(userId) {
   try {
-    await api('/api/party/invite', { method: 'POST', body: JSON.stringify({ targetUserId }) });
+    await api('/api/party/invite', {
+      method: 'POST',
+      body: JSON.stringify({ targetUserId: userId })
+    });
+    await refreshAll();
     showAlert('Инвайт отправлен.');
-    await loadParty();
   } catch (err) {
-    showAlert(`Инвайт не отправлен: ${err.message}`, 'error');
+    showAlert(`Не удалось отправить инвайт: ${err.message}`, 'error');
   }
 }
 
 async function acceptInvite(id) {
   try {
-    await api(`/api/party/invite/${id}/accept`, { method: 'POST' });
+    await api(`/api/party/invite/${encodeURIComponent(id)}/accept`, { method: 'POST' });
+    await refreshAll();
     showAlert('Инвайт принят.');
-    await Promise.all([loadParty(), loadQueue()]);
   } catch (err) {
     showAlert(`Не удалось принять инвайт: ${err.message}`, 'error');
   }
@@ -347,20 +407,19 @@ async function acceptInvite(id) {
 
 async function declineInvite(id) {
   try {
-    await api(`/api/party/invite/${id}/decline`, { method: 'POST' });
+    await api(`/api/party/invite/${encodeURIComponent(id)}/decline`, { method: 'POST' });
+    await refreshAll();
     showAlert('Инвайт отклонён.');
-    await loadParty();
   } catch (err) {
     showAlert(`Не удалось отклонить инвайт: ${err.message}`, 'error');
   }
 }
 
-async function startQueue() {
+async function joinQueue() {
   try {
     await api('/api/queue/join', { method: 'POST', body: JSON.stringify({ mode: '2x2' }) });
-    await Promise.all([loadParty(), loadQueue()]);
-    const members = state.party?.members?.length || 1;
-    showAlert(members === 2 ? 'Поиск 2x2 для готовой пати запущен.' : 'Поиск 2x2 запущен. Система подберёт тебе тиммейта.');
+    await refreshAll();
+    showAlert('Поиск матча запущен.');
   } catch (err) {
     showAlert(`Не удалось запустить поиск: ${err.message}`, 'error');
   }
@@ -369,22 +428,17 @@ async function startQueue() {
 async function cancelQueue() {
   try {
     await api('/api/queue/cancel', { method: 'POST' });
-    showAlert('Поиск остановлен.');
-    await Promise.all([loadParty(), loadQueue()]);
+    await refreshAll();
+    showAlert('Поиск матча отменён.');
   } catch (err) {
     showAlert(`Не удалось отменить поиск: ${err.message}`, 'error');
   }
 }
 
-function bindDelegated() {
-  document.body.addEventListener('click', (e) => {
-    const inviteBtn = e.target.closest('[data-invite-user]');
-    if (inviteBtn) inviteUser(inviteBtn.dataset.inviteUser);
-    const acceptBtn = e.target.closest('[data-accept-invite]');
-    if (acceptBtn) acceptInvite(acceptBtn.dataset.acceptInvite);
-    const declineBtn = e.target.closest('[data-decline-invite]');
-    if (declineBtn) declineInvite(declineBtn.dataset.declineInvite);
-  });
+async function copyConnect() {
+  if (!state.match) return;
+  await navigator.clipboard.writeText(connectString(state.match));
+  showAlert('Команда connect скопирована.');
 }
 
 window.addEventListener('DOMContentLoaded', async () => {
@@ -394,24 +448,16 @@ window.addEventListener('DOMContentLoaded', async () => {
   $('leavePartyBtn')?.addEventListener('click', leaveParty);
   $('disbandPartyBtn')?.addEventListener('click', disbandParty);
   $('userSearchBtn')?.addEventListener('click', searchUsers);
-  $('joinQueueBtn')?.addEventListener('click', startQueue);
+  $('joinQueueBtn')?.addEventListener('click', joinQueue);
   $('cancelQueueBtn')?.addEventListener('click', cancelQueue);
-  $('copyConnectBtn')?.addEventListener('click', async () => {
-    const value = $('copyConnectBtn').dataset.connect || '';
-    if (!value) return;
-    try {
-      await navigator.clipboard.writeText(value);
-      showAlert('Команда connect скопирована.');
-    } catch (_) {
-      showAlert('Не удалось скопировать connect.', 'error');
-    }
+  $('copyConnectBtn')?.addEventListener('click', copyConnect);
+  $('partyInvites')?.addEventListener('click', async (event) => {
+    const acceptId = event.target?.dataset?.acceptInvite;
+    const declineId = event.target?.dataset?.declineInvite;
+    if (acceptId) await acceptInvite(acceptId);
+    if (declineId) await declineInvite(declineId);
   });
-  bindDelegated();
+
   await refreshAll();
-  setInterval(async () => {
-    if (!state.user) return;
-    try {
-      await Promise.all([loadQueue(), loadCurrentMatch()]);
-    } catch (_) {}
-  }, 6000);
+  setInterval(() => { void refreshAll(); }, 5000);
 });
