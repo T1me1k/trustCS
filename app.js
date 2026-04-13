@@ -11,13 +11,24 @@ const state = {
   queue: null,
   match: null,
   history: [],
-  mapPool: ['shortdust', 'lake', 'overpass', 'vertigo', 'nuke']
+  mapPool: ['shortdust', 'lake', 'overpass', 'vertigo', 'nuke'],
+  restriction: null
 };
 
 function $(id) { return document.getElementById(id); }
 function hide(id, on) { $(id)?.classList.toggle('hidden', on); }
 function text(id, value) { const el = $(id); if (el) el.textContent = value; }
 function esc(v) { return String(v ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
+function formatSec(sec) {
+  if (sec == null) return '';
+  const total = Math.max(0, Number(sec) || 0);
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  if (h > 0) return `${h}ч ${m}м`;
+  if (m > 0) return `${m}м ${s}с`;
+  return `${s}с`;
+}
 
 async function api(path, options = {}) {
   const response = await fetch(`${BACKEND_BASE_URL}${path}`, {
@@ -78,6 +89,7 @@ function renderAuth() {
   }
 
   const u = state.user;
+  state.restriction = u.restriction || state.restriction || null;
   $('profileAvatar').src = u.avatarUrl || '';
   text('profileNickname', u.nickname || 'Unknown');
   text('profileSteamId', u.steamId || u.steamId64 || '');
@@ -140,13 +152,22 @@ function renderParty() {
 
 function renderQueue() {
   const queue = state.queue;
+  const restriction = state.restriction || state.user?.restriction || null;
+  const canQueue = state.user ? (state.user.canQueue !== false) : false;
   const inQueue = !!queue;
-  $('queueBadge').textContent = inQueue ? 'В очереди' : 'Не в очереди';
-  $('queueBadge').className = `pill ${inQueue ? 'ok' : 'idle'}`;
-  $('matchmakingState').textContent = inQueue ? 'Поиск...' : 'Ожидание';
-  $('matchmakingState').className = `pill ${inQueue ? 'live' : 'idle'}`;
-  text('searchStateText', inQueue ? 'Матчмейкер подбирает 2x2 игру. Можно играть соло или вдвоём.' : 'Нажми «Найти матч». Если party нет, она создастся автоматически.');
-  hide('joinQueueBtn', inQueue);
+  $('queueBadge').textContent = inQueue ? 'В очереди' : (restriction ? 'Заблокировано' : 'Не в очереди');
+  $('queueBadge').className = `pill ${inQueue ? 'ok' : restriction ? 'warn' : 'idle'}`;
+  $('matchmakingState').textContent = inQueue ? 'Поиск...' : (restriction ? 'Lock' : 'Ожидание');
+  $('matchmakingState').className = `pill ${inQueue ? 'live' : restriction ? 'warn' : 'idle'}`;
+  let searchText = inQueue ? 'Матчмейкер подбирает 2x2 игру. Можно играть соло или вдвоём.' : 'Нажми «Найти матч». Если party нет, она создастся автоматически.';
+  if (restriction) {
+    const remaining = restriction.remainingText || formatSec(restriction.remainingSec) || 'до снятия блокировки';
+    searchText = `${restriction.title || 'Поиск временно недоступен'}. ${restriction.message || 'Есть активное ограничение.'} Осталось: ${remaining}.`;
+  } else if (state.user && !canQueue) {
+    searchText = 'Поиск сейчас недоступен из-за активного состояния матча.';
+  }
+  text('searchStateText', searchText);
+  hide('joinQueueBtn', inQueue || !state.user || !canQueue);
   hide('cancelQueueBtn', !inQueue);
 }
 
@@ -186,7 +207,11 @@ function renderCurrentMatch() {
   text('currentMatchMeta', `${match.mode || '2x2'} • карта: ${match.mapName || 'не выбрана'}`);
   text('currentMatchStatus', match.status || '—');
   $('currentMatchStatus').className = `pill ${match.status === 'live' ? 'live' : match.status === 'server_assigned' ? 'ok' : 'warn'}`;
-  text('serverConnectLine', connectString(match));
+  let connectLine = connectString(match);
+  if (match.status === 'pending_acceptance' && match.timers?.acceptRemainingSec != null) connectLine = `Accept timeout через ${formatSec(match.timers.acceptRemainingSec)}`;
+  if (match.status === 'server_assigned' && match.timers?.connectRemainingSec != null) connectLine = `${connectLine} • подключение за ${formatSec(match.timers.connectRemainingSec)}`;
+  if (match.playerConnectionState === 'disconnected' && match.timers?.reconnectRemainingSec != null) connectLine = `Reconnect grace: ${formatSec(match.timers.reconnectRemainingSec)}`;
+  text('serverConnectLine', connectLine);
 
   const teamA = (match.players || []).filter((p) => p.team === 'A');
   const teamB = (match.players || []).filter((p) => p.team === 'B');
@@ -206,7 +231,7 @@ function playerHtml(p) {
           <div class="muted">Elo ${esc(p.elo || 100)}${p.mapVote ? ` • vote: ${esc(p.mapVote)}` : ''}</div>
         </div>
       </div>
-      <span class="pill ${p.accepted ? 'ok' : 'idle'}">${p.accepted ? 'Accepted' : 'Waiting'}</span>
+      <span class="pill ${p.abandonedAt ? 'warn' : p.connected ? 'ok' : p.accepted ? 'ok' : 'idle'}">${p.abandonedAt ? 'Abandon' : p.connectionState === 'disconnected' ? 'Reconnect' : p.connected ? 'Connected' : p.accepted ? 'Accepted' : 'Waiting'}</span>
     </div>
   `;
 }
@@ -225,6 +250,9 @@ function renderAcceptAndMapVoting(match) {
   const acceptedText = `${match.acceptedCount || 0}/${match.totalPlayers || 4} приняли матч`;
 
   let html = `<div class="muted" style="margin-bottom:10px">${esc(acceptedText)}</div>`;
+  if (match.status === 'pending_acceptance' && match.timers?.acceptRemainingSec != null) html += `<div class="muted" style="margin-bottom:10px">До автододжа: ${esc(formatSec(match.timers.acceptRemainingSec))}</div>`;
+  if (match.status === 'server_assigned' && match.timers?.connectRemainingSec != null) html += `<div class="muted" style="margin-bottom:10px">Подключение к серверу: ${esc(formatSec(match.timers.connectRemainingSec))}</div>`;
+  if (match.playerConnectionState === 'disconnected' && match.timers?.reconnectRemainingSec != null) html += `<div class="muted" style="margin-bottom:10px">Grace period на переподключение: ${esc(formatSec(match.timers.reconnectRemainingSec))}</div>`;
   if (canAccept) {
     html += `<button class="btn primary" id="acceptMatchBtn">ПРИНЯТЬ МАТЧ</button>`;
   } else if (match.status === 'pending_acceptance') {
@@ -273,6 +301,7 @@ function renderAcceptAndMapVoting(match) {
 async function refreshAccount() {
   const data = await api('/auth/me');
   state.user = data.user || null;
+  state.restriction = data.user?.restriction || null;
 }
 
 async function refreshParty() {
@@ -283,6 +312,8 @@ async function refreshParty() {
 async function refreshQueue() {
   const data = await api('/api/queue/me');
   state.queue = data.queue || null;
+  state.restriction = data.restriction || state.restriction || null;
+  if (state.user) state.user.canQueue = data.canQueue !== false;
 }
 
 async function refreshMatch() {
