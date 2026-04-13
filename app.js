@@ -11,24 +11,13 @@ const state = {
   queue: null,
   match: null,
   history: [],
-  mapPool: ['shortdust', 'lake', 'overpass', 'vertigo', 'nuke'],
-  restriction: null
+  mapPool: ['shortdust', 'lake', 'overpass', 'vertigo', 'nuke']
 };
 
 function $(id) { return document.getElementById(id); }
 function hide(id, on) { $(id)?.classList.toggle('hidden', on); }
 function text(id, value) { const el = $(id); if (el) el.textContent = value; }
 function esc(v) { return String(v ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
-function formatSec(sec) {
-  if (sec == null) return '';
-  const total = Math.max(0, Number(sec) || 0);
-  const h = Math.floor(total / 3600);
-  const m = Math.floor((total % 3600) / 60);
-  const s = total % 60;
-  if (h > 0) return `${h}ч ${m}м`;
-  if (m > 0) return `${m}м ${s}с`;
-  return `${s}с`;
-}
 
 async function api(path, options = {}) {
   const response = await fetch(`${BACKEND_BASE_URL}${path}`, {
@@ -74,6 +63,40 @@ function setBusy(buttonId, busy, labelWhenBusy = '...') {
   }
 }
 
+function formatRelativeClock(value) {
+  if (!value) return '—';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '—';
+  return date.toLocaleString('ru-RU', {
+    day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
+  });
+}
+
+function formatDuration(seconds) {
+  const total = Math.max(0, Number(seconds || 0));
+  if (!Number.isFinite(total)) return '—';
+  const mins = Math.floor(total / 60);
+  const secs = total % 60;
+  if (mins >= 60) {
+    const hours = Math.floor(mins / 60);
+    const rem = mins % 60;
+    return `${hours} ч ${rem} мин`;
+  }
+  if (mins > 0) return `${mins} мин ${secs} сек`;
+  return `${secs} сек`;
+}
+
+function phaseLabel(phase) {
+  return ({ accept: 'Accept', map_veto: 'Map', connect: 'Connect', live: 'LIVE', result: 'Result' }[phase] || phase || '—');
+}
+
+function connectionBadge(connectionState) {
+  if (connectionState === 'connected') return { cls: 'ok', text: 'На сервере' };
+  if (connectionState === 'disconnected') return { cls: 'warn', text: 'Отключён' };
+  if (connectionState === 'abandoned') return { cls: 'warn', text: 'Abandon' };
+  return { cls: 'idle', text: 'Ждёт connect' };
+}
+
 function renderAuth() {
   const authed = !!state.user;
   hide('appLoginBtn', authed);
@@ -89,7 +112,6 @@ function renderAuth() {
   }
 
   const u = state.user;
-  state.restriction = u.restriction || state.restriction || null;
   $('profileAvatar').src = u.avatarUrl || '';
   text('profileNickname', u.nickname || 'Unknown');
   text('profileSteamId', u.steamId || u.steamId64 || '');
@@ -152,22 +174,13 @@ function renderParty() {
 
 function renderQueue() {
   const queue = state.queue;
-  const restriction = state.restriction || state.user?.restriction || null;
-  const canQueue = state.user ? (state.user.canQueue !== false) : false;
   const inQueue = !!queue;
-  $('queueBadge').textContent = inQueue ? 'В очереди' : (restriction ? 'Заблокировано' : 'Не в очереди');
-  $('queueBadge').className = `pill ${inQueue ? 'ok' : restriction ? 'warn' : 'idle'}`;
-  $('matchmakingState').textContent = inQueue ? 'Поиск...' : (restriction ? 'Lock' : 'Ожидание');
-  $('matchmakingState').className = `pill ${inQueue ? 'live' : restriction ? 'warn' : 'idle'}`;
-  let searchText = inQueue ? 'Матчмейкер подбирает 2x2 игру. Можно играть соло или вдвоём.' : 'Нажми «Найти матч». Если party нет, она создастся автоматически.';
-  if (restriction) {
-    const remaining = restriction.remainingText || formatSec(restriction.remainingSec) || 'до снятия блокировки';
-    searchText = `${restriction.title || 'Поиск временно недоступен'}. ${restriction.message || 'Есть активное ограничение.'} Осталось: ${remaining}.`;
-  } else if (state.user && !canQueue) {
-    searchText = 'Поиск сейчас недоступен из-за активного состояния матча.';
-  }
-  text('searchStateText', searchText);
-  hide('joinQueueBtn', inQueue || !state.user || !canQueue);
+  $('queueBadge').textContent = inQueue ? 'В очереди' : 'Не в очереди';
+  $('queueBadge').className = `pill ${inQueue ? 'ok' : 'idle'}`;
+  $('matchmakingState').textContent = inQueue ? 'Поиск...' : 'Ожидание';
+  $('matchmakingState').className = `pill ${inQueue ? 'live' : 'idle'}`;
+  text('searchStateText', inQueue ? 'Матчмейкер подбирает 2x2 игру. Можно играть соло или вдвоём.' : 'Нажми «Найти матч». Если party нет, она создастся автоматически.');
+  hide('joinQueueBtn', inQueue);
   hide('cancelQueueBtn', !inQueue);
 }
 
@@ -190,8 +203,79 @@ function renderHistory() {
 }
 
 function connectString(match) {
-  if (!match?.serverIp || !match?.serverPort) return 'Сервер ещё назначается';
-  return `connect ${match.serverIp}:${match.serverPort}; password ${match.serverPassword || ''}`.trim();
+  return match?.room?.server?.connectCommand || (match?.serverIp && match?.serverPort ? `connect ${match.serverIp}:${match.serverPort}; password ${match.serverPassword || ''}`.trim() : 'Сервер ещё назначается');
+}
+
+function playerCardHtml(p, accent = 'idle') {
+  const badge = connectionBadge(p.connectionState);
+  const reconnect = p.reconnectRemainingSec ? `<div class="muted">Reconnect: ${esc(formatDuration(p.reconnectRemainingSec))}</div>` : '';
+  const accepted = p.accepted ? 'Accepted' : 'Waiting';
+  return `
+    <div class="match-player-card ${accent}">
+      <div class="member-main">
+        <img class="avatar sm" src="${esc(p.avatarUrl || '')}" alt="avatar">
+        <div>
+          <div style="font-weight:700">${esc(p.nickname || 'Unknown')}</div>
+          <div class="muted">Elo ${esc(p.elo || 100)}${p.mapVote ? ` • vote: ${esc(p.mapVote)}` : ''}</div>
+          ${reconnect}
+        </div>
+      </div>
+      <div class="match-player-badges">
+        <span class="pill ${p.accepted ? 'ok' : 'idle'}">${accepted}</span>
+        <span class="pill ${badge.cls}">${badge.text}</span>
+      </div>
+    </div>
+  `;
+}
+
+function renderTimeline(room) {
+  return `
+    <div class="timeline-grid">
+      ${(room.timeline || []).map((step) => `
+        <div class="timeline-step ${step.state}">
+          <div class="timeline-step-top">
+            <span class="pill ${step.state === 'done' ? 'ok' : step.state === 'current' ? 'live' : 'idle'}">${esc(step.title)}</span>
+          </div>
+          <div style="font-weight:700;margin-top:10px">${esc(step.key === room.phase ? `${step.title} now` : step.title)}</div>
+          <div class="muted" style="margin-top:8px">${esc(step.description)}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function renderActionPanel(room) {
+  const phase = room.phase;
+  const acceptTimer = room.deadlines?.acceptRemainingSec > 0 ? `До auto-cancel: ${formatDuration(room.deadlines.acceptRemainingSec)}` : '';
+  const connectTimer = room.deadlines?.connectRemainingSec > 0 ? `До connect timeout: ${formatDuration(room.deadlines.connectRemainingSec)}` : '';
+  const ownReconnect = room.me?.reconnectRemainingSec > 0 ? `На переподключение осталось ${formatDuration(room.me.reconnectRemainingSec)}` : '';
+
+  let html = `<div class="room-panel emphasis"><div class="label">Действия</div><div style="font-size:18px;font-weight:800">${esc(room.statusText || 'Матч в процессе')}</div>`;
+  if (acceptTimer || connectTimer || ownReconnect) {
+    html += `<div class="muted" style="margin-top:8px">${esc([acceptTimer, connectTimer, ownReconnect].filter(Boolean).join(' • '))}</div>`;
+  }
+  html += `<div class="room-actions">`;
+
+  if (room.actions?.canAccept) {
+    html += `<button class="btn primary" id="acceptMatchBtn">ПРИНЯТЬ МАТЧ</button>`;
+  }
+  if (room.actions?.canCopyConnect) {
+    html += `<button class="btn secondary" id="copyConnectRoomBtn">Копировать connect</button>`;
+  }
+  html += `</div>`;
+
+  if (room.actions?.canVoteMap) {
+    html += `<div style="margin-top:16px"><div class="label">Выбор карты</div><div class="map-grid">${state.mapPool.map((map) => `<button class="btn secondary" data-map-vote="${esc(map)}">${esc(map)}</button>`).join('')}</div></div>`;
+  } else if (phase === 'map_veto' && !room.mapName) {
+    html += `<div class="empty" style="margin-top:16px">Все игроки уже здесь. Осталось завершить голосование по карте.</div>`;
+  }
+
+  if (room.server?.connectCommand) {
+    html += `<div class="room-connect-box"><div class="label">Connect</div><div class="connect-code">${esc(room.server.connectCommand)}</div></div>`;
+  }
+
+  html += `</div>`;
+  return html;
 }
 
 function renderCurrentMatch() {
@@ -199,77 +283,77 @@ function renderCurrentMatch() {
   const hasMatch = !!match;
   hide('currentMatchEmpty', hasMatch);
   hide('currentMatchCard', !hasMatch);
-  $('currentMatchBadge').textContent = hasMatch ? (match.status || 'Матч') : 'Нет матча';
+  $('currentMatchBadge').textContent = hasMatch ? (phaseLabel(match.phase) || match.status || 'Match room') : 'Нет матча';
   $('currentMatchBadge').className = `pill ${hasMatch ? 'live' : 'idle'}`;
   if (!hasMatch) return;
 
-  text('currentMatchId', match.publicMatchId || match.matchId || '—');
-  text('currentMatchMeta', `${match.mode || '2x2'} • карта: ${match.mapName || 'не выбрана'}`);
-  text('currentMatchStatus', match.status || '—');
-  $('currentMatchStatus').className = `pill ${match.status === 'live' ? 'live' : match.status === 'server_assigned' ? 'ok' : 'warn'}`;
-  let connectLine = connectString(match);
-  if (match.status === 'pending_acceptance' && match.timers?.acceptRemainingSec != null) connectLine = `Accept timeout через ${formatSec(match.timers.acceptRemainingSec)}`;
-  if (match.status === 'server_assigned' && match.timers?.connectRemainingSec != null) connectLine = `${connectLine} • подключение за ${formatSec(match.timers.connectRemainingSec)}`;
-  if (match.playerConnectionState === 'disconnected' && match.timers?.reconnectRemainingSec != null) connectLine = `Reconnect grace: ${formatSec(match.timers.reconnectRemainingSec)}`;
-  text('serverConnectLine', connectLine);
+  const room = match.room || {
+    phase: match.phase,
+    title: `TRUST ${match.mode || '2x2'} Match Room`,
+    subtitle: match.statusText || 'Текущий матч',
+    statusText: match.statusText || match.status,
+    players: match.players || [],
+    teams: { teamA: (match.players || []).filter((p) => p.team === 'A'), teamB: (match.players || []).filter((p) => p.team === 'B') },
+    mapName: match.mapName,
+    server: {
+      name: match.serverName || 'EU-1',
+      region: match.serverRegion || 'EU',
+      connectCommand: connectString(match)
+    },
+    timeline: match.timeline || [],
+    score: { teamA: match.teamAScore || 0, teamB: match.teamBScore || 0, winnerTeam: match.winnerTeam || null },
+    actions: { canAccept: match.status === 'pending_acceptance' && !match.accepted, canVoteMap: ['map_voting', 'server_assigned'].includes(match.status) && !match.mapName, canCopyConnect: !!match.serverIp },
+    deadlines: { acceptRemainingSec: match.acceptRemainingSec, connectRemainingSec: match.connectRemainingSec }
+  };
 
-  const teamA = (match.players || []).filter((p) => p.team === 'A');
-  const teamB = (match.players || []).filter((p) => p.team === 'B');
-  $('teamAPlayers').innerHTML = teamA.map(playerHtml).join('');
-  $('teamBPlayers').innerHTML = teamB.map(playerHtml).join('');
+  const phasePill = phaseLabel(room.phase);
+  const scoreLine = room.phase === 'result' || room.phase === 'live'
+    ? `${room.score?.teamA ?? 0} : ${room.score?.teamB ?? 0}${room.score?.winnerTeam ? ` • победила команда ${room.score.winnerTeam}` : ''}`
+    : (room.mapName ? `Карта: ${room.mapName}` : 'Карта ещё выбирается');
 
-  renderAcceptAndMapVoting(match);
-}
-
-function playerHtml(p) {
-  return `
-    <div class="member-item">
-      <div class="member-main">
-        <img class="avatar sm" src="${esc(p.avatarUrl || '')}" alt="avatar">
+  $('currentMatchCard').innerHTML = `
+    <div class="match-room-shell">
+      <div class="room-hero">
         <div>
-          <div>${esc(p.nickname || 'Unknown')}</div>
-          <div class="muted">Elo ${esc(p.elo || 100)}${p.mapVote ? ` • vote: ${esc(p.mapVote)}` : ''}</div>
+          <div class="badge">MATCH ROOM</div>
+          <div class="room-title">${esc(room.title || 'TRUST Match Room')}</div>
+          <div class="muted" style="margin-top:10px">${esc(room.subtitle || '')}</div>
+        </div>
+        <div class="room-hero-side">
+          <span class="pill live">${esc(phasePill)}</span>
+          <div class="room-score">${esc(scoreLine)}</div>
+          <div class="muted">ID: ${esc(match.publicMatchId || match.matchId || '—')}</div>
         </div>
       </div>
-      <span class="pill ${p.abandonedAt ? 'warn' : p.connected ? 'ok' : p.accepted ? 'ok' : 'idle'}">${p.abandonedAt ? 'Abandon' : p.connectionState === 'disconnected' ? 'Reconnect' : p.connected ? 'Connected' : p.accepted ? 'Accepted' : 'Waiting'}</span>
+
+      ${renderTimeline(room)}
+
+      <div class="room-grid">
+        ${renderActionPanel(room)}
+
+        <div class="room-panel">
+          <div class="section-title"><h3>Сервер</h3><span class="pill ok">${esc(room.server?.name || 'EU-1')}</span></div>
+          <div class="room-info-row"><span>Регион</span><strong>${esc(room.server?.region || 'EU')}</strong></div>
+          <div class="room-info-row"><span>Карта</span><strong>${esc(room.mapName || 'ещё не выбрана')}</strong></div>
+          <div class="room-info-row"><span>Accept</span><strong>${esc(`${match.acceptedCount || room.counts?.accepted || 0}/${match.totalPlayers || room.counts?.totalPlayers || 4}`)}</strong></div>
+          <div class="room-info-row"><span>Connected</span><strong>${esc(`${match.connectedCount || room.counts?.connected || 0}/${match.totalPlayers || room.counts?.totalPlayers || 4}`)}</strong></div>
+          <div class="room-info-row"><span>Accept deadline</span><strong>${esc(room.deadlines?.acceptExpiresAt ? formatRelativeClock(room.deadlines.acceptExpiresAt) : '—')}</strong></div>
+          <div class="room-info-row"><span>Connect deadline</span><strong>${esc(room.deadlines?.connectExpiresAt ? formatRelativeClock(room.deadlines.connectExpiresAt) : '—')}</strong></div>
+        </div>
+      </div>
+
+      <div class="room-grid team-boards">
+        <div class="room-panel team-panel">
+          <div class="section-title"><h3>Team A</h3><span class="pill idle">2 slots</span></div>
+          <div class="list">${(room.teams?.teamA || []).map((p) => playerCardHtml(p, 'team-a')).join('')}</div>
+        </div>
+        <div class="room-panel team-panel">
+          <div class="section-title"><h3>Team B</h3><span class="pill idle">2 slots</span></div>
+          <div class="list">${(room.teams?.teamB || []).map((p) => playerCardHtml(p, 'team-b')).join('')}</div>
+        </div>
+      </div>
     </div>
   `;
-}
-
-function renderAcceptAndMapVoting(match) {
-  let box = $('matchActions');
-  if (!box) {
-    box = document.createElement('div');
-    box.id = 'matchActions';
-    box.style.marginTop = '14px';
-    $('currentMatchCard').appendChild(box);
-  }
-
-  const canAccept = match.status === 'pending_acceptance' && !match.accepted;
-  const canVoteMap = match.acceptedCount === match.totalPlayers && ['map_voting', 'server_assigned'].includes(match.status) && !match.mapName;
-  const acceptedText = `${match.acceptedCount || 0}/${match.totalPlayers || 4} приняли матч`;
-
-  let html = `<div class="muted" style="margin-bottom:10px">${esc(acceptedText)}</div>`;
-  if (match.status === 'pending_acceptance' && match.timers?.acceptRemainingSec != null) html += `<div class="muted" style="margin-bottom:10px">До автододжа: ${esc(formatSec(match.timers.acceptRemainingSec))}</div>`;
-  if (match.status === 'server_assigned' && match.timers?.connectRemainingSec != null) html += `<div class="muted" style="margin-bottom:10px">Подключение к серверу: ${esc(formatSec(match.timers.connectRemainingSec))}</div>`;
-  if (match.playerConnectionState === 'disconnected' && match.timers?.reconnectRemainingSec != null) html += `<div class="muted" style="margin-bottom:10px">Grace period на переподключение: ${esc(formatSec(match.timers.reconnectRemainingSec))}</div>`;
-  if (canAccept) {
-    html += `<button class="btn primary" id="acceptMatchBtn">ПРИНЯТЬ МАТЧ</button>`;
-  } else if (match.status === 'pending_acceptance') {
-    html += `<div class="empty">Ждём, пока все игроки примут матч.</div>`;
-  }
-
-  if (canVoteMap) {
-    html += `<div style="margin-top:14px"><div class="label">Выбор карты</div><div class="list">`;
-    html += state.mapPool.map((map) => `<button class="btn secondary block" data-map-vote="${esc(map)}">${esc(map)}</button>`).join('');
-    html += `</div></div>`;
-  } else if (match.status === 'map_voting' && !match.mapName) {
-    html += `<div class="empty" style="margin-top:12px">После принятия всеми игроками выбирается карта из пула: ${state.mapPool.join(', ')}.</div>`;
-  } else if (match.mapName) {
-    html += `<div class="empty" style="margin-top:12px">Выбрана карта: ${esc(match.mapName)}.</div>`;
-  }
-
-  box.innerHTML = html;
 
   $('acceptMatchBtn')?.addEventListener('click', async () => {
     try {
@@ -278,12 +362,12 @@ function renderAcceptAndMapVoting(match) {
       await refreshAll();
     } catch (err) {
       showAlert(`Не удалось принять матч: ${err.message}`, 'error');
-    } finally {
       setBusy('acceptMatchBtn', false);
     }
   });
 
-  box.querySelectorAll('[data-map-vote]').forEach((btn) => btn.addEventListener('click', async () => {
+  $('copyConnectRoomBtn')?.addEventListener('click', copyConnect);
+  $('currentMatchCard').querySelectorAll('[data-map-vote]').forEach((btn) => btn.addEventListener('click', async () => {
     try {
       btn.disabled = true;
       await api(`/api/matches/${encodeURIComponent(match.publicMatchId)}/map-vote`, {
@@ -301,7 +385,6 @@ function renderAcceptAndMapVoting(match) {
 async function refreshAccount() {
   const data = await api('/auth/me');
   state.user = data.user || null;
-  state.restriction = data.user?.restriction || null;
 }
 
 async function refreshParty() {
@@ -312,8 +395,6 @@ async function refreshParty() {
 async function refreshQueue() {
   const data = await api('/api/queue/me');
   state.queue = data.queue || null;
-  state.restriction = data.restriction || state.restriction || null;
-  if (state.user) state.user.canQueue = data.canQueue !== false;
 }
 
 async function refreshMatch() {
