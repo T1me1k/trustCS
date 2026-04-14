@@ -1,90 +1,151 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TRUST — Competitive 2x2</title>
+  <title>TRUST — Competitive 2v2 Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css" />
 </head>
-<body>
-  <header class="topbar">
+<body class="landing-page">
+  <header class="topbar landing-topbar">
     <div class="container topbar-inner">
-      <div class="brand">
+      <div class="brand reveal reveal-1">
         <div class="brand-mark">T</div>
         <div>
           <div class="brand-name">TRUST</div>
-          <div class="brand-sub">Competitive 2x2 platform</div>
+          <div class="brand-sub" data-i18n="brand_sub">Competitive 2v2 platform</div>
         </div>
       </div>
-      <nav class="nav">
-        <a href="#about">Платформа</a>
-        <a href="#status">Статус</a>
-        <a href="./leaderboard.html">Лидерборд</a>
+      <nav class="nav reveal reveal-2">
+        <a href="#platform" data-i18n="nav_platform">Platform</a>
+        <a href="#status" data-i18n="nav_status">Status</a>
+        <a href="./leaderboard.html" data-i18n="nav_leaderboard">Leaderboard</a>
       </nav>
-      <div class="actions">
-        <a class="btn ghost hidden" id="landingAppBtn" href="./app.html">Кабинет</a>
-        <button class="btn primary" id="landingLoginBtn">Войти через Steam</button>
-        <button class="btn ghost hidden" id="landingLogoutBtn">Выйти</button>
+      <div class="actions reveal reveal-3 landing-actions">
+        <div class="lang-switch" aria-label="Language switch">
+          <button type="button" class="lang-btn active" data-lang="en">ENG</button>
+          <button type="button" class="lang-btn" data-lang="ru">RU</button>
+        </div>
+        <a class="btn ghost hidden" id="landingAppBtn" href="./app.html" data-i18n="cabinet">Cabinet</a>
+        <button class="btn primary" id="landingLoginBtn" data-i18n="login">Sign in with Steam</button>
+        <button class="btn ghost hidden" id="landingLogoutBtn" data-i18n="logout">Log out</button>
       </div>
     </div>
   </header>
-  <main class="hero">
-    <div class="container hero-grid">
-      <section class="card">
-        <span class="badge">TRUST RELEASE</span>
-        <h1>Лёгкий 2x2 матчмейкинг<br>без лишнего шума.</h1>
-        <p class="muted">
-          Играй через сайт или launcher. Ник и аккаунт берутся из Steam, party и очередь живут на backend, рейтинг один и тот же для всех игроков, а после ready-check выбирается карта матча.
-        </p>
-        <div class="hero-cta">
-          <button class="btn primary" id="heroLoginBtn">Войти через Steam</button>
-          <a class="btn ghost" href="./app.html">Открыть app</a>
-          <a class="btn ghost" href="./leaderboard.html">Лидерборд</a>
-        </div>
-        <div class="metrics">
-          <div class="metric"><span>Формат</span><strong>2x2</strong></div>
-          <div class="metric"><span>Elo</span><strong>100 / +25 / -25</strong></div>
-          <div class="metric"><span>Платформы</span><strong>Web + Launcher</strong></div>
-        </div>
-      </section>
-      <aside class="card">
-        <div class="section-title"><h3>Аккаунт</h3><span class="pill idle" id="landingAuthBadge">Проверка...</span></div>
-        <div class="empty" id="landingGuestCard">Войди через Steam, чтобы открыть party, поиск матча и профиль.</div>
-        <div class="hidden" id="landingUserCard">
-          <div class="profile-box">
-            <img id="landingAvatar" class="avatar" alt="avatar">
-            <div>
-              <div id="landingNickname" style="font-weight:700;font-size:20px">—</div>
-              <div id="landingSteamId" class="muted">—</div>
+
+  <main class="landing-main">
+    <section class="hero landing-hero" id="platform">
+      <div class="container hero-grid landing-hero-grid">
+        <section class="card landing-hero-card reveal reveal-1">
+          <div class="hero-glow"></div>
+          <span class="badge" data-i18n="release_badge">TRUST RELEASE</span>
+          <h1 data-i18n="hero_title">Competitive 2v2<br>matchmaking with<br>less noise.</h1>
+          <p class="muted landing-lead" data-i18n="hero_text">
+            Queue solo or as a duo, keep one shared rating, accept the match, vote the map and move straight into a clean server-driven flow.
+          </p>
+          <div class="hero-cta">
+            <button class="btn primary" id="heroLoginBtn" data-i18n="hero_cta_login">Sign in with Steam</button>
+            <a class="btn ghost" href="./app.html" data-i18n="hero_cta_open">Open app</a>
+            <a class="btn ghost" href="./leaderboard.html" data-i18n="hero_cta_leaderboard">Leaderboard</a>
+          </div>
+          <div class="metrics landing-metrics">
+            <div class="metric reveal reveal-2">
+              <span data-i18n="metric_format">Format</span>
+              <strong>2v2</strong>
+            </div>
+            <div class="metric reveal reveal-3">
+              <span>ELO</span>
+              <strong>100 / +25 / -25</strong>
+            </div>
+            <div class="metric reveal reveal-4">
+              <span data-i18n="metric_platforms">Platforms</span>
+              <strong data-i18n="metric_platforms_value">Web + Launcher</strong>
             </div>
           </div>
-          <div class="grid-3" style="margin-top:18px">
-            <div class="stat"><span>Elo</span><strong id="landingElo">100</strong></div>
-            <div class="stat"><span>Матчи</span><strong id="landingMatches">0</strong></div>
-            <div class="stat"><span>Победы</span><strong id="landingWins">0</strong></div>
+        </section>
+
+        <aside class="card landing-account-card reveal reveal-2">
+          <div class="section-title"><h3 data-i18n="account_title">Account</h3><span class="pill idle" id="landingAuthBadge">Checking...</span></div>
+          <div class="empty" id="landingGuestCard" data-i18n="account_guest">Sign in with Steam to unlock party, queue and profile.</div>
+          <div class="hidden" id="landingUserCard">
+            <div class="profile-box">
+              <img id="landingAvatar" class="avatar" alt="avatar">
+              <div>
+                <div id="landingNickname" style="font-weight:700;font-size:20px">—</div>
+                <div id="landingSteamId" class="muted">—</div>
+              </div>
+            </div>
+            <div class="landing-account-grid">
+              <div class="stat"><span>ELO</span><strong id="landingElo">100</strong></div>
+              <div class="stat"><span data-i18n="account_matches">Matches</span><strong id="landingMatches">0</strong></div>
+              <div class="stat"><span data-i18n="account_wins">Wins</span><strong id="landingWins">0</strong></div>
+              <div class="stat"><span data-i18n="account_mode">Mode</span><strong>2v2</strong></div>
+            </div>
+            <a href="./app.html" class="btn secondary block landing-account-open" data-i18n="account_open">Open player cabinet</a>
           </div>
-        </div>
-      </aside>
-    </div>
-    <section id="status" class="section">
+        </aside>
+      </div>
+    </section>
+
+    <section class="section landing-section reveal reveal-2">
+      <div class="container landing-feature-grid">
+        <article class="card landing-feature-card">
+          <div class="section-title"><h3 data-i18n="feature_ready_title">Built around the real match flow</h3><span class="pill live">2v2</span></div>
+          <p class="muted" data-i18n="feature_ready_text">Party, ready-check, map choice, connect, live state and result all live in one backend-driven flow instead of separate scripts.</p>
+        </article>
+        <article class="card landing-feature-card">
+          <div class="section-title"><h3 data-i18n="feature_server_title">Server-authoritative logic</h3><span class="pill ok">Live</span></div>
+          <p class="muted" data-i18n="feature_server_text">The match server controls connection state, reconnect windows and whitelist access so the platform stays consistent during real games.</p>
+        </article>
+        <article class="card landing-feature-card">
+          <div class="section-title"><h3 data-i18n="feature_simple_title">Minimal surface, serious core</h3><span class="pill idle">TRUST</span></div>
+          <p class="muted" data-i18n="feature_simple_text">No overloaded hubs. Just profile, party, queue, current match, history and a clean route back into the next game.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="status" class="section landing-section reveal reveal-3">
       <div class="container grid-3">
-        <div class="card">
-          <div class="section-title"><h3>Backend</h3><span id="backendBadge" class="pill idle">Проверка...</span></div>
-          <div class="muted" id="backendText">Проверяем подключение к TRUST backend.</div>
+        <div class="card status-card">
+          <div class="section-title"><h3 data-i18n="backend_title">Backend</h3><span id="backendBadge" class="pill idle">Checking...</span></div>
+          <div class="muted" id="backendText" data-i18n="backend_text_loading">Checking TRUST backend availability.</div>
         </div>
-        <div class="card">
-          <div class="section-title"><h3>Конфиг</h3><span id="configBadge" class="pill idle">Ожидание</span></div>
-          <div class="muted" id="configText">Читаем настройки матчмейкинга.</div>
+        <div class="card status-card">
+          <div class="section-title"><h3 data-i18n="config_title">Config</h3><span id="configBadge" class="pill idle">Waiting</span></div>
+          <div class="muted" id="configText" data-i18n="config_text_loading">Loading matchmaking config.</div>
         </div>
-        <div class="card" id="about">
-          <div class="section-title"><h3>Принцип</h3><span class="pill live">Steam-only</span></div>
-          <div class="muted">Ник берётся из Steam, режим только 2x2: можно искать матч соло или вдвоём. После принятия матча всеми игроками открывается голосование по картам: shortdust, lake, overpass, vertigo, nuke.</div>
+        <div class="card status-card">
+          <div class="section-title"><h3 data-i18n="principle_title">Principle</h3><span class="pill live">Steam-only</span></div>
+          <div class="muted" data-i18n="principle_text">Nick and account come from Steam, the mode is only 2v2, and once all players accept the match the platform moves into map selection and server connect.</div>
         </div>
       </div>
     </section>
+
+    <section class="section landing-section reveal reveal-4">
+      <div class="container landing-bottom-grid">
+        <div class="card landing-bottom-card">
+          <div class="section-title"><h3 data-i18n="how_title">How it works</h3></div>
+          <div class="landing-steps">
+            <div class="landing-step"><span>01</span><p data-i18n="how_step_1">Sign in with Steam and open your profile.</p></div>
+            <div class="landing-step"><span>02</span><p data-i18n="how_step_2">Queue solo or invite one teammate into a duo.</p></div>
+            <div class="landing-step"><span>03</span><p data-i18n="how_step_3">Accept the match, vote the map and join the server.</p></div>
+          </div>
+        </div>
+        <div class="card landing-bottom-card landing-bottom-cta">
+          <span class="badge" data-i18n="cta_badge">TRUST 2v2</span>
+          <h3 data-i18n="cta_title">Ready to play the final version of the platform, not a test page.</h3>
+          <p class="muted" data-i18n="cta_text">The landing is now focused on status, identity and direct access into the real app flow.</p>
+          <div class="hero-cta">
+            <button class="btn primary" id="bottomLoginBtn" data-i18n="hero_cta_login">Sign in with Steam</button>
+            <a class="btn ghost" href="./app.html" data-i18n="hero_cta_open">Open app</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <div class="footer-space"></div>
   </main>
   <script src="./frontend-config.js"></script>
