@@ -126,10 +126,14 @@ function renderParty() {
   const party = state.party;
   const membersEl = $('partyMembers');
   const invitesEl = $('partyInvites');
+
   membersEl.innerHTML = '';
   invitesEl.innerHTML = '';
+
   const hasParty = !!party?.id;
   const count = party?.members?.length || 0;
+  const invites = party?.pendingInvites || [];
+
   $('partyBadge').textContent = hasParty ? `${count}/2` : 'Нет party';
   $('partyBadge').className = `pill ${hasParty ? 'ok' : 'idle'}`;
   text('queuePartyStat', hasParty ? `${count}/2` : '1/2');
@@ -138,9 +142,36 @@ function renderParty() {
 
   if (!hasParty) {
     membersEl.innerHTML = '<div class="empty">Party пока нет. Она создастся автоматически при поиске или по кнопке.</div>';
-    invitesEl.innerHTML = '<div class="empty">Входящих инвайтов нет.</div>';
-    return;
+  } else {
+    membersEl.innerHTML = (party.members || []).map((m) => `
+      <div class="member-item">
+        <div class="member-main">
+          <img class="avatar sm" src="${esc(m.avatarUrl || '')}" alt="avatar">
+          <div>
+            <div>${esc(m.nickname || 'Unknown')}</div>
+            <div class="muted">${esc(m.role || 'member')} • Elo ${esc(m.elo2v2 ?? 100)}</div>
+          </div>
+        </div>
+        <span class="pill ${m.role === 'leader' ? 'live' : 'idle'}">${m.role === 'leader' ? 'Leader' : 'Member'}</span>
+      </div>
+    `).join('');
   }
+
+  invitesEl.innerHTML = invites.length
+    ? invites.map((inv) => `
+      <div class="invite-item">
+        <div>
+          <div style="font-weight:700">${esc(inv.fromNickname || 'Игрок')}</div>
+          <div class="muted">Приглашает в party</div>
+        </div>
+        <div class="inline">
+          <button class="btn secondary" data-accept-invite="${esc(inv.id)}">Принять</button>
+          <button class="btn ghost" data-decline-invite="${esc(inv.id)}">Отклонить</button>
+        </div>
+      </div>
+    `).join('')
+    : '<div class="empty">Входящих инвайтов нет.</div>';
+}
 
   membersEl.innerHTML = (party.members || []).map((m) => `
     <div class="member-item">
