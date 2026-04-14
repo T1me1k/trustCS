@@ -448,7 +448,13 @@ function createInviteToast(invite) {
 
   const progress = toast.querySelector('.invite-toast-progress-bar');
   if (progress) {
-    progress.style.width = '100%';
+    const createdAt = invite.createdAt ? new Date(invite.createdAt).getTime() : Date.now();
+    const expiresAt = invite.expiresAt ? new Date(invite.expiresAt).getTime() : (createdAt + 10000);
+    const totalMs = Math.max(1, expiresAt - createdAt);
+    const remainingMs = Math.max(0, expiresAt - Date.now());
+    const remainingPercent = Math.max(0, Math.min(100, (remainingMs / totalMs) * 100));
+    progress.style.transitionDuration = `${remainingMs}ms`;
+    progress.style.width = `${remainingPercent}%`;
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         progress.style.width = '0%';
@@ -456,7 +462,9 @@ function createInviteToast(invite) {
     });
   }
 
-  const timer = window.setTimeout(() => dismissInviteToast(inviteId), 10000);
+  const expiresAtMs = invite.expiresAt ? new Date(invite.expiresAt).getTime() : Date.now() + 10000;
+  const timeoutMs = Math.max(0, expiresAtMs - Date.now());
+  const timer = window.setTimeout(() => dismissInviteToast(inviteId), timeoutMs || 10);
   state.inviteToastTimers.set(inviteId, timer);
 }
 
@@ -913,18 +921,24 @@ async function searchUsers() {
       root.innerHTML = '<div class="empty">Игроки не найдены.</div>';
       return;
     }
-    root.innerHTML = items.map((item) => `
+    root.innerHTML = items.map((item) => {
+      const canPullFromParty = item.partyStatus && item.partyStatus !== 'closed';
+      const presenceLabel = item.presenceLabel || 'Онлайн';
+      const inviteLabel = canPullFromParty ? 'Забрать в party' : 'Пригласить';
+      return `
       <div class="member-item">
         <div class="member-main">
           ${getAvatarMarkup(item.avatarUrl, item.nickname, 'avatar sm')}
           <div>
             <div>${esc(item.nickname || 'Unknown')}</div>
             <div class="muted rank-inline">${getRankPillMarkup(item.rank, item.elo2v2 ?? 100)} <span class="muted">Elo ${esc(item.elo2v2 ?? 100)}</span></div>
+            <div class="muted search-user-meta">${esc(presenceLabel)}${canPullFromParty ? ' • его текущее lobby закроется после принятия' : ''}</div>
           </div>
         </div>
-        <button class="btn secondary" data-invite-user="${esc(item.id)}">Пригласить</button>
+        <button class="btn secondary" data-invite-user="${esc(item.id)}">${inviteLabel}</button>
       </div>
-    `).join('');
+    `;
+    }).join('');
   } catch (err) {
     root.innerHTML = `<div class="empty">Ошибка поиска: ${esc(err.message)}</div>`;
   }
