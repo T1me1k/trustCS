@@ -150,27 +150,7 @@ function renderAuth() {
 }
 
 function renderProfileOverview() {
-  const profile = state.profile;
-  const hasProfile = !!profile;
-  hide('profileOverviewGuest', hasProfile);
-  hide('profileOverview', !hasProfile);
-  $('profileStanding').textContent = hasProfile ? formatStanding(profile.standing) : 'building';
-  $('profileStanding').className = `pill ${hasProfile ? standingPillClass(profile.standing) : 'idle'}`;
-  if (!hasProfile) return;
-
-  $('profileHeroAvatar').src = profile.avatarUrl || '';
-  text('profileHeroName', profile.nickname || 'Unknown');
-  text('profileHeroSteam', profile.steamId || profile.steamId64 || '');
-  text('profileHeroElo', profile.elo2v2 ?? 100);
-  text('profileWins', profile.wins2v2 ?? 0);
-  text('profileLosses', profile.losses2v2 ?? 0);
-  text('profileHeroWinRate', formatPercent(profile.winRate2v2 || 0));
-  text('profileHeroMatches', profile.matchesPlayed2v2 ?? 0);
-  text('profileHeroCurrentStreak', `${profile.currentWinStreak ?? 0}W`);
-  text('profileHeroBestStreak', `${profile.bestWinStreak ?? 0}W`);
-  text('profileHeroFavoriteMap', profile.favoriteMap || '—');
-  text('profileHeroStanding', formatStanding(profile.standing));
-  renderRecentForm('profileHeroForm', profile.recentForm || []);
+  return;
 }
 
 function renderParty() {
