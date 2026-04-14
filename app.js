@@ -11,13 +11,62 @@ const state = {
   queue: null,
   match: null,
   history: [],
-  mapPool: ['shortdust', 'lake', 'overpass', 'vertigo', 'nuke']
+  mapPool: ['shortdust', 'lake', 'overpass', 'vertigo', 'nuke'],
+  ui: { inviteVisuals: {} }
 };
 
 function $(id) { return document.getElementById(id); }
 function hide(id, on) { $(id)?.classList.toggle('hidden', on); }
 function text(id, value) { const el = $(id); if (el) el.textContent = value; }
 function esc(v) { return String(v ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
+
+function parseTime(value) {
+  const ts = value ? new Date(value).getTime() : NaN;
+  return Number.isFinite(ts) ? ts : null;
+}
+
+function formatSecondsLeft(totalSeconds) {
+  const seconds = Math.max(0, Math.ceil(totalSeconds));
+  if (seconds >= 60) {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return secs ? `${mins}м ${secs}с` : `${mins}м`;
+  }
+  return `${seconds}с`;
+}
+
+function getInviteVisual(invite) {
+  const key = String(invite.id);
+  const store = state.ui.inviteVisuals;
+  const now = Date.now();
+  const actualExpiry = parseTime(invite.expiresAt);
+
+  if (!store[key]) {
+    store[key] = {
+      toastEndsAt: now + 10_000,
+      hidden: false
+    };
+  }
+
+  const item = store[key];
+  const toastRemainingMs = Math.max(0, item.toastEndsAt - now);
+  if (toastRemainingMs <= 0) item.hidden = true;
+
+  return {
+    showToast: !item.hidden,
+    toastRemainingMs,
+    toastProgress: Math.max(0, Math.min(100, (toastRemainingMs / 10000) * 100)),
+    actualExpiry,
+    actualRemainingMs: actualExpiry ? Math.max(0, actualExpiry - now) : null
+  };
+}
+
+function cleanupInviteVisuals() {
+  const activeIds = new Set((state.party?.pendingInvites || []).map((inv) => String(inv.id)));
+  for (const key of Object.keys(state.ui.inviteVisuals)) {
+    if (!activeIds.has(key)) delete state.ui.inviteVisuals[key];
+  }
+}
 
 async function api(path, options = {}) {
   const response = await fetch(`${BACKEND_BASE_URL}${path}`, {
@@ -63,40 +112,6 @@ function setBusy(buttonId, busy, labelWhenBusy = '...') {
   }
 }
 
-function formatRelativeClock(value) {
-  if (!value) return '—';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '—';
-  return date.toLocaleString('ru-RU', {
-    day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
-  });
-}
-
-function formatDuration(seconds) {
-  const total = Math.max(0, Number(seconds || 0));
-  if (!Number.isFinite(total)) return '—';
-  const mins = Math.floor(total / 60);
-  const secs = total % 60;
-  if (mins >= 60) {
-    const hours = Math.floor(mins / 60);
-    const rem = mins % 60;
-    return `${hours} ч ${rem} мин`;
-  }
-  if (mins > 0) return `${mins} мин ${secs} сек`;
-  return `${secs} сек`;
-}
-
-function phaseLabel(phase) {
-  return ({ accept: 'Accept', map_veto: 'Map', connect: 'Connect', live: 'LIVE', result: 'Result' }[phase] || phase || '—');
-}
-
-function connectionBadge(connectionState) {
-  if (connectionState === 'connected') return { cls: 'ok', text: 'На сервере' };
-  if (connectionState === 'disconnected') return { cls: 'warn', text: 'Отключён' };
-  if (connectionState === 'abandoned') return { cls: 'warn', text: 'Abandon' };
-  return { cls: 'idle', text: 'Ждёт connect' };
-}
-
 function renderAuth() {
   const authed = !!state.user;
   hide('appLoginBtn', authed);
@@ -126,7 +141,6 @@ function renderParty() {
   const party = state.party;
   const membersEl = $('partyMembers');
   const invitesEl = $('partyInvites');
-
   membersEl.innerHTML = '';
   invitesEl.innerHTML = '';
 
@@ -134,73 +148,72 @@ function renderParty() {
   const count = party?.members?.length || 0;
   const invites = party?.pendingInvites || [];
 
-  $('partyBadge').textContent = hasParty ? `${count}/2` : 'Нет party';
+  $('partyBadge').textContent = hasParty ? `${count}/2` : 'Соло';
   $('partyBadge').className = `pill ${hasParty ? 'ok' : 'idle'}`;
   text('queuePartyStat', hasParty ? `${count}/2` : '1/2');
   hide('leavePartyBtn', !hasParty);
   hide('disbandPartyBtn', !(hasParty && party.isLeader));
 
   if (!hasParty) {
-    membersEl.innerHTML = '<div class="empty">Party пока нет. Она создастся автоматически при поиске или по кнопке.</div>';
+    membersEl.innerHTML = `
+      <div class="party-slot-card accent">
+        <div class="party-slot-head">
+          <span class="pill live">SOLO</span>
+          <span class="muted">Тиммейт подберётся в матчмейкинге</span>
+        </div>
+        <div class="party-slot-title">Сейчас ты без party</div>
+        <div class="muted">Можно искать матч одному или создать duo прямо здесь.</div>
+      </div>
+    `;
   } else {
     membersEl.innerHTML = (party.members || []).map((m) => `
-      <div class="member-item">
-        <div class="member-main">
+      <div class="party-slot-card ${m.role === 'leader' ? 'accent' : ''}">
+        <div class="party-slot-head">
           <img class="avatar sm" src="${esc(m.avatarUrl || '')}" alt="avatar">
-          <div>
-            <div>${esc(m.nickname || 'Unknown')}</div>
-            <div class="muted">${esc(m.role || 'member')} • Elo ${esc(m.elo2v2 ?? 100)}</div>
-          </div>
+          <span class="pill ${m.role === 'leader' ? 'live' : 'idle'}">${m.role === 'leader' ? 'Leader' : 'Member'}</span>
         </div>
-        <span class="pill ${m.role === 'leader' ? 'live' : 'idle'}">${m.role === 'leader' ? 'Leader' : 'Member'}</span>
+        <div class="party-slot-title">${esc(m.nickname || 'Unknown')}</div>
+        <div class="muted">Elo ${esc(m.elo2v2 ?? 100)}</div>
       </div>
     `).join('');
+
+    if ((party.members || []).length < 2) {
+      membersEl.innerHTML += `
+        <div class="party-slot-card empty-slot">
+          <div class="party-slot-head"><span class="pill idle">+1</span></div>
+          <div class="party-slot-title">Свободный слот</div>
+          <div class="muted">Пригласи друга по нику или ищи матч соло.</div>
+        </div>
+      `;
+    }
   }
 
   invitesEl.innerHTML = invites.length
-    ? invites.map((inv) => `
-      <div class="invite-item">
-        <div>
-          <div style="font-weight:700">${esc(inv.fromNickname || 'Игрок')}</div>
-          <div class="muted">Приглашает в party</div>
-        </div>
-        <div class="inline">
-          <button class="btn secondary" data-accept-invite="${esc(inv.id)}">Принять</button>
-          <button class="btn ghost" data-decline-invite="${esc(inv.id)}">Отклонить</button>
-        </div>
-      </div>
-    `).join('')
+    ? invites.map((inv) => {
+        const visual = getInviteVisual(inv);
+        const expiresText = visual.actualRemainingMs != null
+          ? `Истечёт через ${formatSecondsLeft(visual.actualRemainingMs / 1000)}`
+          : 'Ожидает ответа';
+        return `
+          <div class="invite-shelf-card">
+            <div class="invite-shelf-main">
+              <img class="avatar sm" src="${esc(inv.fromAvatarUrl || '')}" alt="avatar">
+              <div>
+                <div style="font-weight:700">${esc(inv.fromNickname || 'Игрок')}</div>
+                <div class="muted">Приглашает в party • ${expiresText}</div>
+              </div>
+            </div>
+            <div class="invite-actions compact">
+              <button class="btn secondary" type="button" data-accept-invite="${esc(inv.id)}">Принять</button>
+              <button class="btn ghost" type="button" data-decline-invite="${esc(inv.id)}">Отклонить</button>
+            </div>
+          </div>
+        `;
+      }).join('')
     : '<div class="empty">Входящих инвайтов нет.</div>';
-}
 
-  membersEl.innerHTML = (party.members || []).map((m) => `
-    <div class="member-item">
-      <div class="member-main">
-        <img class="avatar sm" src="${esc(m.avatarUrl || '')}" alt="avatar">
-        <div>
-          <div>${esc(m.nickname || 'Unknown')}</div>
-          <div class="muted">${esc(m.role || 'member')} • Elo ${esc(m.elo2v2 ?? 100)}</div>
-        </div>
-      </div>
-      <span class="pill ${m.role === 'leader' ? 'live' : 'idle'}">${m.role === 'leader' ? 'Leader' : 'Member'}</span>
-    </div>
-  `).join('');
-
-  const invites = party.pendingInvites || [];
-  invitesEl.innerHTML = invites.length
-    ? invites.map((inv) => `
-      <div class="invite-item">
-        <div>
-          <div style="font-weight:700">${esc(inv.fromNickname || 'Игрок')}</div>
-          <div class="muted">Приглашает в party</div>
-        </div>
-        <div class="inline">
-          <button class="btn secondary" data-accept-invite="${esc(inv.id)}">Принять</button>
-          <button class="btn ghost" data-decline-invite="${esc(inv.id)}">Отклонить</button>
-        </div>
-      </div>
-    `).join('')
-    : '<div class="empty">Входящих инвайтов нет.</div>';
+  cleanupInviteVisuals();
+  renderInviteOverlay();
 }
 
 function renderQueue() {
@@ -213,6 +226,42 @@ function renderQueue() {
   text('searchStateText', inQueue ? 'Матчмейкер подбирает 2x2 игру. Можно играть соло или вдвоём.' : 'Нажми «Найти матч». Если party нет, она создастся автоматически.');
   hide('joinQueueBtn', inQueue);
   hide('cancelQueueBtn', !inQueue);
+}
+
+function renderInviteOverlay() {
+  const root = $('inviteOverlay');
+  if (!root) return;
+
+  const invites = (state.party?.pendingInvites || []).filter((inv) => getInviteVisual(inv).showToast);
+  if (!invites.length) {
+    root.innerHTML = '';
+    return;
+  }
+
+  root.innerHTML = invites.map((inv) => {
+    const visual = getInviteVisual(inv);
+    const secondsLeft = Math.max(0, Math.ceil(visual.toastRemainingMs / 1000));
+    return `
+      <div class="invite-toast">
+        <div class="invite-toast-top">
+          <span class="pill live">PARTY INVITE</span>
+          <span class="invite-toast-timer">${secondsLeft}с</span>
+        </div>
+        <div class="invite-toast-body">
+          <img class="avatar" src="${esc(inv.fromAvatarUrl || '')}" alt="avatar">
+          <div>
+            <div class="invite-toast-title">${esc(inv.fromNickname || 'Игрок')} зовёт тебя в party</div>
+            <div class="muted">Уведомление висит 10 секунд. Сам invite ниже остаётся активным до backend expiry.</div>
+          </div>
+        </div>
+        <div class="invite-actions">
+          <button class="btn primary" type="button" data-accept-invite="${esc(inv.id)}">Принять</button>
+          <button class="btn ghost" type="button" data-decline-invite="${esc(inv.id)}">Отклонить</button>
+        </div>
+        <div class="invite-progress"><span style="width:${visual.toastProgress}%"></span></div>
+      </div>
+    `;
+  }).join('');
 }
 
 function renderHistory() {
@@ -234,79 +283,8 @@ function renderHistory() {
 }
 
 function connectString(match) {
-  return match?.room?.server?.connectCommand || (match?.serverIp && match?.serverPort ? `connect ${match.serverIp}:${match.serverPort}; password ${match.serverPassword || ''}`.trim() : 'Сервер ещё назначается');
-}
-
-function playerCardHtml(p, accent = 'idle') {
-  const badge = connectionBadge(p.connectionState);
-  const reconnect = p.reconnectRemainingSec ? `<div class="muted">Reconnect: ${esc(formatDuration(p.reconnectRemainingSec))}</div>` : '';
-  const accepted = p.accepted ? 'Accepted' : 'Waiting';
-  return `
-    <div class="match-player-card ${accent}">
-      <div class="member-main">
-        <img class="avatar sm" src="${esc(p.avatarUrl || '')}" alt="avatar">
-        <div>
-          <div style="font-weight:700">${esc(p.nickname || 'Unknown')}</div>
-          <div class="muted">Elo ${esc(p.elo || 100)}${p.mapVote ? ` • vote: ${esc(p.mapVote)}` : ''}</div>
-          ${reconnect}
-        </div>
-      </div>
-      <div class="match-player-badges">
-        <span class="pill ${p.accepted ? 'ok' : 'idle'}">${accepted}</span>
-        <span class="pill ${badge.cls}">${badge.text}</span>
-      </div>
-    </div>
-  `;
-}
-
-function renderTimeline(room) {
-  return `
-    <div class="timeline-grid">
-      ${(room.timeline || []).map((step) => `
-        <div class="timeline-step ${step.state}">
-          <div class="timeline-step-top">
-            <span class="pill ${step.state === 'done' ? 'ok' : step.state === 'current' ? 'live' : 'idle'}">${esc(step.title)}</span>
-          </div>
-          <div style="font-weight:700;margin-top:10px">${esc(step.key === room.phase ? `${step.title} now` : step.title)}</div>
-          <div class="muted" style="margin-top:8px">${esc(step.description)}</div>
-        </div>
-      `).join('')}
-    </div>
-  `;
-}
-
-function renderActionPanel(room) {
-  const phase = room.phase;
-  const acceptTimer = room.deadlines?.acceptRemainingSec > 0 ? `До auto-cancel: ${formatDuration(room.deadlines.acceptRemainingSec)}` : '';
-  const connectTimer = room.deadlines?.connectRemainingSec > 0 ? `До connect timeout: ${formatDuration(room.deadlines.connectRemainingSec)}` : '';
-  const ownReconnect = room.me?.reconnectRemainingSec > 0 ? `На переподключение осталось ${formatDuration(room.me.reconnectRemainingSec)}` : '';
-
-  let html = `<div class="room-panel emphasis"><div class="label">Действия</div><div style="font-size:18px;font-weight:800">${esc(room.statusText || 'Матч в процессе')}</div>`;
-  if (acceptTimer || connectTimer || ownReconnect) {
-    html += `<div class="muted" style="margin-top:8px">${esc([acceptTimer, connectTimer, ownReconnect].filter(Boolean).join(' • '))}</div>`;
-  }
-  html += `<div class="room-actions">`;
-
-  if (room.actions?.canAccept) {
-    html += `<button class="btn primary" id="acceptMatchBtn">ПРИНЯТЬ МАТЧ</button>`;
-  }
-  if (room.actions?.canCopyConnect) {
-    html += `<button class="btn secondary" id="copyConnectRoomBtn">Копировать connect</button>`;
-  }
-  html += `</div>`;
-
-  if (room.actions?.canVoteMap) {
-    html += `<div style="margin-top:16px"><div class="label">Выбор карты</div><div class="map-grid">${state.mapPool.map((map) => `<button class="btn secondary" data-map-vote="${esc(map)}">${esc(map)}</button>`).join('')}</div></div>`;
-  } else if (phase === 'map_veto' && !room.mapName) {
-    html += `<div class="empty" style="margin-top:16px">Все игроки уже здесь. Осталось завершить голосование по карте.</div>`;
-  }
-
-  if (room.server?.connectCommand) {
-    html += `<div class="room-connect-box"><div class="label">Connect</div><div class="connect-code">${esc(room.server.connectCommand)}</div></div>`;
-  }
-
-  html += `</div>`;
-  return html;
+  if (!match?.serverIp || !match?.serverPort) return 'Сервер ещё назначается';
+  return `connect ${match.serverIp}:${match.serverPort}; password ${match.serverPassword || ''}`.trim();
 }
 
 function renderCurrentMatch() {
@@ -314,77 +292,70 @@ function renderCurrentMatch() {
   const hasMatch = !!match;
   hide('currentMatchEmpty', hasMatch);
   hide('currentMatchCard', !hasMatch);
-  $('currentMatchBadge').textContent = hasMatch ? (phaseLabel(match.phase) || match.status || 'Match room') : 'Нет матча';
+  $('currentMatchBadge').textContent = hasMatch ? (match.status || 'Матч') : 'Нет матча';
   $('currentMatchBadge').className = `pill ${hasMatch ? 'live' : 'idle'}`;
   if (!hasMatch) return;
 
-  const room = match.room || {
-    phase: match.phase,
-    title: `TRUST ${match.mode || '2x2'} Match Room`,
-    subtitle: match.statusText || 'Текущий матч',
-    statusText: match.statusText || match.status,
-    players: match.players || [],
-    teams: { teamA: (match.players || []).filter((p) => p.team === 'A'), teamB: (match.players || []).filter((p) => p.team === 'B') },
-    mapName: match.mapName,
-    server: {
-      name: match.serverName || 'EU-1',
-      region: match.serverRegion || 'EU',
-      connectCommand: connectString(match)
-    },
-    timeline: match.timeline || [],
-    score: { teamA: match.teamAScore || 0, teamB: match.teamBScore || 0, winnerTeam: match.winnerTeam || null },
-    actions: { canAccept: match.status === 'pending_acceptance' && !match.accepted, canVoteMap: ['map_voting', 'server_assigned'].includes(match.status) && !match.mapName, canCopyConnect: !!match.serverIp },
-    deadlines: { acceptRemainingSec: match.acceptRemainingSec, connectRemainingSec: match.connectRemainingSec }
-  };
+  text('currentMatchId', match.publicMatchId || match.matchId || '—');
+  text('currentMatchMeta', `${match.mode || '2x2'} • карта: ${match.mapName || 'не выбрана'}`);
+  text('currentMatchStatus', match.status || '—');
+  $('currentMatchStatus').className = `pill ${match.status === 'live' ? 'live' : match.status === 'server_assigned' ? 'ok' : 'warn'}`;
+  text('serverConnectLine', connectString(match));
 
-  const phasePill = phaseLabel(room.phase);
-  const scoreLine = room.phase === 'result' || room.phase === 'live'
-    ? `${room.score?.teamA ?? 0} : ${room.score?.teamB ?? 0}${room.score?.winnerTeam ? ` • победила команда ${room.score.winnerTeam}` : ''}`
-    : (room.mapName ? `Карта: ${room.mapName}` : 'Карта ещё выбирается');
+  const teamA = (match.players || []).filter((p) => p.team === 'A');
+  const teamB = (match.players || []).filter((p) => p.team === 'B');
+  $('teamAPlayers').innerHTML = teamA.map(playerHtml).join('');
+  $('teamBPlayers').innerHTML = teamB.map(playerHtml).join('');
 
-  $('currentMatchCard').innerHTML = `
-    <div class="match-room-shell">
-      <div class="room-hero">
+  renderAcceptAndMapVoting(match);
+}
+
+function playerHtml(p) {
+  return `
+    <div class="member-item">
+      <div class="member-main">
+        <img class="avatar sm" src="${esc(p.avatarUrl || '')}" alt="avatar">
         <div>
-          <div class="badge">MATCH ROOM</div>
-          <div class="room-title">${esc(room.title || 'TRUST Match Room')}</div>
-          <div class="muted" style="margin-top:10px">${esc(room.subtitle || '')}</div>
-        </div>
-        <div class="room-hero-side">
-          <span class="pill live">${esc(phasePill)}</span>
-          <div class="room-score">${esc(scoreLine)}</div>
-          <div class="muted">ID: ${esc(match.publicMatchId || match.matchId || '—')}</div>
+          <div>${esc(p.nickname || 'Unknown')}</div>
+          <div class="muted">Elo ${esc(p.elo || 100)}${p.mapVote ? ` • vote: ${esc(p.mapVote)}` : ''}</div>
         </div>
       </div>
-
-      ${renderTimeline(room)}
-
-      <div class="room-grid">
-        ${renderActionPanel(room)}
-
-        <div class="room-panel">
-          <div class="section-title"><h3>Сервер</h3><span class="pill ok">${esc(room.server?.name || 'EU-1')}</span></div>
-          <div class="room-info-row"><span>Регион</span><strong>${esc(room.server?.region || 'EU')}</strong></div>
-          <div class="room-info-row"><span>Карта</span><strong>${esc(room.mapName || 'ещё не выбрана')}</strong></div>
-          <div class="room-info-row"><span>Accept</span><strong>${esc(`${match.acceptedCount || room.counts?.accepted || 0}/${match.totalPlayers || room.counts?.totalPlayers || 4}`)}</strong></div>
-          <div class="room-info-row"><span>Connected</span><strong>${esc(`${match.connectedCount || room.counts?.connected || 0}/${match.totalPlayers || room.counts?.totalPlayers || 4}`)}</strong></div>
-          <div class="room-info-row"><span>Accept deadline</span><strong>${esc(room.deadlines?.acceptExpiresAt ? formatRelativeClock(room.deadlines.acceptExpiresAt) : '—')}</strong></div>
-          <div class="room-info-row"><span>Connect deadline</span><strong>${esc(room.deadlines?.connectExpiresAt ? formatRelativeClock(room.deadlines.connectExpiresAt) : '—')}</strong></div>
-        </div>
-      </div>
-
-      <div class="room-grid team-boards">
-        <div class="room-panel team-panel">
-          <div class="section-title"><h3>Team A</h3><span class="pill idle">2 slots</span></div>
-          <div class="list">${(room.teams?.teamA || []).map((p) => playerCardHtml(p, 'team-a')).join('')}</div>
-        </div>
-        <div class="room-panel team-panel">
-          <div class="section-title"><h3>Team B</h3><span class="pill idle">2 slots</span></div>
-          <div class="list">${(room.teams?.teamB || []).map((p) => playerCardHtml(p, 'team-b')).join('')}</div>
-        </div>
-      </div>
+      <span class="pill ${p.accepted ? 'ok' : 'idle'}">${p.accepted ? 'Accepted' : 'Waiting'}</span>
     </div>
   `;
+}
+
+function renderAcceptAndMapVoting(match) {
+  let box = $('matchActions');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'matchActions';
+    box.style.marginTop = '14px';
+    $('currentMatchCard').appendChild(box);
+  }
+
+  const canAccept = match.status === 'pending_acceptance' && !match.accepted;
+  const canVoteMap = match.acceptedCount === match.totalPlayers && ['map_voting', 'server_assigned'].includes(match.status) && !match.mapName;
+  const acceptedText = `${match.acceptedCount || 0}/${match.totalPlayers || 4} приняли матч`;
+
+  let html = `<div class="muted" style="margin-bottom:10px">${esc(acceptedText)}</div>`;
+  if (canAccept) {
+    html += `<button class="btn primary" id="acceptMatchBtn">ПРИНЯТЬ МАТЧ</button>`;
+  } else if (match.status === 'pending_acceptance') {
+    html += `<div class="empty">Ждём, пока все игроки примут матч.</div>`;
+  }
+
+  if (canVoteMap) {
+    html += `<div style="margin-top:14px"><div class="label">Выбор карты</div><div class="list">`;
+    html += state.mapPool.map((map) => `<button class="btn secondary block" data-map-vote="${esc(map)}">${esc(map)}</button>`).join('');
+    html += `</div></div>`;
+  } else if (match.status === 'map_voting' && !match.mapName) {
+    html += `<div class="empty" style="margin-top:12px">После принятия всеми игроками выбирается карта из пула: ${state.mapPool.join(', ')}.</div>`;
+  } else if (match.mapName) {
+    html += `<div class="empty" style="margin-top:12px">Выбрана карта: ${esc(match.mapName)}.</div>`;
+  }
+
+  box.innerHTML = html;
 
   $('acceptMatchBtn')?.addEventListener('click', async () => {
     try {
@@ -393,12 +364,12 @@ function renderCurrentMatch() {
       await refreshAll();
     } catch (err) {
       showAlert(`Не удалось принять матч: ${err.message}`, 'error');
+    } finally {
       setBusy('acceptMatchBtn', false);
     }
   });
 
-  $('copyConnectRoomBtn')?.addEventListener('click', copyConnect);
-  $('currentMatchCard').querySelectorAll('[data-map-vote]').forEach((btn) => btn.addEventListener('click', async () => {
+  box.querySelectorAll('[data-map-vote]').forEach((btn) => btn.addEventListener('click', async () => {
     try {
       btn.disabled = true;
       await api(`/api/matches/${encodeURIComponent(match.publicMatchId)}/map-vote`, {
@@ -594,13 +565,17 @@ window.addEventListener('DOMContentLoaded', async () => {
   $('joinQueueBtn')?.addEventListener('click', joinQueue);
   $('cancelQueueBtn')?.addEventListener('click', cancelQueue);
   $('copyConnectBtn')?.addEventListener('click', copyConnect);
-  $('partyInvites')?.addEventListener('click', async (event) => {
-    const acceptId = event.target?.dataset?.acceptInvite;
-    const declineId = event.target?.dataset?.declineInvite;
+  document.addEventListener('click', async (event) => {
+    const target = event.target.closest?.('[data-accept-invite], [data-decline-invite]');
+    if (!target) return;
+    event.preventDefault();
+    const acceptId = target.dataset.acceptInvite;
+    const declineId = target.dataset.declineInvite;
     if (acceptId) await acceptInvite(acceptId);
     if (declineId) await declineInvite(declineId);
   });
 
   await refreshAll();
   setInterval(() => { void refreshAll(); }, 5000);
+  setInterval(() => { renderInviteOverlay(); }, 1000);
 });
