@@ -350,28 +350,41 @@ button,input{font:inherit}
 }
 
 
+.landing-account-grid-soft .stat{
+  border-radius:16px;
+  border:1px solid rgba(167,139,250,.08);
+  background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.015));
+  box-shadow:none;
+}
+.landing-account-open{
+  display:inline-flex;
+  width:auto;
+  margin-top:18px;
+  padding-inline:18px;
+}
+@media (max-width: 720px){
+  .landing-account-open{width:100%;justify-content:center}
+}
+
+
 #landingUserCard{
   display:flex;
   flex-direction:column;
   gap:16px;
 }
-
-#landingUserCard .profile-box{
-  margin-bottom:0;
+#landingUserCard.hidden{
+  display:none!important;
 }
-
+.landing-account-card{
+  align-self:stretch;
+}
 .landing-account-grid{
   margin-top:0;
 }
-
 .landing-account-open{
-  margin-top:0;
   display:flex;
-  align-items:center;
-  justify-content:center;
   width:100%;
-}
-
-.landing-account-card .empty{
-  background:transparent;
+  justify-content:center;
+  margin-top:0;
+  position:static;
 }

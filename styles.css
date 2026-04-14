@@ -270,3 +270,6 @@ button,input{font:inherit}
   .post-match-result-label{font-size:42px}
   .post-match-scoreline,.post-match-stats-grid,.post-match-meta{grid-template-columns:1fr}
 }
+
+.rank-chip{display:inline-flex;align-items:center;gap:10px}
+.rank-chip-icon{width:28px;height:28px;border-radius:8px;background:#0b1020;border:1px solid rgba(167,139,250,.12)}

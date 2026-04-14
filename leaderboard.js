@@ -35,7 +35,7 @@ function getRankByElo(rawElo) {
     if (elo >= ranks[i].minElo) currentIndex = i;
     else break;
   }
-  return ranks[currentIndex];
+  return { ...ranks[currentIndex] };
 }
 function normalizeRank(rank, elo) {
   return rank && rank.name ? rank : getRankByElo(elo);
