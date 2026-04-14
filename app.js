@@ -16,7 +16,8 @@ const state = {
   mapPool: ['shortdust', 'lake', 'overpass', 'vertigo', 'nuke'],
   inviteToastSeen: new Set(),
   inviteToastDismissed: new Set(),
-  inviteToastTimers: new Map()
+  inviteToastTimers: new Map(),
+  queueElapsedInterval: null
 };
 
 function $(id) { return document.getElementById(id); }
@@ -41,6 +42,44 @@ function formatDuration(totalSec) {
   const minutes = Math.floor(sec / 60);
   const seconds = sec % 60;
   return `${minutes}м ${String(seconds).padStart(2, '0')}с`;
+}
+
+function pad2(value) { return String(value).padStart(2, '0'); }
+function formatElapsedSeconds(totalSec) {
+  const sec = Math.max(0, Math.floor(Number(totalSec) || 0));
+  const minutes = Math.floor(sec / 60);
+  const seconds = sec % 60;
+  const hours = Math.floor(minutes / 60);
+  if (hours > 0) {
+    return `${pad2(hours)}:${pad2(minutes % 60)}:${pad2(seconds)}`;
+  }
+  return `${pad2(minutes)}:${pad2(seconds)}`;
+}
+function getQueueStartedAt(queue) {
+  const candidate = queue?.joinedAt || queue?.createdAt || queue?.queuedAt || queue?.startedAt || queue?.searchStartedAt || null;
+  if (!candidate) return null;
+  const dt = new Date(candidate);
+  return Number.isNaN(dt.getTime()) ? null : dt;
+}
+function updateQueueElapsed() {
+  const wrap = $('queueElapsedWrap');
+  const valueEl = $('queueElapsedValue');
+  if (!wrap || !valueEl) return;
+
+  const startedAt = getQueueStartedAt(state.queue);
+  const inQueue = !!state.queue && !!startedAt;
+  hide('queueElapsedWrap', !inQueue);
+  if (!inQueue) {
+    valueEl.textContent = '00:00';
+    return;
+  }
+
+  const diffSec = Math.floor((Date.now() - startedAt.getTime()) / 1000);
+  valueEl.textContent = formatElapsedSeconds(diffSec);
+}
+function ensureQueueElapsedTicker() {
+  if (state.queueElapsedInterval) return;
+  state.queueElapsedInterval = window.setInterval(updateQueueElapsed, 1000);
 }
 function formatStanding(standing) {
   if (standing === 'hot') return 'HOT';
@@ -311,6 +350,7 @@ function renderQueue() {
   text('searchStateText', inQueue ? 'Матчмейкер подбирает 2x2 игру. Можно играть соло или вдвоём.' : 'Нажми «Найти матч». Если party нет, она создастся автоматически.');
   hide('joinQueueBtn', inQueue);
   hide('cancelQueueBtn', !inQueue);
+  updateQueueElapsed();
 }
 
 function renderHistory() {
@@ -751,5 +791,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   });
 
   await refreshAll();
+  ensureQueueElapsedTicker();
   setInterval(() => { void refreshAll(); }, 5000);
 });
