@@ -260,6 +260,54 @@ function renderAuth() {
   const rank = normalizeRank(profile.rank, profile.elo2v2 ?? 100);
   const rankPill = $('profileRankPill');
   if (rankPill) { rankPill.textContent = rank.name; rankPill.className = `rank-pill ${rank.color || 'iron'}`; }
+  renderRankTooltip(rank);
+  function getAllRanks() {
+  return [
+    { name: 'Iron', minElo: 0, color: 'iron' },
+    { name: 'Bronze', minElo: 300, color: 'bronze' },
+    { name: 'Silver', minElo: 500, color: 'silver' },
+    { name: 'Gold Nova', minElo: 700, color: 'gold' },
+    { name: 'Master Guardian', minElo: 900, color: 'guardian' },
+    { name: 'Distinguished', minElo: 1100, color: 'distinguished' },
+    { name: 'Legendary Eagle', minElo: 1300, color: 'eagle' },
+    { name: 'Supreme', minElo: 1500, color: 'supreme' },
+    { name: 'Global Elite', minElo: 1700, color: 'global' },
+  ];
+}
+
+function renderRankTooltip(currentRank) {
+  const pill = $('profileRankPill');
+  if (!pill) return;
+
+  let wrap = pill.closest('.rank-hover');
+  if (!wrap) {
+    wrap = document.createElement('div');
+    wrap.className = 'rank-hover';
+    pill.parentNode.insertBefore(wrap, pill);
+    wrap.appendChild(pill);
+  }
+
+  let tooltip = wrap.querySelector('.rank-tooltip');
+  if (!tooltip) {
+    tooltip = document.createElement('div');
+    tooltip.className = 'rank-tooltip';
+    wrap.appendChild(tooltip);
+  }
+
+  const rows = getAllRanks().map(rank => `
+    <div class="rank-tooltip-row ${rank.name === currentRank.name ? 'is-current' : ''}">
+      <div class="rank-tooltip-name">
+        <span class="rank-pill ${esc(rank.color || 'iron')}">${esc(rank.name)}</span>
+      </div>
+      <div class="rank-tooltip-elo">${esc(rank.minElo)}+</div>
+    </div>
+  `).join('');
+
+  tooltip.innerHTML = `
+    <div class="rank-tooltip-title">Звания TRUST</div>
+    <div class="rank-tooltip-list">${rows}</div>
+  `;
+}
   renderRankTooltip(rank.key);
   text('profileRankName', rank.name);
   text('profileRankProgressText', rank.isMaxRank ? 'Максимальное звание достигнуто' : `До следующего звания: ${rank.pointsToNext}`);
