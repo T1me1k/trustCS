@@ -1069,6 +1069,200 @@ async function handleDelegatedClick(event) {
   }
 }
 
+
+
+function matchPhaseBadgeClass(phase) {
+  if (phase === 'live' || phase === 'finished') return 'ok';
+  if (phase === 'cancelled') return 'warn';
+  return 'live';
+}
+
+function getPlayerDelayReason(player) {
+  if (!player) return '';
+  if (!player.accepted) return `${player.nickname || 'Игрок'} ещё не принял матч`;
+  if (player.connectionState === 'waiting_connect') return `${player.nickname || 'Игрок'} ещё не подключился`;
+  if (player.connectionState === 'disconnected') return `${player.nickname || 'Игрок'} вылетел и ждёт reconnect`;
+  if (player.connectionState === 'abandoned') return `${player.nickname || 'Игрок'} получил abandon`;
+  return '';
+}
+
+function renderMatchPlayerCard(p) {
+  const tags = [];
+  if (p.partyMarker) tags.push(`<span class="tag duo">${esc(p.partyMarker)}</span>`);
+  tags.push(`<span class="tag ${esc(p.statusTone || 'idle')}">${esc(p.statusLabel || 'Pending')}</span>`);
+  if (p.mapVote) tags.push(`<span class="tag">vote: ${esc(p.mapVote)}</span>`);
+  if (p.isReconnecting) tags.push(`<span class="tag warn">reconnect ${esc(formatDuration(p.reconnectRemainingSec))}</span>`);
+  if (p.isAbandoned) tags.push('<span class="tag danger">abandon</span>');
+  return `
+    <div class="match-player-card">
+      <div class="match-player-main">
+        ${getAvatarMarkup(p.avatarUrl, p.nickname, 'avatar sm')}
+        <div>
+          <div>${esc(p.nickname || 'Unknown')}</div>
+          <div class="muted rank-inline">${getRankPillMarkup(p.rank, p.elo || p.elo2v2 || 100)} <span class="muted">Elo ${esc(p.elo || p.elo2v2 || 100)}</span></div>
+          <div class="match-player-meta">${tags.join('')}</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderMatchRoomActions(match) {
+  const room = match?.room || {};
+  const actions = [];
+  if (room.actions?.canAccept) actions.push('<button class="btn primary" data-room-action="accept">ПРИНЯТЬ МАТЧ</button>');
+  if (room.actions?.canVoteMap) {
+    actions.push(state.mapPool.map((map) => `<button class="btn secondary" data-room-action="vote" data-map-name="${esc(map)}">Карта: ${esc(map)}</button>`).join(''));
+  }
+  if (room.phase === 'connect' || room.phase === 'live') {
+    if (room.actions?.canConnect) actions.push('<button class="btn primary" data-room-action="connect">Подключиться</button>');
+    if (room.actions?.canCopyIp) actions.push('<button class="btn secondary" data-room-action="copy-ip">Скопировать IP</button>');
+    if (room.actions?.canCopyCommand) actions.push('<button class="btn secondary" data-room-action="copy-command">Скопировать connect-команду</button>');
+  }
+  if (room.phase === 'live') {
+    actions.push('<button class="btn secondary" data-room-action="room">Комната матча</button>');
+    actions.push('<button class="btn ghost" data-room-action="issue">Проблема с матчем</button>');
+  }
+  if (room.phase === 'finished' || room.phase === 'cancelled') {
+    actions.push('<button class="btn secondary" data-room-action="result">Открыть результат</button>');
+    actions.push('<button class="btn ghost" data-room-action="profile">Открыть профиль</button>');
+    actions.push('<button class="btn primary" data-room-action="play-again">Играть ещё</button>');
+  }
+  $('matchRoomActions').innerHTML = actions.join('') || '<div class="empty">Ожидание следующего шага матча.</div>';
+}
+
+function renderCurrentMatch() {
+  const match = state.match;
+  const hasMatch = !!match;
+  hide('queueStageCard', hasMatch);
+  hide('matchStageCard', !hasMatch);
+  $('currentMatchBadge').textContent = hasMatch ? ((match.room?.phaseLabel) || match.status || 'Матч') : 'Нет матча';
+  $('currentMatchBadge').className = `pill ${hasMatch ? matchPhaseBadgeClass(match.room?.phase) : 'idle'}`;
+  if (!hasMatch) return;
+
+  const room = match.room || {};
+  text('currentMatchId', room.publicMatchId || match.publicMatchId || '—');
+  text('currentMatchMeta', `${match.mode || '2x2'} • карта: ${room.mapName || 'не выбрана'} • сервер: ${room.server?.name || 'EU-1'}`);
+  text('currentMatchStatus', room.statusText || match.status || '—');
+  $('currentMatchStatus').className = `pill ${matchPhaseBadgeClass(room.phase)}`;
+  text('serverConnectLine', room.server?.connectCommand || connectString(match));
+
+  $('currentMatchSummaryGrid').innerHTML = `
+    <div class="match-room-summary-card"><span>Фаза</span><strong>${esc(room.phaseLabel || room.phase || '—')}</strong></div>
+    <div class="match-room-summary-card"><span>Match ID</span><strong>${esc(room.publicMatchId || '—')}</strong></div>
+    <div class="match-room-summary-card"><span>Карта</span><strong>${esc(room.mapName || 'pending')}</strong></div>
+    <div class="match-room-summary-card"><span>Сервер</span><strong>${esc(room.server?.name || 'EU-1')}</strong></div>
+    <div class="match-room-summary-card"><span>Таймер фазы</span><strong>${esc(formatDuration(room.currentDeadlineSec))}</strong></div>
+    <div class="match-room-summary-card"><span>Финиш</span><strong>${esc(room.finishReasonLabel || '—')}</strong></div>`;
+
+  $('currentMatchStageTimeline').innerHTML = (room.progressTimeline || []).map((step) => `
+    <div class="match-room-stage-step ${esc(step.state || 'upcoming')}">
+      <div class="current-match-step-title">${esc(step.title || step.key)}</div>
+      <div class="muted">${esc(step.description || '')}</div>
+    </div>`).join('');
+
+  $('teamAPlayers').innerHTML = ((room.teams?.teamA) || []).map(renderMatchPlayerCard).join('') || '<div class="empty">Нет игроков</div>';
+  $('teamBPlayers').innerHTML = ((room.teams?.teamB) || []).map(renderMatchPlayerCard).join('') || '<div class="empty">Нет игроков</div>';
+
+  const blocker = (match.players || []).map(getPlayerDelayReason).find(Boolean);
+  text('matchRoomWhyBlocked', blocker || (room.finalMessage || 'Все игроки синхронизированы.'));
+
+  $('matchRoomEvents').innerHTML = (room.eventTimeline || []).length
+    ? room.eventTimeline.map((event) => `
+      <div class="match-event-item">
+        <div class="match-event-time">${esc(formatDate(event.createdAt))}</div>
+        <div>
+          <div class="match-event-title">${esc(event.title || event.type || 'Event')}</div>
+          <div class="muted">${esc(event.description || '')}</div>
+        </div>
+      </div>`).join('')
+    : '<div class="empty">Пока нет событий комнаты матча.</div>';
+
+  renderMatchRoomActions(match);
+}
+
+async function submitMatchIssue() {
+  const match = state.match;
+  if (!match?.publicMatchId) return;
+  try {
+    setBusy('submitMatchIssueBtn', true, 'ОТПРАВКА...');
+    await api(`/api/matches/${encodeURIComponent(match.publicMatchId)}/issues`, {
+      method: 'POST',
+      body: JSON.stringify({
+        phase: match.room?.phase || match.phase || 'live',
+        reason: $('matchIssueReason')?.value || 'other',
+        comment: $('matchIssueComment')?.value || ''
+      })
+    });
+    $('matchIssueComment').value = '';
+    hide('matchIssueModal', true);
+    showAlert('Проблема по матчу отправлена в backend.');
+    await refreshMatch();
+    renderCurrentMatch();
+  } catch (err) {
+    showAlert(`Не удалось отправить репорт: ${err.message}`, 'error');
+  } finally {
+    setBusy('submitMatchIssueBtn', false);
+  }
+}
+
+function openMatchIssueModal() { hide('matchIssueModal', false); }
+function closeMatchIssueModal() { hide('matchIssueModal', true); }
+
+async function refreshMatch() {
+  const data = await api('/api/matches/me/current');
+  state.match = data.match || null;
+  state.issueReasons = data.issueReasons || [];
+  if (state.match) stopQueueTimer();
+  if (Array.isArray(data.mapPool)) state.mapPool = data.mapPool;
+}
+
+async function executeRoomAction(action, mapName) {
+  const match = state.match;
+  if (!match?.publicMatchId) return;
+  if (action === 'accept') {
+    await api(`/api/matches/${encodeURIComponent(match.publicMatchId)}/accept`, { method: 'POST' });
+    await refreshAll();
+    return;
+  }
+  if (action === 'vote') {
+    await api(`/api/matches/${encodeURIComponent(match.publicMatchId)}/map-vote`, { method: 'POST', body: JSON.stringify({ mapName }) });
+    await refreshAll();
+    return;
+  }
+  if (action === 'connect') {
+    window.open(`steam://connect/${match.serverIp}:${match.serverPort}`, '_self');
+    return;
+  }
+  if (action === 'copy-ip') {
+    await navigator.clipboard.writeText(`${match.serverIp}:${match.serverPort}`);
+    showAlert('IP сервера скопирован.');
+    return;
+  }
+  if (action === 'copy-command') {
+    await copyConnect();
+    return;
+  }
+  if (action === 'issue') { openMatchIssueModal(); return; }
+  if (action === 'result') { await openMatchDetails(match.publicMatchId); return; }
+  if (action === 'profile') { document.querySelector('.sidebar .card')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+  if (action === 'play-again') { if (state.queue) await cancelQueue(); await joinQueue(); return; }
+  if (action === 'room') { showAlert('Ты уже в комнате матча.'); }
+}
+
+document.addEventListener('click', (event) => {
+  const actionBtn = event.target.closest('[data-room-action]');
+  if (actionBtn) {
+    event.preventDefault();
+    void executeRoomAction(actionBtn.dataset.roomAction, actionBtn.dataset.mapName || null);
+    return;
+  }
+  const issueClose = event.target.closest('[data-close-modal="match-issue"]');
+  if (issueClose) {
+    event.preventDefault();
+    closeMatchIssueModal();
+  }
+});
+
 window.addEventListener('DOMContentLoaded', async () => {
   setupRankTooltipInteractions();
   $('appLoginBtn')?.addEventListener('click', login);
@@ -1081,19 +1275,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   $('copyConnectBtn')?.addEventListener('click', (event) => { event.preventDefault(); void copyConnect(); });
   $('postMatchContinueBtn')?.addEventListener('click', (event) => { event.preventDefault(); void closePostMatchModal(); });
   $('postMatchProfileBtn')?.addEventListener('click', (event) => { event.preventDefault(); void openProfileFromPostMatch(); });
+  $('submitMatchIssueBtn')?.addEventListener('click', (event) => { event.preventDefault(); void submitMatchIssue(); });
   document.addEventListener('click', (event) => {
-    const createBtn = event.target.closest('#createPartyBtn');
-    if (createBtn) {
-      event.preventDefault();
-      void createParty();
-      return;
-    }
-    const leaveBtn = event.target.closest('#leavePartyBtn');
-    if (leaveBtn) {
-      event.preventDefault();
-      void leaveParty();
-      return;
-    }
     void handleDelegatedClick(event);
   });
 

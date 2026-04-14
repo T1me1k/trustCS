@@ -132,28 +132,54 @@
           </div>
         </section>
 
-        <section class="card current-match-hero hidden" id="matchStageCard">
-          <div class="section-title section-title-match"><h3>Комната матча</h3><span id="currentMatchBadge" class="pill idle">Нет матча</span></div>
-          <div id="currentMatchCard">
-            <div class="current-match-hero-top">
+        <section class="card current-match-hero hidden match-room-shell" id="matchStageCard">
+          <div class="section-title section-title-match"><h3>Match Room 2.0</h3><span id="currentMatchBadge" class="pill idle">Нет матча</span></div>
+          <div id="currentMatchCard" class="match-room-root">
+            <div class="match-room-topbar">
               <div>
                 <div id="currentMatchId" class="current-match-id">—</div>
                 <div id="currentMatchMeta" class="muted">—</div>
               </div>
               <div class="current-match-hero-actions">
                 <span id="currentMatchStatus" class="pill live">—</span>
-                <button class="btn secondary" id="copyConnectBtn">Копировать connect</button>
+                <button class="btn secondary" id="copyConnectBtn">Скопировать connect</button>
               </div>
             </div>
-            <div class="server-connect-box">
-              <div class="label">Сервер</div>
-              <div id="serverConnectLine" class="server-connect-line">—</div>
-            </div>
-            <div id="currentMatchRoomGrid" class="current-match-room-grid"></div>
-            <div id="currentMatchTimeline" class="current-match-timeline"></div>
-            <div class="match-grid match-grid-compact" style="margin-top:12px">
-              <div class="team"><div style="font-weight:700;margin-bottom:10px">Team A</div><div class="list" id="teamAPlayers"></div></div>
-              <div class="team"><div style="font-weight:700;margin-bottom:10px">Team B</div><div class="list" id="teamBPlayers"></div></div>
+            <div id="currentMatchSummaryGrid" class="match-room-summary-grid"></div>
+            <div class="match-room-layout">
+              <div class="match-room-maincol">
+                <div class="match-room-panel">
+                  <div class="label">Прогресс матча</div>
+                  <div id="currentMatchStageTimeline" class="match-room-stage-timeline"></div>
+                </div>
+                <div class="match-room-panel">
+                  <div class="match-room-panel-head">
+                    <div class="label">Составы команд</div>
+                    <div class="muted" id="matchRoomWhyBlocked">—</div>
+                  </div>
+                  <div class="match-room-teams-grid">
+                    <div class="team match-room-team"><div class="match-room-team-title">Team A</div><div class="list" id="teamAPlayers"></div></div>
+                    <div class="team match-room-team"><div class="match-room-team-title">Team B</div><div class="list" id="teamBPlayers"></div></div>
+                  </div>
+                </div>
+                <div class="match-room-panel">
+                  <div class="match-room-panel-head">
+                    <div class="label">Timeline</div>
+                    <div class="muted">Live room events</div>
+                  </div>
+                  <div id="matchRoomEvents" class="match-room-events"></div>
+                </div>
+              </div>
+              <aside class="match-room-sidecol">
+                <div class="match-room-panel compact">
+                  <div class="label">Сервер</div>
+                  <div id="serverConnectLine" class="server-connect-line">—</div>
+                </div>
+                <div class="match-room-panel compact">
+                  <div class="label">Действия</div>
+                  <div id="matchRoomActions" class="match-room-actions"></div>
+                </div>
+              </aside>
             </div>
           </div>
         </section>
@@ -205,6 +231,41 @@
         <button class="btn ghost" type="button" data-close-modal="match-details">Закрыть</button>
       </div>
       <div id="matchDetailsBody"></div>
+    </div>
+  </div>
+
+  
+
+  <div id="matchIssueModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-backdrop" data-close-modal="match-issue"></div>
+    <div class="modal-dialog card">
+      <div class="section-title modal-head">
+        <div>
+          <h3>Проблема с матчем</h3>
+          <div class="muted">Tech-report flow для Match Room</div>
+        </div>
+        <button class="btn ghost" type="button" data-close-modal="match-issue">Закрыть</button>
+      </div>
+      <div class="issue-form-grid">
+        <div>
+          <div class="label">Причина</div>
+          <select id="matchIssueReason" class="input issue-select">
+            <option value="server_not_responding">Сервер не отвечает</option>
+            <option value="cannot_connect">Не могу подключиться</option>
+            <option value="player_not_connecting">Игрок не подключается</option>
+            <option value="match_stuck">Матч завис</option>
+            <option value="result_not_recorded">Результат не записался</option>
+            <option value="other">Другое</option>
+          </select>
+        </div>
+        <div>
+          <div class="label">Комментарий</div>
+          <textarea id="matchIssueComment" class="input issue-textarea" placeholder="Коротко опиши проблему"></textarea>
+        </div>
+      </div>
+      <div class="post-match-actions" style="margin-top:16px">
+        <button class="btn secondary" id="submitMatchIssueBtn">Отправить репорт</button>
+      </div>
     </div>
   </div>
 
