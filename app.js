@@ -105,8 +105,8 @@ function renderParty() {
   $('partyBadge').textContent = hasParty ? `${count}/2` : 'Нет party';
   $('partyBadge').className = `pill ${hasParty ? 'ok' : 'idle'}`;
   text('queuePartyStat', hasParty ? `${count}/2` : '1/2');
+  hide('createPartyBtn', hasParty);
   hide('leavePartyBtn', !hasParty);
-  hide('disbandPartyBtn', !(hasParty && party.isLeader));
 
   if (!hasParty) {
     membersEl.innerHTML = '<div class="empty">Party пока нет. Она создастся автоматически при поиске или по кнопке.</div>';
@@ -132,7 +132,7 @@ function renderParty() {
           <div style="font-weight:700">${esc(inv.fromNickname || 'Игрок')}</div>
           <div class="muted">Приглашает в party</div>
         </div>
-        <div class="inline invite-actions-inline">
+        <div class="invite-actions invite-actions-inline">
           <button class="btn secondary" data-accept-invite="${esc(inv.id)}">Принять</button>
           <button class="btn ghost" data-decline-invite="${esc(inv.id)}">Отклонить</button>
         </div>
@@ -184,7 +184,6 @@ function createInviteToast(invite) {
     <button class="invite-toast-close" type="button" aria-label="Скрыть" data-dismiss-invite-toast="${esc(inviteId)}">×</button>
     <div class="invite-toast-head">
       <div class="invite-toast-title">Приглашение в party</div>
-      <div class="invite-toast-time">10 сек</div>
     </div>
     <div class="invite-toast-body">
       <div class="invite-toast-avatar">${esc((invite.fromNickname || 'Игрок').slice(0, 1).toUpperCase())}</div>
@@ -484,16 +483,10 @@ async function searchUsers() {
 
 async function inviteUser(userId) {
   try {
-    if (!state.party?.id) {
-      await api('/api/party/create', { method: 'POST' });
-      await refreshParty();
-    }
-
     await api('/api/party/invite', {
       method: 'POST',
       body: JSON.stringify({ targetUserId: userId })
     });
-
     await refreshAll();
     showAlert('Инвайт отправлен.');
   } catch (err) {
@@ -586,7 +579,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   $('appLogoutBtn')?.addEventListener('click', logout);
   $('createPartyBtn')?.addEventListener('click', createParty);
   $('leavePartyBtn')?.addEventListener('click', leaveParty);
-  $('disbandPartyBtn')?.addEventListener('click', disbandParty);
   $('userSearchBtn')?.addEventListener('click', searchUsers);
   $('joinQueueBtn')?.addEventListener('click', joinQueue);
   $('cancelQueueBtn')?.addEventListener('click', cancelQueue);
