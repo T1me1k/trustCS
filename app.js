@@ -379,16 +379,37 @@ function startQueueTimer(startAt) {
   queueTimerInterval = setInterval(tick, 1000);
 }
 
+function renderRestrictionCard() {
+  const restrictions = state.restrictions || null;
+  const block = restrictions?.restriction || null;
+  const visible = !!block?.isActive;
+  hide('restrictionCard', !visible);
+  if (!visible) return;
+  text('restrictionTitle', block.title || 'Поиск временно недоступен');
+  text('restrictionMessage', block.message || 'У игрока есть активное ограничение.');
+  text('restrictionReason', block.reasonKey || block.type || 'queue_lock');
+  text('restrictionRemaining', block.remainingText || 'до разблокировки');
+  text('restrictionBadge', block.category === 'queue_lock' ? 'Locked' : 'Cooldown');
+  $('restrictionBadge').className = `pill ${block.category === 'queue_lock' ? 'warn' : 'live'}`;
+}
+
 function renderQueue() {
   const queue = state.queue;
   const inQueue = !!queue;
+  const restrictions = state.restrictions || null;
+  const canQueue = restrictions?.canQueue !== false;
   $('queueBadge').textContent = inQueue ? 'В очереди' : 'Не в очереди';
   $('queueBadge').className = `pill ${inQueue ? 'ok' : 'idle'}`;
-  $('matchmakingState').textContent = inQueue ? 'Поиск...' : 'Ожидание';
-  $('matchmakingState').className = `pill ${inQueue ? 'live' : 'idle'}`;
-  text('searchStateText', inQueue ? 'Матчмейкер подбирает 2x2 игру. Можно играть соло или вдвоём.' : 'Нажми «Найти матч». Если party нет, она создастся автоматически.');
+  $('matchmakingState').textContent = inQueue ? 'Поиск...' : (canQueue ? 'Ожидание' : 'Blocked');
+  $('matchmakingState').className = `pill ${inQueue ? 'live' : canQueue ? 'idle' : 'warn'}`;
+  text('searchStateText', inQueue
+    ? 'Матчмейкер подбирает 2x2 игру. Можно играть соло или вдвоём.'
+    : canQueue
+      ? 'Нажми «Найти матч». Если party нет, она создастся автоматически.'
+      : (restrictions?.restriction?.message || 'Поиск временно недоступен.'));
   hide('joinQueueBtn', inQueue);
   hide('cancelQueueBtn', !inQueue);
+  if ($('joinQueueBtn')) $('joinQueueBtn').disabled = !inQueue && !canQueue;
 
   const queueStartedAt = queue?.queuedAt || queue?.joinedAt || queue?.createdAt || queue?.startedAt || queue?.searchStartedAt || null;
   if (inQueue && queueStartedAt) {
@@ -453,8 +474,25 @@ function renderCurrentMatch() {
   text('currentMatchId', match.publicMatchId || match.matchId || '—');
   text('currentMatchMeta', `${match.mode || '2x2'} • карта: ${match.mapName || 'не выбрана'}`);
   text('currentMatchStatus', match.status || '—');
-  $('currentMatchStatus').className = `pill ${match.status === 'live' ? 'live' : match.status === 'server_assigned' ? 'ok' : 'warn'}`;
+  $('currentMatchStatus').className = `pill ${match.status === 'live' ? 'live' : match.status === 'server_assigned' ? 'ok' : match.status === 'finished' ? 'ok' : 'warn'}`;
   text('serverConnectLine', connectString(match));
+
+  const roomGrid = $('currentMatchRoomGrid');
+  const timeline = $('currentMatchTimeline');
+  const room = match.room || {};
+  const deadlines = room.deadlines || {};
+  roomGrid.innerHTML = `
+    <div class="current-match-room-stat"><span>Phase</span><strong>${esc(room.phase || match.phase || 'waiting')}</strong></div>
+    <div class="current-match-room-stat"><span>Accepted</span><strong>${esc(`${match.acceptedCount || 0}/${match.totalPlayers || 4}`)}</strong></div>
+    <div class="current-match-room-stat"><span>Connected</span><strong>${esc(`${match.connectedCount || 0}/${match.totalPlayers || 4}`)}</strong></div>
+    <div class="current-match-room-stat"><span>Deadline</span><strong>${esc(room.phase === 'accept' ? formatDuration(deadlines.acceptRemainingSec) : room.phase === 'connect' ? formatDuration(deadlines.connectRemainingSec) : '—')}</strong></div>
+  `;
+  timeline.innerHTML = (match.timeline || []).map((step) => `
+    <div class="current-match-step ${esc(step.state || 'upcoming')}">
+      <div class="current-match-step-title">${esc(step.title || step.key || 'Step')}</div>
+      <div class="muted">${esc(step.description || '')}</div>
+    </div>
+  `).join('');
 
   const teamA = (match.players || []).filter((p) => p.team === 'A');
   const teamB = (match.players || []).filter((p) => p.team === 'B');
@@ -614,6 +652,7 @@ function renderPostMatchModal() {
 }
 
 function evaluatePostMatchSummary() {
+  if (state.postMatchSummary) return;
   const latest = (state.profileHistory || [])[0] || null;
   const summary = buildPostMatchSummary(latest, state.profile);
   if (!summary || hasSeenPostMatch(summary.publicMatchId)) {
@@ -623,16 +662,22 @@ function evaluatePostMatchSummary() {
   state.postMatchSummary = summary;
 }
 
-function closePostMatchModal() {
-  if (state.postMatchSummary?.publicMatchId) markPostMatchSeen(state.postMatchSummary.publicMatchId);
+async function closePostMatchModal() {
+  const matchId = state.postMatchSummary?.publicMatchId || null;
+  if (matchId) {
+    markPostMatchSeen(matchId);
+    try {
+      await api(`/api/matches/${encodeURIComponent(matchId)}/post-match/ack`, { method: 'POST' });
+    } catch (_) {}
+  }
   state.postMatchSummary = null;
   renderPostMatchModal();
 }
 
-function openProfileFromPostMatch() {
+async function openProfileFromPostMatch() {
   const profileSection = document.querySelector('.sidebar .card');
   if (profileSection) profileSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  closePostMatchModal();
+  await closePostMatchModal();
 }
 
 async function refreshAccount() {
@@ -646,6 +691,7 @@ async function refreshParty() {
 async function refreshQueue() {
   const data = await api('/api/queue/me');
   state.queue = data.queue || null;
+  state.restrictions = data.restrictions || null;
   if (!state.queue) stopQueueTimer();
 }
 async function refreshMatch() {
@@ -662,6 +708,22 @@ async function refreshProfileHistory() {
   const data = await api('/api/profile/me/history?limit=12');
   state.profileHistory = data.items || [];
 }
+async function refreshPostMatchSummary() {
+  const data = await api('/api/matches/me/post-match');
+  const summary = data.summary || null;
+  if (!summary) {
+    state.postMatchSummary = null;
+    return;
+  }
+  const profile = state.profile || null;
+  state.postMatchSummary = {
+    ...summary,
+    scoreLabel: `${summary.teamAScore ?? 0} : ${summary.teamBScore ?? 0}`,
+    eloAfter: summary.eloAfter ?? profile?.elo2v2 ?? 100,
+    streakAfter: profile?.currentWinStreak ?? 0,
+    streakDeltaLabel: summary.result === 'win' ? '+1 win streak' : 'Streak reset'
+  };
+}
 
 async function refreshAll() {
   await Promise.allSettled([
@@ -670,11 +732,13 @@ async function refreshAll() {
     refreshQueue(),
     refreshMatch(),
     refreshProfile(),
-    refreshProfileHistory()
+    refreshProfileHistory(),
+    refreshPostMatchSummary()
   ]);
   renderAuth();
   renderProfileOverview();
   renderParty();
+  renderRestrictionCard();
   renderQueue();
   renderCurrentMatch();
   renderHistory();
@@ -786,6 +850,7 @@ async function joinQueue() {
       await api('/api/party/create', { method: 'POST' });
       await refreshParty();
       renderParty();
+      renderRestrictionCard();
       renderQueue();
     }
     await api('/api/queue/join', { method: 'POST', body: JSON.stringify({ mode: '2x2' }) });
@@ -870,8 +935,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   $('joinQueueBtn')?.addEventListener('click', (event) => { event.preventDefault(); void joinQueue(); });
   $('cancelQueueBtn')?.addEventListener('click', (event) => { event.preventDefault(); void cancelQueue(); });
   $('copyConnectBtn')?.addEventListener('click', (event) => { event.preventDefault(); void copyConnect(); });
-  $('postMatchContinueBtn')?.addEventListener('click', (event) => { event.preventDefault(); closePostMatchModal(); });
-  $('postMatchProfileBtn')?.addEventListener('click', (event) => { event.preventDefault(); openProfileFromPostMatch(); });
+  $('postMatchContinueBtn')?.addEventListener('click', (event) => { event.preventDefault(); void closePostMatchModal(); });
+  $('postMatchProfileBtn')?.addEventListener('click', (event) => { event.preventDefault(); void openProfileFromPostMatch(); });
   document.addEventListener('click', (event) => {
     const createBtn = event.target.closest('#createPartyBtn');
     if (createBtn) {

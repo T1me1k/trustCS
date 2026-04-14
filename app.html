@@ -117,6 +117,21 @@
 
         
 
+
+        <section class="card restriction-card hidden" id="restrictionCard">
+          <div class="section-title"><h3>Queue Guard</h3><span id="restrictionBadge" class="pill warn">Blocked</span></div>
+          <div class="restriction-grid">
+            <div>
+              <div id="restrictionTitle" class="restriction-title">Поиск временно недоступен</div>
+              <div id="restrictionMessage" class="muted">—</div>
+            </div>
+            <div class="restriction-meta">
+              <div class="restriction-meta-row"><span>Причина</span><strong id="restrictionReason">—</strong></div>
+              <div class="restriction-meta-row"><span>Осталось</span><strong id="restrictionRemaining">—</strong></div>
+            </div>
+          </div>
+        </section>
+
         <section class="card">
           <div class="section-title"><h3>Текущий матч</h3><span id="currentMatchBadge" class="pill idle">Нет матча</span></div>
           <div id="currentMatchEmpty" class="empty">Сейчас активного матча нет.</div>
@@ -135,6 +150,8 @@
               </div>
               <button class="btn secondary" id="copyConnectBtn">Копировать connect</button>
             </div>
+            <div id="currentMatchRoomGrid" class="current-match-room-grid"></div>
+            <div id="currentMatchTimeline" class="current-match-timeline"></div>
             <div class="match-grid" style="margin-top:12px">
               <div class="team"><div style="font-weight:700;margin-bottom:10px">Team A</div><div class="list" id="teamAPlayers"></div></div>
               <div class="team"><div style="font-weight:700;margin-bottom:10px">Team B</div><div class="list" id="teamBPlayers"></div></div>
