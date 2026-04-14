@@ -484,10 +484,16 @@ async function searchUsers() {
 
 async function inviteUser(userId) {
   try {
+    if (!state.party?.id) {
+      await api('/api/party/create', { method: 'POST' });
+      await refreshParty();
+    }
+
     await api('/api/party/invite', {
       method: 'POST',
       body: JSON.stringify({ targetUserId: userId })
     });
+
     await refreshAll();
     showAlert('Инвайт отправлен.');
   } catch (err) {
