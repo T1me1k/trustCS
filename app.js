@@ -5,6 +5,37 @@ const BACKEND_BASE_URL = (() => {
   return (fromWindow || fromMeta || fromStorage || 'https://YOUR-BACKEND.up.railway.app').replace(/\/+$/, '');
 })();
 
+
+
+const RANK_TABLE = [
+  { key: 'iron', name: 'Iron', minElo: 0, color: 'iron', icon: './assets/ranks/iron.svg' },
+  { key: 'bronze', name: 'Bronze', minElo: 300, color: 'bronze', icon: './assets/ranks/bronze.svg' },
+  { key: 'silver', name: 'Silver', minElo: 500, color: 'silver', icon: './assets/ranks/silver.svg' },
+  { key: 'gold_nova', name: 'Gold Nova', minElo: 700, color: 'gold', icon: './assets/ranks/gold_nova.svg' },
+  { key: 'master_guardian', name: 'Master Guardian', minElo: 900, color: 'guardian', icon: './assets/ranks/master_guardian.svg' },
+  { key: 'distinguished', name: 'Distinguished', minElo: 1100, color: 'distinguished', icon: './assets/ranks/distinguished.svg' },
+  { key: 'legendary_eagle', name: 'Legendary Eagle', minElo: 1300, color: 'eagle', icon: './assets/ranks/legendary_eagle.svg' },
+  { key: 'supreme', name: 'Supreme', minElo: 1500, color: 'supreme', icon: './assets/ranks/supreme.svg' },
+  { key: 'global_elite', name: 'Global Elite', minElo: 1700, color: 'global', icon: './assets/ranks/global_elite.svg' }
+];
+
+function renderRankTooltip(activeRankKey) {
+  const root = $('rankTooltipList');
+  if (!root) return;
+  root.innerHTML = RANK_TABLE.map((rank) => `
+    <div class="rank-tooltip-row ${rank.key === activeRankKey ? 'active' : ''}">
+      <div class="rank-tooltip-rank">
+        <img class="rank-tooltip-icon" src="${esc(rank.icon)}" alt="${esc(rank.name)}">
+        <div>
+          <div class="rank-tooltip-name">${esc(rank.name)}</div>
+          <div class="muted">${esc(rank.minElo)}+ Elo</div>
+        </div>
+      </div>
+      <span class="rank-pill ${esc(rank.color)}">${esc(rank.minElo)}+</span>
+    </div>
+  `).join('');
+}
+
 const state = {
   user: null,
   party: null,
@@ -114,17 +145,7 @@ function resultPillClass(result) {
 
 function getRankByElo(rawElo) {
   const elo = Math.max(0, Number(rawElo) || 0);
-  const ranks = [
-    { key: 'iron', name: 'Iron', minElo: 0, color: 'iron' },
-    { key: 'bronze', name: 'Bronze', minElo: 300, color: 'bronze' },
-    { key: 'silver', name: 'Silver', minElo: 500, color: 'silver' },
-    { key: 'gold_nova', name: 'Gold Nova', minElo: 700, color: 'gold' },
-    { key: 'master_guardian', name: 'Master Guardian', minElo: 900, color: 'guardian' },
-    { key: 'distinguished', name: 'Distinguished', minElo: 1100, color: 'distinguished' },
-    { key: 'legendary_eagle', name: 'Legendary Eagle', minElo: 1300, color: 'eagle' },
-    { key: 'supreme', name: 'Supreme', minElo: 1500, color: 'supreme' },
-    { key: 'global_elite', name: 'Global Elite', minElo: 1700, color: 'global' }
-  ];
+  const ranks = RANK_TABLE;
   let currentIndex = 0;
   for (let i = 0; i < ranks.length; i += 1) {
     if (elo >= ranks[i].minElo) currentIndex = i;
@@ -139,6 +160,7 @@ function getRankByElo(rawElo) {
     key: current.key,
     name: current.name,
     color: current.color,
+    icon: current.icon,
     currentElo: elo,
     nextRankName: next?.name || null,
     nextRankElo: next?.minElo || null,
@@ -152,8 +174,9 @@ function normalizeRank(rank, elo) {
 }
 function getRankPillMarkup(rank, elo) {
   const info = normalizeRank(rank, elo);
-  return `<span class="rank-pill ${esc(info.color || 'iron')}">${esc(info.name)}</span>`;
+  return `<span class="rank-chip-inline"><img class="rank-mini-icon" src="${esc(info.icon || './assets/ranks/iron.svg')}" alt="rank"><span class="rank-pill ${esc(info.color || 'iron')}">${esc(info.name)}</span></span>`;
 }
+
 function getAvatarMarkup(avatarUrl, fallback, className = 'avatar sm') {
   if (avatarUrl) return `<img class="${className}" src="${esc(avatarUrl)}" alt="avatar">`;
   return `<div class="avatar-fallback ${className.includes('sm') ? 'sm' : ''}">${esc((fallback || '?').slice(0, 1).toUpperCase())}</div>`;
@@ -239,6 +262,9 @@ function renderAuth() {
   const rank = normalizeRank(profile.rank, profile.elo2v2 ?? 100);
   const rankPill = $('profileRankPill');
   if (rankPill) { rankPill.textContent = rank.name; rankPill.className = `rank-pill ${rank.color || 'iron'}`; }
+  const rankIcon = $('profileRankIcon');
+  if (rankIcon) rankIcon.src = rank.icon || './assets/ranks/iron.svg';
+  renderRankTooltip(rank.key);
   text('profileRankName', rank.name);
   text('profileRankProgressText', rank.isMaxRank ? 'Максимальное звание достигнуто' : `До следующего звания: ${rank.pointsToNext}`);
   text('profileRankNext', rank.isMaxRank ? 'MAX' : `${rank.nextRankName} • ${rank.nextRankElo}`);
@@ -516,8 +542,8 @@ function connectString(match) {
 function renderCurrentMatch() {
   const match = state.match;
   const hasMatch = !!match;
-  hide('currentMatchEmpty', hasMatch);
-  hide('currentMatchCard', !hasMatch);
+  hide('queueStageCard', hasMatch);
+  hide('matchStageCard', !hasMatch);
   $('currentMatchBadge').textContent = hasMatch ? (match.status || 'Матч') : 'Нет матча';
   $('currentMatchBadge').className = `pill ${hasMatch ? 'live' : 'idle'}`;
   if (!hasMatch) return;
