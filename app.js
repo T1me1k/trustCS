@@ -111,6 +111,49 @@ function resultPillClass(result) {
   if (result === 'loss') return 'warn';
   return 'idle';
 }
+
+function getRankByElo(rawElo) {
+  const elo = Math.max(0, Number(rawElo) || 0);
+  const ranks = [
+    { key: 'iron', name: 'Iron', minElo: 0, color: 'iron' },
+    { key: 'bronze', name: 'Bronze', minElo: 300, color: 'bronze' },
+    { key: 'silver', name: 'Silver', minElo: 500, color: 'silver' },
+    { key: 'gold_nova', name: 'Gold Nova', minElo: 700, color: 'gold' },
+    { key: 'master_guardian', name: 'Master Guardian', minElo: 900, color: 'guardian' },
+    { key: 'distinguished', name: 'Distinguished', minElo: 1100, color: 'distinguished' },
+    { key: 'legendary_eagle', name: 'Legendary Eagle', minElo: 1300, color: 'eagle' },
+    { key: 'supreme', name: 'Supreme', minElo: 1500, color: 'supreme' },
+    { key: 'global_elite', name: 'Global Elite', minElo: 1700, color: 'global' }
+  ];
+  let currentIndex = 0;
+  for (let i = 0; i < ranks.length; i += 1) {
+    if (elo >= ranks[i].minElo) currentIndex = i;
+    else break;
+  }
+  const current = ranks[currentIndex];
+  const next = ranks[currentIndex + 1] || null;
+  const progressPercent = next
+    ? Math.max(0, Math.min(100, Math.round(((elo - current.minElo) / Math.max(1, next.minElo - current.minElo)) * 100)))
+    : 100;
+  return {
+    key: current.key,
+    name: current.name,
+    color: current.color,
+    currentElo: elo,
+    nextRankName: next?.name || null,
+    nextRankElo: next?.minElo || null,
+    pointsToNext: next ? Math.max(0, next.minElo - elo) : 0,
+    progressPercent,
+    isMaxRank: !next
+  };
+}
+function normalizeRank(rank, elo) {
+  return rank && rank.name ? rank : getRankByElo(elo);
+}
+function getRankPillMarkup(rank, elo) {
+  const info = normalizeRank(rank, elo);
+  return `<span class="rank-pill ${esc(info.color || 'iron')}">${esc(info.name)}</span>`;
+}
 function getAvatarMarkup(avatarUrl, fallback, className = 'avatar sm') {
   if (avatarUrl) return `<img class="${className}" src="${esc(avatarUrl)}" alt="avatar">`;
   return `<div class="avatar-fallback ${className.includes('sm') ? 'sm' : ''}">${esc((fallback || '?').slice(0, 1).toUpperCase())}</div>`;
@@ -193,6 +236,14 @@ function renderAuth() {
   text('profileNickname', profile.nickname || 'Unknown');
   text('profileSteamId', profile.steamId || profile.steamId64 || '');
   text('profileElo', profile.elo2v2 ?? 100);
+  const rank = normalizeRank(profile.rank, profile.elo2v2 ?? 100);
+  const rankPill = $('profileRankPill');
+  if (rankPill) { rankPill.textContent = rank.name; rankPill.className = `rank-pill ${rank.color || 'iron'}`; }
+  text('profileRankName', rank.name);
+  text('profileRankProgressText', rank.isMaxRank ? 'Максимальное звание достигнуто' : `До следующего звания: ${rank.pointsToNext}`);
+  text('profileRankNext', rank.isMaxRank ? 'MAX' : `${rank.nextRankName} • ${rank.nextRankElo}`);
+  const rankFill = $('profileRankProgressFill');
+  if (rankFill) rankFill.style.width = `${rank.progressPercent || 0}%`;
   text('profileWinRate', formatPercent(profile.winRate2v2 || 0));
   text('profileMatches', profile.matchesPlayed2v2 ?? 0);
   text('profileRecord', `${profile.wins2v2 ?? 0} / ${profile.losses2v2 ?? 0}`);
@@ -233,7 +284,7 @@ function renderParty() {
           ${getAvatarMarkup(m.avatarUrl, m.nickname, 'avatar sm')}
           <div>
             <div>${esc(m.nickname || 'Unknown')}</div>
-            <div class="muted">${esc(m.role || 'member')} • Elo ${esc(m.elo2v2 ?? 100)}</div>
+            <div class="muted rank-inline">${esc(m.role || 'member')} • ${getRankPillMarkup(m.rank, m.elo2v2 ?? 100)} <span class="muted">Elo ${esc(m.elo2v2 ?? 100)}</span></div>
           </div>
         </div>
         <span class="pill ${m.role === 'leader' ? 'live' : 'idle'}">${m.role === 'leader' ? 'Leader' : 'Member'}</span>
@@ -509,7 +560,7 @@ function playerHtml(p) {
         ${getAvatarMarkup(p.avatarUrl, p.nickname, 'avatar sm')}
         <div>
           <div>${esc(p.nickname || 'Unknown')}</div>
-          <div class="muted">Elo ${esc(p.elo || p.elo2v2 || 100)}${p.mapVote ? ` • vote: ${esc(p.mapVote)}` : ''}</div>
+          <div class="muted rank-inline">${getRankPillMarkup(p.rank, p.elo || p.elo2v2 || 100)} <span class="muted">Elo ${esc(p.elo || p.elo2v2 || 100)}</span>${p.mapVote ? ` <span class="muted">• vote: ${esc(p.mapVote)}</span>` : ''}</div>
         </div>
       </div>
       <span class="pill ${p.accepted ? 'ok' : 'idle'}">${p.accepted ? 'Accepted' : 'Waiting'}</span>
@@ -595,7 +646,7 @@ function renderMatchDetailsModal() {
               ${getAvatarMarkup(player.avatarUrl, player.nickname, 'avatar sm')}
               <div>
                 <div>${esc(player.nickname || 'Unknown')}</div>
-                <div class="muted">Elo ${esc(player.elo2v2 ?? 100)}${player.result ? ` • ${esc(player.result)}` : ''}</div>
+                <div class="muted rank-inline">${getRankPillMarkup(player.rank, player.elo2v2 ?? 100)} <span class="muted">Elo ${esc(player.elo2v2 ?? 100)}</span>${player.result ? ` <span class="muted">• ${esc(player.result)}</span>` : ''}</div>
               </div>
             </div>
             <span class="pill ${player.result === 'win' ? 'ok' : player.result === 'loss' ? 'warn' : player.accepted ? 'live' : 'idle'}">${player.result ? esc(player.result) : player.accepted ? 'Accepted' : '—'}</span>
@@ -790,7 +841,7 @@ async function searchUsers() {
           ${getAvatarMarkup(item.avatarUrl, item.nickname, 'avatar sm')}
           <div>
             <div>${esc(item.nickname || 'Unknown')}</div>
-            <div class="muted">Elo ${esc(item.elo2v2 ?? 100)}</div>
+            <div class="muted rank-inline">${getRankPillMarkup(item.rank, item.elo2v2 ?? 100)} <span class="muted">Elo ${esc(item.elo2v2 ?? 100)}</span></div>
           </div>
         </div>
         <button class="btn secondary" data-invite-user="${esc(item.id)}">Пригласить</button>

@@ -16,6 +16,30 @@ async function api(path, options = {}) {
   return data;
 }
 
+
+function getRankByElo(rawElo) {
+  const elo = Math.max(0, Number(rawElo) || 0);
+  const ranks = [
+    { key: 'iron', name: 'Iron', minElo: 0, color: 'iron' },
+    { key: 'bronze', name: 'Bronze', minElo: 300, color: 'bronze' },
+    { key: 'silver', name: 'Silver', minElo: 500, color: 'silver' },
+    { key: 'gold_nova', name: 'Gold Nova', minElo: 700, color: 'gold' },
+    { key: 'master_guardian', name: 'Master Guardian', minElo: 900, color: 'guardian' },
+    { key: 'distinguished', name: 'Distinguished', minElo: 1100, color: 'distinguished' },
+    { key: 'legendary_eagle', name: 'Legendary Eagle', minElo: 1300, color: 'eagle' },
+    { key: 'supreme', name: 'Supreme', minElo: 1500, color: 'supreme' },
+    { key: 'global_elite', name: 'Global Elite', minElo: 1700, color: 'global' }
+  ];
+  let currentIndex = 0;
+  for (let i = 0; i < ranks.length; i += 1) {
+    if (elo >= ranks[i].minElo) currentIndex = i;
+    else break;
+  }
+  return ranks[currentIndex];
+}
+function normalizeRank(rank, elo) {
+  return rank && rank.name ? rank : getRankByElo(elo);
+}
 function esc(v) {
   return String(v ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
 }
@@ -30,13 +54,16 @@ async function loadLeaderboard() {
       root.innerHTML = '<div class="empty">Лидерборд пока пустой.</div>';
       return;
     }
-    root.innerHTML = items.map((item, idx) => `
+    root.innerHTML = items.map((item, idx) => {
+      const rankInfo = normalizeRank(item.rank, item.elo2v2 ?? 100);
+      return `
       <div class="table-row">
-        <div><strong>#${esc(item.rank ?? (idx + 1))}</strong></div>
+        <div><strong>#${esc(item.rankPosition ?? item.rank ?? (idx + 1))}</strong></div>
         <div class="table-player"><img class="avatar sm" src="${esc(item.avatarUrl || '')}" alt="avatar"><span>${esc(item.nickname || 'Unknown')}</span></div>
+        <div><span class="rank-pill ${esc(rankInfo.color || 'iron')}">${esc(rankInfo.name || 'Iron')}</span></div>
         <div><strong>${esc(item.elo2v2 ?? 100)}</strong></div>
       </div>
-    `).join('');
+    `}).join('');
   } catch (_) {
     root.innerHTML = '<div class="empty">Не удалось загрузить лидерборд.</div>';
   }

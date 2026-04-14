@@ -46,6 +46,9 @@
               <div>
                 <div id="profileNickname" style="font-weight:700;font-size:20px">—</div>
                 <div id="profileSteamId" class="muted">—</div>
+                  <div class="profile-rank-line">
+                    <span id="profileRankPill" class="rank-pill iron">Iron</span>
+                  </div>
               </div>
             </div>
             <div class="stats-grid profile-sidebar-stats" style="margin-top:18px">
@@ -55,6 +58,17 @@
               <div class="stat"><span>W / L</span><strong id="profileRecord">0 / 0</strong></div>
             </div>
             <div class="profile-side-meta">
+              <div class="rank-progress-card">
+                <div class="rank-progress-head">
+                  <span class="muted">Звание</span>
+                  <strong id="profileRankName">Iron</strong>
+                </div>
+                <div class="rank-progress-bar"><div id="profileRankProgressFill" class="rank-progress-fill"></div></div>
+                <div class="rank-progress-foot">
+                  <span id="profileRankProgressText" class="muted">До следующего звания: —</span>
+                  <strong id="profileRankNext">—</strong>
+                </div>
+              </div>
               <div class="meta-row"><span class="muted">Серия</span><strong id="profileCurrentStreak">0W</strong></div>
               <div class="meta-row"><span class="muted">Лучшая серия</span><strong id="profileBestStreak">0W</strong></div>
               <div class="meta-row"><span class="muted">Лучшая карта</span><strong id="profileFavoriteMap">—</strong></div>
