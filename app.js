@@ -642,6 +642,16 @@ async function declineInvite(id) {
 
 async function joinQueue() {
   try {
+    if (!state.user) {
+      showAlert('Сначала войди через Steam.', 'error');
+      return;
+    }
+    if (!state.party?.id) {
+      await api('/api/party/create', { method: 'POST' });
+      await refreshParty();
+      renderParty();
+      renderQueue();
+    }
     await api('/api/queue/join', { method: 'POST', body: JSON.stringify({ mode: '2x2' }) });
     await refreshAll();
     showAlert('Поиск матча запущен.');
@@ -718,13 +728,27 @@ async function handleDelegatedClick(event) {
 window.addEventListener('DOMContentLoaded', async () => {
   $('appLoginBtn')?.addEventListener('click', login);
   $('appLogoutBtn')?.addEventListener('click', logout);
-  $('createPartyBtn')?.addEventListener('click', createParty);
-  $('leavePartyBtn')?.addEventListener('click', leaveParty);
-  $('userSearchBtn')?.addEventListener('click', searchUsers);
-  $('joinQueueBtn')?.addEventListener('click', joinQueue);
-  $('cancelQueueBtn')?.addEventListener('click', cancelQueue);
-  $('copyConnectBtn')?.addEventListener('click', copyConnect);
-  document.addEventListener('click', (event) => { void handleDelegatedClick(event); });
+  $('createPartyBtn')?.addEventListener('click', (event) => { event.preventDefault(); void createParty(); });
+  $('leavePartyBtn')?.addEventListener('click', (event) => { event.preventDefault(); void leaveParty(); });
+  $('userSearchBtn')?.addEventListener('click', (event) => { event.preventDefault(); void searchUsers(); });
+  $('joinQueueBtn')?.addEventListener('click', (event) => { event.preventDefault(); void joinQueue(); });
+  $('cancelQueueBtn')?.addEventListener('click', (event) => { event.preventDefault(); void cancelQueue(); });
+  $('copyConnectBtn')?.addEventListener('click', (event) => { event.preventDefault(); void copyConnect(); });
+  document.addEventListener('click', (event) => {
+    const createBtn = event.target.closest('#createPartyBtn');
+    if (createBtn) {
+      event.preventDefault();
+      void createParty();
+      return;
+    }
+    const leaveBtn = event.target.closest('#leavePartyBtn');
+    if (leaveBtn) {
+      event.preventDefault();
+      void leaveParty();
+      return;
+    }
+    void handleDelegatedClick(event);
+  });
 
   await refreshAll();
   setInterval(() => { void refreshAll(); }, 5000);
