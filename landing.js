@@ -269,13 +269,38 @@ function setLanguage(lang) {
   applyTranslations();
 }
 
-window.addEventListener('DOMContentLoaded', async () => {
-  ['landingLoginBtn', 'heroLoginBtn', 'bottomLoginBtn'].forEach((id) => $(id)?.addEventListener('click', login));
-  $('landingLogoutBtn')?.addEventListener('click', logout);
-  document.querySelectorAll('.lang-btn').forEach((btn) => {
-    btn.addEventListener('click', () => setLanguage(btn.dataset.lang));
-  });
+function bindLandingEvents() {
+  document.addEventListener('click', async (e) => {
+    const langBtn = e.target.closest('[data-lang]');
+    if (langBtn) {
+      e.preventDefault();
+      setLanguage(langBtn.dataset.lang);
+      return;
+    }
 
+    const loginBtn = e.target.closest('#landingLoginBtn, #heroLoginBtn, #bottomLoginBtn');
+    if (loginBtn) {
+      e.preventDefault();
+      login();
+      return;
+    }
+
+    const logoutBtn = e.target.closest('#landingLogoutBtn');
+    if (logoutBtn) {
+      e.preventDefault();
+      await logout();
+    }
+  });
+}
+
+async function initLanding() {
+  bindLandingEvents();
   applyTranslations();
   await Promise.all([refreshAuth(), refreshHealth(), refreshConfig()]);
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initLanding, { once: true });
+} else {
+  initLanding();
+}
