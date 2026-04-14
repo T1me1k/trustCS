@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./app.css" />
+  <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
   <div id="inviteToastLayer" class="invite-toast-layer" aria-live="polite" aria-atomic="false"></div>
@@ -161,6 +161,55 @@
         <button class="btn ghost" type="button" data-close-modal="match-details">Закрыть</button>
       </div>
       <div id="matchDetailsBody"></div>
+    </div>
+  </div>
+
+
+  <div id="postMatchModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-backdrop post-match-backdrop"></div>
+    <div class="modal-dialog post-match-dialog">
+      <section class="card post-match-card" id="postMatchCard">
+        <div class="post-match-header">
+          <span class="badge">MATCH COMPLETE</span>
+          <div id="postMatchResultPill" class="post-match-result-pill win">WIN</div>
+        </div>
+        <div class="post-match-body">
+          <div>
+            <div id="postMatchResultLabel" class="post-match-result-label">WIN</div>
+            <div id="postMatchSubtitle" class="post-match-subtitle">Your 2x2 match is complete.</div>
+          </div>
+          <div class="post-match-scoreline">
+            <div class="post-match-score-box">
+              <span>Score</span>
+              <strong id="postMatchScore">13 : 9</strong>
+            </div>
+            <div class="post-match-score-box">
+              <span>Map</span>
+              <strong id="postMatchMap">nuke</strong>
+            </div>
+          </div>
+          <div class="post-match-stats-grid">
+            <div class="post-match-stat">
+              <span>ELO</span>
+              <strong id="postMatchEloDelta">+12</strong>
+              <small id="postMatchEloAfter">Now 1120</small>
+            </div>
+            <div class="post-match-stat">
+              <span>Streak</span>
+              <strong id="postMatchStreakDelta">+1 win streak</strong>
+              <small id="postMatchStreakAfter">Current 3W</small>
+            </div>
+          </div>
+          <div class="post-match-meta">
+            <div class="post-match-meta-row"><span>Match</span><strong id="postMatchMatchId">TRUST-0001</strong></div>
+            <div class="post-match-meta-row"><span>Finished</span><strong id="postMatchFinishedAt">—</strong></div>
+          </div>
+          <div class="post-match-actions">
+            <button class="btn ghost" type="button" id="postMatchContinueBtn">Продолжить</button>
+            <button class="btn primary" type="button" id="postMatchProfileBtn">Открыть профиль</button>
+          </div>
+        </div>
+      </section>
     </div>
   </div>
 

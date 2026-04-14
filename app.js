@@ -16,7 +16,8 @@ const state = {
   mapPool: ['shortdust', 'lake', 'overpass', 'vertigo', 'nuke'],
   inviteToastSeen: new Set(),
   inviteToastDismissed: new Set(),
-  inviteToastTimers: new Map()
+  inviteToastTimers: new Map(),
+  postMatchSummary: null
 };
 
 let queueTimerInterval = null;
@@ -54,6 +55,46 @@ function formatDuration(totalSec) {
   const minutes = Math.floor(sec / 60);
   const seconds = sec % 60;
   return `${minutes}м ${String(seconds).padStart(2, '0')}с`;
+}
+
+function getPostMatchStorageKey(matchId) {
+  return `trust_post_match_seen_${matchId}`;
+}
+function markPostMatchSeen(matchId) {
+  if (!matchId) return;
+  try { localStorage.setItem(getPostMatchStorageKey(matchId), '1'); } catch (_) {}
+}
+function hasSeenPostMatch(matchId) {
+  if (!matchId) return true;
+  try { return localStorage.getItem(getPostMatchStorageKey(matchId)) === '1'; } catch (_) { return false; }
+}
+function formatStreakValue(value) {
+  const n = Number(value) || 0;
+  return `${n}W`;
+}
+function buildPostMatchSummary(item, profile) {
+  if (!item || !item.publicMatchId || !item.result) return null;
+  const result = item.result === 'win' ? 'win' : 'loss';
+  const eloDelta = Number(item.eloDelta || 0);
+  const eloAfter = Number(profile?.elo2v2 || 100);
+  const eloBefore = eloAfter - eloDelta;
+  const currentStreak = Number(profile?.currentWinStreak || 0);
+  const streakAfter = result === 'win' ? currentStreak : 0;
+  const streakBefore = result === 'win' ? Math.max(0, streakAfter - 1) : Math.max(0, currentStreak);
+  const streakDeltaLabel = result === 'win' ? '+1 win streak' : 'Streak reset';
+  return {
+    publicMatchId: item.publicMatchId,
+    result,
+    mapName: item.mapName || '—',
+    scoreLabel: `${item.teamAScore ?? 0} : ${item.teamBScore ?? 0}`,
+    eloDelta,
+    eloAfter,
+    eloBefore,
+    streakBefore,
+    streakAfter,
+    streakDeltaLabel,
+    finishedAt: item.finishedAt || null
+  };
 }
 function formatStanding(standing) {
   if (standing === 'hot') return 'HOT';
@@ -547,6 +588,53 @@ function renderMatchDetailsModal() {
   `;
 }
 
+function renderPostMatchModal() {
+  const modal = $('postMatchModal');
+  const summary = state.postMatchSummary;
+  hide('postMatchModal', !summary);
+  if (!summary) return;
+
+  const isWin = summary.result === 'win';
+  text('postMatchResultLabel', isWin ? 'WIN' : 'LOSS');
+  text('postMatchSubtitle', isWin ? 'You won your latest 2x2 match.' : 'Your latest 2x2 match ended in a loss.');
+  text('postMatchScore', summary.scoreLabel || '—');
+  text('postMatchMap', summary.mapName || '—');
+  text('postMatchEloDelta', `${summary.eloDelta > 0 ? '+' : ''}${summary.eloDelta}`);
+  text('postMatchEloAfter', `Now ${summary.eloAfter}`);
+  text('postMatchStreakDelta', summary.streakDeltaLabel || '—');
+  text('postMatchStreakAfter', `Current ${formatStreakValue(summary.streakAfter)}`);
+  text('postMatchMatchId', summary.publicMatchId || '—');
+  text('postMatchFinishedAt', formatDate(summary.finishedAt));
+  text('postMatchResultPill', isWin ? 'WIN' : 'LOSS');
+
+  const pill = $('postMatchResultPill');
+  const card = $('postMatchCard');
+  pill.className = `post-match-result-pill ${isWin ? 'win' : 'loss'}`;
+  if (card) card.className = `card post-match-card ${isWin ? 'win' : 'loss'}`;
+}
+
+function evaluatePostMatchSummary() {
+  const latest = (state.profileHistory || [])[0] || null;
+  const summary = buildPostMatchSummary(latest, state.profile);
+  if (!summary || hasSeenPostMatch(summary.publicMatchId)) {
+    state.postMatchSummary = null;
+    return;
+  }
+  state.postMatchSummary = summary;
+}
+
+function closePostMatchModal() {
+  if (state.postMatchSummary?.publicMatchId) markPostMatchSeen(state.postMatchSummary.publicMatchId);
+  state.postMatchSummary = null;
+  renderPostMatchModal();
+}
+
+function openProfileFromPostMatch() {
+  const profileSection = document.querySelector('.sidebar .card');
+  if (profileSection) profileSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  closePostMatchModal();
+}
+
 async function refreshAccount() {
   const data = await api('/auth/me');
   state.user = data.user || null;
@@ -590,7 +678,9 @@ async function refreshAll() {
   renderQueue();
   renderCurrentMatch();
   renderHistory();
+  evaluatePostMatchSummary();
   renderMatchDetailsModal();
+  renderPostMatchModal();
 }
 
 function login() { window.location.href = `${BACKEND_BASE_URL}/auth/steam`; }
@@ -780,6 +870,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   $('joinQueueBtn')?.addEventListener('click', (event) => { event.preventDefault(); void joinQueue(); });
   $('cancelQueueBtn')?.addEventListener('click', (event) => { event.preventDefault(); void cancelQueue(); });
   $('copyConnectBtn')?.addEventListener('click', (event) => { event.preventDefault(); void copyConnect(); });
+  $('postMatchContinueBtn')?.addEventListener('click', (event) => { event.preventDefault(); closePostMatchModal(); });
+  $('postMatchProfileBtn')?.addEventListener('click', (event) => { event.preventDefault(); openProfileFromPostMatch(); });
   document.addEventListener('click', (event) => {
     const createBtn = event.target.closest('#createPartyBtn');
     if (createBtn) {
