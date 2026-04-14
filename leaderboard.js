@@ -35,7 +35,7 @@ function getRankByElo(rawElo) {
     if (elo >= ranks[i].minElo) currentIndex = i;
     else break;
   }
-  return { ...ranks[currentIndex], icon: `./assets/ranks/${ranks[currentIndex].key}.svg` };
+  return ranks[currentIndex];
 }
 function normalizeRank(rank, elo) {
   return rank && rank.name ? rank : getRankByElo(elo);
@@ -60,7 +60,7 @@ async function loadLeaderboard() {
       <div class="table-row">
         <div><strong>#${esc(item.rankPosition ?? item.rank ?? (idx + 1))}</strong></div>
         <div class="table-player"><img class="avatar sm" src="${esc(item.avatarUrl || '')}" alt="avatar"><span>${esc(item.nickname || 'Unknown')}</span></div>
-        <div><span class="rank-chip"><img class="rank-chip-icon" src="${esc(rankInfo.icon || './assets/ranks/iron.svg')}" alt="rank"><span class="rank-pill ${esc(rankInfo.color || 'iron')}">${esc(rankInfo.name || 'Iron')}</span></span></div>
+        <div><span class="rank-pill ${esc(rankInfo.color || 'iron')}">${esc(rankInfo.name || 'Iron')}</span></div>
         <div><strong>${esc(item.elo2v2 ?? 100)}</strong></div>
       </div>
     `}).join('');
