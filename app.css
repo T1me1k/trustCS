@@ -297,8 +297,15 @@ button,input{font:inherit}
 .profile-head-copy{min-width:0}
 .profile-box-updated{align-items:flex-start}
 .profile-stats-compact{margin-top:18px}
-.rank-trigger{display:inline-flex;align-items:center;gap:10px;padding:0;border:none;background:none;cursor:pointer}
+.rank-trigger{display:inline-flex;align-items:center;gap:10px;padding:0;border:none;background:transparent;color:inherit;cursor:pointer;appearance:none;-webkit-appearance:none;box-shadow:none;outline:none}
 .rank-hover-card{position:relative;display:inline-flex}
+.rank-trigger:focus,.rank-trigger:focus-visible{outline:none;box-shadow:none}
+.profile-rank-line{position:relative;z-index:6}
+.rank-hover-card{position:relative;display:inline-flex;z-index:8}
+.party-main-grid .label{display:block;margin-bottom:10px}
+#userSearchResults{margin-top:10px;min-height:58px}
+#partyMembers,#partyInvites{margin-top:10px}
+
 .rank-tooltip{position:absolute;left:0;top:calc(100% + 12px);width:min(420px,calc(100vw - 40px));padding:16px;border-radius:20px;border:1px solid rgba(167,139,250,.18);background:linear-gradient(180deg,rgba(17,19,28,.98),rgba(10,12,22,.98));box-shadow:0 24px 60px rgba(0,0,0,.42);opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity .18s ease,transform .18s ease;z-index:30}
 .rank-hover-card:hover .rank-tooltip,.rank-hover-card:focus-within .rank-tooltip{opacity:1;transform:translateY(0);pointer-events:auto}
 .rank-tooltip-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
