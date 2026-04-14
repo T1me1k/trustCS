@@ -189,13 +189,18 @@ function createInviteToast(invite) {
   const toast = document.createElement('div');
   toast.className = 'invite-toast';
   toast.dataset.inviteId = inviteId;
+  const avatarUrl = invite.fromAvatarUrl || invite.avatarUrl || '';
+  const avatarHtml = avatarUrl
+    ? `<img class="invite-toast-avatar-img" src="${esc(avatarUrl)}" alt="avatar">`
+    : esc((invite.fromNickname || 'Игрок').slice(0, 1).toUpperCase());
+
   toast.innerHTML = `
     <button class="invite-toast-close" type="button" aria-label="Скрыть" data-dismiss-invite-toast="${esc(inviteId)}">×</button>
     <div class="invite-toast-head">
       <div class="invite-toast-title">Приглашение в party</div>
     </div>
     <div class="invite-toast-body">
-      <div class="invite-toast-avatar">${esc((invite.fromNickname || 'Игрок').slice(0, 1).toUpperCase())}</div>
+      <div class="invite-toast-avatar">${avatarHtml}</div>
       <div>
         <div class="invite-toast-name">${esc(invite.fromNickname || 'Игрок')}</div>
         <div class="invite-toast-sub">приглашает тебя в duo party</div>
