@@ -16,9 +16,10 @@ const state = {
   mapPool: ['shortdust', 'lake', 'overpass', 'vertigo', 'nuke'],
   inviteToastSeen: new Set(),
   inviteToastDismissed: new Set(),
-  inviteToastTimers: new Map(),
-  queueElapsedInterval: null
+  inviteToastTimers: new Map()
 };
+
+let queueTimerInterval = null;
 
 function $(id) { return document.getElementById(id); }
 function hide(id, on) {
@@ -36,50 +37,23 @@ function formatDate(value) {
   if (Number.isNaN(dt.getTime())) return '—';
   return dt.toLocaleString('ru-RU', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
 }
+
+function formatQueueElapsed(totalSeconds) {
+  const sec = Math.max(0, Math.floor(Number(totalSeconds) || 0));
+  const hours = Math.floor(sec / 3600);
+  const minutes = Math.floor((sec % 3600) / 60);
+  const seconds = sec % 60;
+  const mm = String(minutes).padStart(2, '0');
+  const ss = String(seconds).padStart(2, '0');
+  return hours > 0 ? `${String(hours).padStart(2, '0')}:${mm}:${ss}` : `${mm}:${ss}`;
+}
+
 function formatDuration(totalSec) {
   if (totalSec == null || Number.isNaN(Number(totalSec))) return '—';
   const sec = Number(totalSec);
   const minutes = Math.floor(sec / 60);
   const seconds = sec % 60;
   return `${minutes}м ${String(seconds).padStart(2, '0')}с`;
-}
-
-function pad2(value) { return String(value).padStart(2, '0'); }
-function formatElapsedSeconds(totalSec) {
-  const sec = Math.max(0, Math.floor(Number(totalSec) || 0));
-  const minutes = Math.floor(sec / 60);
-  const seconds = sec % 60;
-  const hours = Math.floor(minutes / 60);
-  if (hours > 0) {
-    return `${pad2(hours)}:${pad2(minutes % 60)}:${pad2(seconds)}`;
-  }
-  return `${pad2(minutes)}:${pad2(seconds)}`;
-}
-function getQueueStartedAt(queue) {
-  const candidate = queue?.joinedAt || queue?.createdAt || queue?.queuedAt || queue?.startedAt || queue?.searchStartedAt || null;
-  if (!candidate) return null;
-  const dt = new Date(candidate);
-  return Number.isNaN(dt.getTime()) ? null : dt;
-}
-function updateQueueElapsed() {
-  const wrap = $('queueElapsedWrap');
-  const valueEl = $('queueElapsedValue');
-  if (!wrap || !valueEl) return;
-
-  const startedAt = getQueueStartedAt(state.queue);
-  const inQueue = !!state.queue && !!startedAt;
-  hide('queueElapsedWrap', !inQueue);
-  if (!inQueue) {
-    valueEl.textContent = '00:00';
-    return;
-  }
-
-  const diffSec = Math.floor((Date.now() - startedAt.getTime()) / 1000);
-  valueEl.textContent = formatElapsedSeconds(diffSec);
-}
-function ensureQueueElapsedTicker() {
-  if (state.queueElapsedInterval) return;
-  state.queueElapsedInterval = window.setInterval(updateQueueElapsed, 1000);
 }
 function formatStanding(standing) {
   if (standing === 'hot') return 'HOT';
@@ -340,6 +314,30 @@ function dismissInviteToast(inviteId) {
   removeInviteToast(inviteId);
 }
 
+
+function stopQueueTimer() {
+  if (queueTimerInterval) {
+    clearInterval(queueTimerInterval);
+    queueTimerInterval = null;
+  }
+  hide('queueTimerRow', true);
+  text('queueTimerValue', '00:00');
+}
+
+function startQueueTimer(startAt) {
+  stopQueueTimer();
+  if (!startAt) return;
+  const startedMs = new Date(startAt).getTime();
+  if (Number.isNaN(startedMs)) return;
+  hide('queueTimerRow', false);
+  const tick = () => {
+    const elapsedSeconds = Math.floor((Date.now() - startedMs) / 1000);
+    text('queueTimerValue', formatQueueElapsed(elapsedSeconds));
+  };
+  tick();
+  queueTimerInterval = setInterval(tick, 1000);
+}
+
 function renderQueue() {
   const queue = state.queue;
   const inQueue = !!queue;
@@ -350,7 +348,13 @@ function renderQueue() {
   text('searchStateText', inQueue ? 'Матчмейкер подбирает 2x2 игру. Можно играть соло или вдвоём.' : 'Нажми «Найти матч». Если party нет, она создастся автоматически.');
   hide('joinQueueBtn', inQueue);
   hide('cancelQueueBtn', !inQueue);
-  updateQueueElapsed();
+
+  const queueStartedAt = queue?.queuedAt || queue?.joinedAt || queue?.createdAt || queue?.startedAt || queue?.searchStartedAt || null;
+  if (inQueue && queueStartedAt) {
+    startQueueTimer(queueStartedAt);
+  } else {
+    stopQueueTimer();
+  }
 }
 
 function renderHistory() {
@@ -554,10 +558,12 @@ async function refreshParty() {
 async function refreshQueue() {
   const data = await api('/api/queue/me');
   state.queue = data.queue || null;
+  if (!state.queue) stopQueueTimer();
 }
 async function refreshMatch() {
   const data = await api('/api/matches/me/current');
   state.match = data.match || null;
+  if (state.match) stopQueueTimer();
   if (Array.isArray(data.mapPool)) state.mapPool = data.mapPool;
 }
 async function refreshProfile() {
@@ -791,6 +797,5 @@ window.addEventListener('DOMContentLoaded', async () => {
   });
 
   await refreshAll();
-  ensureQueueElapsedTicker();
   setInterval(() => { void refreshAll(); }, 5000);
 });

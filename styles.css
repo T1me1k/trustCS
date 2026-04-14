@@ -212,28 +212,9 @@ button,input{font:inherit}
 }
 
 
-.queue-elapsed {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 14px;
-  padding: 10px 14px;
-  border-radius: 14px;
-  background: rgba(122, 92, 255, 0.12);
-  border: 1px solid rgba(122, 92, 255, 0.24);
-}
-
-.queue-elapsed-label {
-  color: #a9b1d6;
+.status-subline {
+  margin-top: 8px;
+  color: #aeb4e6;
   font-size: 13px;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-}
-
-#queueElapsedValue {
-  color: #ffffff;
-  font-size: 18px;
-  font-weight: 800;
-  letter-spacing: 0.03em;
-  font-variant-numeric: tabular-nums;
+  font-weight: 700;
 }
