@@ -382,3 +382,36 @@ button,input{font:inherit}
 @media (max-width:720px){
   .party-search-inline{grid-template-columns:1fr}
 }
+
+
+/* final fixes v2 */
+.party-card-main{order:0 !important}
+#partySection{order:0 !important}
+#partySection + .card{order:1 !important}
+.rank-tooltip{
+  width:min(360px,calc(100vw - 28px)) !important;
+  padding:12px !important;
+  border-radius:18px !important;
+  background:#0f1320 !important;
+  background-image:none !important;
+  opacity:0;
+}
+.rank-tooltip-head{margin-bottom:10px}
+.rank-tooltip-row{padding:8px 10px;border-radius:12px}
+.rank-tooltip-name{font-size:14px}
+.rank-tooltip .muted{font-size:12px}
+.party-column-right{align-items:stretch}
+.party-main-actions-right{align-items:flex-end}
+.party-main-actions-right .btn{max-width:260px}
+.party-search-block{margin-top:0}
+.party-search-inline{display:grid;grid-template-columns:120px minmax(0,1fr) !important;gap:12px;align-items:stretch}
+.party-search-inline .btn{order:0}
+.party-search-inline .input{order:1}
+@media (max-width:1180px){
+  .party-main-actions-right{align-items:flex-start}
+}
+@media (max-width:720px){
+  .rank-tooltip{left:0 !important;width:min(320px,calc(100vw - 20px)) !important}
+  .party-search-inline{grid-template-columns:1fr !important}
+  .party-main-actions-right .btn{max-width:none}
+}
