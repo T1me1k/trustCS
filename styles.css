@@ -101,42 +101,65 @@ button,input{font:inherit}
 .footer-space{height:24px}
 @media (max-width:980px){.hero-grid,.app-grid,.search-card,.grid-3,.match-grid{grid-template-columns:1fr}.nav{display:none}.metrics{grid-template-columns:1fr}}
 
-.app-grid-wide{grid-template-columns:280px 1fr}
-.sidebar-compact{position:sticky;top:102px;align-self:start}
-.search-card-enhanced{grid-template-columns:1.08fr .92fr;align-items:start}
-.queue-stack{display:flex;flex-direction:column;gap:16px}
-.party-dock{border-radius:22px;border:1px solid rgba(139,92,246,.20);background:linear-gradient(180deg,rgba(17,19,28,.95),rgba(15,17,26,.96));padding:18px}
-.party-dock-title{align-items:flex-start}
-.party-dock-title h3{margin-bottom:6px}
-.party-dock-sub{max-width:380px;line-height:1.45}
-.party-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
-.party-toolbar .btn{flex:1 1 140px}
-.party-search-row{display:grid;grid-template-columns:1fr auto;gap:10px;margin-bottom:14px}
-.party-layout{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}
-.party-members-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.party-slot-card{min-height:146px;padding:16px;border-radius:18px;background:rgba(255,255,255,.03);border:1px solid var(--line);display:flex;flex-direction:column;justify-content:space-between}
-.party-slot-card.accent{background:linear-gradient(180deg,rgba(139,92,246,.14),rgba(139,92,246,.06));border-color:rgba(139,92,246,.30)}
-.party-slot-card.empty-slot{border-style:dashed}
-.party-slot-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.party-slot-title{font-size:18px;font-weight:700;letter-spacing:-.02em}
-.invite-shelf{display:flex;flex-direction:column;gap:10px}
-.invite-shelf-card{padding:14px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid var(--line);display:flex;flex-direction:column;gap:12px}
-.invite-shelf-main{display:flex;align-items:center;gap:12px}
-.invite-actions{display:flex;gap:10px}
-.invite-actions.compact .btn{padding:10px 12px}
-.invite-actions .btn{flex:1}
-.invite-overlay{position:fixed;top:96px;right:24px;z-index:60;width:min(390px,calc(100vw - 28px));display:flex;flex-direction:column;gap:12px;pointer-events:none}
-.invite-toast{pointer-events:auto;border-radius:22px;border:1px solid rgba(139,92,246,.30);background:linear-gradient(180deg,rgba(17,19,28,.98),rgba(11,13,20,.98));box-shadow:0 26px 60px rgba(0,0,0,.42);overflow:hidden;padding:16px}
-.invite-toast-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
-.invite-toast-timer{font-size:13px;font-weight:800;color:#ddd6fe}
-.invite-toast-body{display:flex;align-items:center;gap:14px}
-.invite-toast-body .avatar{width:56px;height:56px}
-.invite-toast-title{font-size:17px;font-weight:800;line-height:1.2;margin-bottom:4px}
-.invite-progress{height:6px;border-radius:999px;background:rgba(255,255,255,.07);overflow:hidden;margin-top:14px}
-.invite-progress span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--primary),#c084fc)}
+
+.invite-toast-layer{
+  position:fixed;
+  top:96px;
+  right:24px;
+  z-index:60;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  pointer-events:none;
+}
+.invite-toast{
+  width:min(360px,calc(100vw - 32px));
+  position:relative;
+  overflow:hidden;
+  border-radius:20px;
+  border:1px solid rgba(139,92,246,.24);
+  background:linear-gradient(180deg,rgba(19,21,34,.98),rgba(13,15,24,.98));
+  box-shadow:0 20px 48px rgba(0,0,0,.38);
+  padding:18px 18px 16px;
+  pointer-events:auto;
+  opacity:0;
+  transform:translateY(-8px) scale(.98);
+  transition:opacity .18s ease,transform .18s ease;
+}
+.invite-toast.shown{opacity:1;transform:translateY(0) scale(1)}
+.invite-toast.hiding{opacity:0;transform:translateY(-6px) scale(.98)}
+.invite-toast-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:14px;
+}
+.invite-toast-title{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#ddd6fe}
+.invite-toast-time{font-size:12px;color:var(--muted)}
+.invite-toast-body{display:flex;align-items:center;gap:12px}
+.invite-toast-avatar{
+  width:44px;height:44px;border-radius:14px;display:grid;place-items:center;
+  background:rgba(139,92,246,.16);border:1px solid rgba(139,92,246,.26);font-weight:800;color:#f5f3ff;flex:0 0 auto;
+}
+.invite-toast-name{font-weight:700}
+.invite-toast-sub{font-size:13px;color:var(--muted);margin-top:2px}
+.invite-toast-actions{display:flex;gap:10px;margin-top:16px}
+.invite-toast-actions .btn{flex:1}
+.invite-toast-close{
+  position:absolute;top:10px;right:10px;width:28px;height:28px;border:none;border-radius:999px;
+  background:rgba(255,255,255,.05);color:var(--muted);cursor:pointer;font-size:18px;line-height:1;
+}
+.invite-toast-close:hover{background:rgba(255,255,255,.09);color:var(--text)}
+.invite-toast-progress{
+  position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(255,255,255,.05);
+}
+.invite-toast-progress-bar{
+  width:100%;height:100%;background:linear-gradient(90deg,var(--primary),#a78bfa);transform-origin:left center;
+  transition:transform 10s linear;
+}
+.invite-actions-inline{max-width:250px}
 @media (max-width:980px){
-  .app-grid-wide,.search-card-enhanced,.party-layout,.party-members-grid{grid-template-columns:1fr}
-  .sidebar-compact{position:static}
-  .invite-overlay{top:88px;right:16px;left:16px;width:auto}
-  .party-search-row{grid-template-columns:1fr}
+  .invite-toast-layer{top:88px;right:16px;left:16px}
+  .invite-toast{width:100%}
 }

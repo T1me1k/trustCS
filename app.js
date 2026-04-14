@@ -12,61 +12,15 @@ const state = {
   match: null,
   history: [],
   mapPool: ['shortdust', 'lake', 'overpass', 'vertigo', 'nuke'],
-  ui: { inviteVisuals: {} }
+  inviteToastSeen: new Set(),
+  inviteToastDismissed: new Set(),
+  inviteToastTimers: new Map()
 };
 
 function $(id) { return document.getElementById(id); }
 function hide(id, on) { $(id)?.classList.toggle('hidden', on); }
 function text(id, value) { const el = $(id); if (el) el.textContent = value; }
 function esc(v) { return String(v ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
-
-function parseTime(value) {
-  const ts = value ? new Date(value).getTime() : NaN;
-  return Number.isFinite(ts) ? ts : null;
-}
-
-function formatSecondsLeft(totalSeconds) {
-  const seconds = Math.max(0, Math.ceil(totalSeconds));
-  if (seconds >= 60) {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return secs ? `${mins}м ${secs}с` : `${mins}м`;
-  }
-  return `${seconds}с`;
-}
-
-function getInviteVisual(invite) {
-  const key = String(invite.id);
-  const store = state.ui.inviteVisuals;
-  const now = Date.now();
-  const actualExpiry = parseTime(invite.expiresAt);
-
-  if (!store[key]) {
-    store[key] = {
-      toastEndsAt: now + 10_000,
-      hidden: false
-    };
-  }
-
-  const item = store[key];
-  const toastRemainingMs = Math.max(0, item.toastEndsAt - now);
-  if (toastRemainingMs <= 0) item.hidden = true;
-
-  return {
-    showToast: !item.hidden,
-    toastRemainingMs,
-    toastProgress: Math.max(0, Math.min(100, (toastRemainingMs / 10000) * 100)),
-    actualExpiry,
-    actualRemainingMs: actualExpiry ? Math.max(0, actualExpiry - now) : null
-  };
-}
-
-function cleanupInviteVisuals() {
-  const activeIds = new Set((state.party?.pendingInvites || []).map((inv) => String(inv.id)));
-  for (const key of Object.keys(state.ui.inviteVisuals)) {
-    if (!activeIds.has(key)) delete state.ui.inviteVisuals[key];
-  }
-}
 
 async function api(path, options = {}) {
   const response = await fetch(`${BACKEND_BASE_URL}${path}`, {
@@ -148,72 +102,141 @@ function renderParty() {
   const count = party?.members?.length || 0;
   const invites = party?.pendingInvites || [];
 
-  $('partyBadge').textContent = hasParty ? `${count}/2` : 'Соло';
+  $('partyBadge').textContent = hasParty ? `${count}/2` : 'Нет party';
   $('partyBadge').className = `pill ${hasParty ? 'ok' : 'idle'}`;
   text('queuePartyStat', hasParty ? `${count}/2` : '1/2');
   hide('leavePartyBtn', !hasParty);
   hide('disbandPartyBtn', !(hasParty && party.isLeader));
 
   if (!hasParty) {
-    membersEl.innerHTML = `
-      <div class="party-slot-card accent">
-        <div class="party-slot-head">
-          <span class="pill live">SOLO</span>
-          <span class="muted">Тиммейт подберётся в матчмейкинге</span>
-        </div>
-        <div class="party-slot-title">Сейчас ты без party</div>
-        <div class="muted">Можно искать матч одному или создать duo прямо здесь.</div>
-      </div>
-    `;
+    membersEl.innerHTML = '<div class="empty">Party пока нет. Она создастся автоматически при поиске или по кнопке.</div>';
   } else {
     membersEl.innerHTML = (party.members || []).map((m) => `
-      <div class="party-slot-card ${m.role === 'leader' ? 'accent' : ''}">
-        <div class="party-slot-head">
+      <div class="member-item">
+        <div class="member-main">
           <img class="avatar sm" src="${esc(m.avatarUrl || '')}" alt="avatar">
-          <span class="pill ${m.role === 'leader' ? 'live' : 'idle'}">${m.role === 'leader' ? 'Leader' : 'Member'}</span>
+          <div>
+            <div>${esc(m.nickname || 'Unknown')}</div>
+            <div class="muted">${esc(m.role || 'member')} • Elo ${esc(m.elo2v2 ?? 100)}</div>
+          </div>
         </div>
-        <div class="party-slot-title">${esc(m.nickname || 'Unknown')}</div>
-        <div class="muted">Elo ${esc(m.elo2v2 ?? 100)}</div>
+        <span class="pill ${m.role === 'leader' ? 'live' : 'idle'}">${m.role === 'leader' ? 'Leader' : 'Member'}</span>
       </div>
     `).join('');
-
-    if ((party.members || []).length < 2) {
-      membersEl.innerHTML += `
-        <div class="party-slot-card empty-slot">
-          <div class="party-slot-head"><span class="pill idle">+1</span></div>
-          <div class="party-slot-title">Свободный слот</div>
-          <div class="muted">Пригласи друга по нику или ищи матч соло.</div>
-        </div>
-      `;
-    }
   }
 
   invitesEl.innerHTML = invites.length
-    ? invites.map((inv) => {
-        const visual = getInviteVisual(inv);
-        const expiresText = visual.actualRemainingMs != null
-          ? `Истечёт через ${formatSecondsLeft(visual.actualRemainingMs / 1000)}`
-          : 'Ожидает ответа';
-        return `
-          <div class="invite-shelf-card">
-            <div class="invite-shelf-main">
-              <img class="avatar sm" src="${esc(inv.fromAvatarUrl || '')}" alt="avatar">
-              <div>
-                <div style="font-weight:700">${esc(inv.fromNickname || 'Игрок')}</div>
-                <div class="muted">Приглашает в party • ${expiresText}</div>
-              </div>
-            </div>
-            <div class="invite-actions compact">
-              <button class="btn secondary" type="button" data-accept-invite="${esc(inv.id)}">Принять</button>
-              <button class="btn ghost" type="button" data-decline-invite="${esc(inv.id)}">Отклонить</button>
-            </div>
-          </div>
-        `;
-      }).join('')
+    ? invites.map((inv) => `
+      <div class="invite-item invite-inline-card" data-invite-card="${esc(inv.id)}">
+        <div>
+          <div style="font-weight:700">${esc(inv.fromNickname || 'Игрок')}</div>
+          <div class="muted">Приглашает в party</div>
+        </div>
+        <div class="inline invite-actions-inline">
+          <button class="btn secondary" data-accept-invite="${esc(inv.id)}">Принять</button>
+          <button class="btn ghost" data-decline-invite="${esc(inv.id)}">Отклонить</button>
+        </div>
+      </div>
+    `).join('')
     : '<div class="empty">Входящих инвайтов нет.</div>';
 
-  cleanupInviteVisuals();
-  renderInviteOverlay();
+  syncInviteToasts(invites);
+}
+
+function syncInviteToasts(invites) {
+  const layer = $('inviteToastLayer');
+  if (!layer) return;
+
+  const currentIds = new Set((invites || []).map((inv) => String(inv.id)));
+
+  // Clear stale ids so new invites can show again if they disappear and later come back.
+  [...state.inviteToastSeen].forEach((id) => {
+    if (!currentIds.has(id)) state.inviteToastSeen.delete(id);
+  });
+  [...state.inviteToastDismissed].forEach((id) => {
+    if (!currentIds.has(id)) state.inviteToastDismissed.delete(id);
+  });
+
+  layer.querySelectorAll('.invite-toast').forEach((node) => {
+    if (!currentIds.has(node.dataset.inviteId)) {
+      removeInviteToast(node.dataset.inviteId);
+    }
+  });
+
+  (invites || []).forEach((inv) => {
+    const inviteId = String(inv.id);
+    if (state.inviteToastDismissed.has(inviteId) || state.inviteToastSeen.has(inviteId)) return;
+    state.inviteToastSeen.add(inviteId);
+    createInviteToast(inv);
+  });
+}
+
+function createInviteToast(invite) {
+  const layer = $('inviteToastLayer');
+  if (!layer) return;
+  const inviteId = String(invite.id);
+  if (layer.querySelector(`[data-invite-id="${CSS.escape(inviteId)}"]`)) return;
+
+  const toast = document.createElement('div');
+  toast.className = 'invite-toast';
+  toast.dataset.inviteId = inviteId;
+  toast.innerHTML = `
+    <button class="invite-toast-close" type="button" aria-label="Скрыть" data-dismiss-invite-toast="${esc(inviteId)}">×</button>
+    <div class="invite-toast-head">
+      <div class="invite-toast-title">Приглашение в party</div>
+      <div class="invite-toast-time">10 сек</div>
+    </div>
+    <div class="invite-toast-body">
+      <div class="invite-toast-avatar">${esc((invite.fromNickname || 'Игрок').slice(0, 1).toUpperCase())}</div>
+      <div>
+        <div class="invite-toast-name">${esc(invite.fromNickname || 'Игрок')}</div>
+        <div class="invite-toast-sub">приглашает тебя в duo party</div>
+      </div>
+    </div>
+    <div class="invite-toast-actions">
+      <button class="btn secondary" data-accept-invite="${esc(inviteId)}">Принять</button>
+      <button class="btn ghost" data-decline-invite="${esc(inviteId)}">Отклонить</button>
+    </div>
+    <div class="invite-toast-progress"><div class="invite-toast-progress-bar"></div></div>
+  `;
+
+  layer.prepend(toast);
+  requestAnimationFrame(() => toast.classList.add('shown'));
+
+  const progress = toast.querySelector('.invite-toast-progress-bar');
+  if (progress) {
+    requestAnimationFrame(() => {
+      progress.style.transform = 'scaleX(0)';
+    });
+  }
+
+  const timer = window.setTimeout(() => {
+    dismissInviteToast(inviteId);
+  }, 10000);
+  state.inviteToastTimers.set(inviteId, timer);
+}
+
+function clearInviteToastTimer(inviteId) {
+  const timer = state.inviteToastTimers.get(inviteId);
+  if (timer) {
+    clearTimeout(timer);
+    state.inviteToastTimers.delete(inviteId);
+  }
+}
+
+function removeInviteToast(inviteId) {
+  clearInviteToastTimer(inviteId);
+  const layer = $('inviteToastLayer');
+  const node = layer?.querySelector(`[data-invite-id="${CSS.escape(String(inviteId))}"]`);
+  if (!node) return;
+  node.classList.remove('shown');
+  node.classList.add('hiding');
+  window.setTimeout(() => node.remove(), 180);
+}
+
+function dismissInviteToast(inviteId) {
+  state.inviteToastDismissed.add(String(inviteId));
+  removeInviteToast(inviteId);
 }
 
 function renderQueue() {
@@ -226,42 +249,6 @@ function renderQueue() {
   text('searchStateText', inQueue ? 'Матчмейкер подбирает 2x2 игру. Можно играть соло или вдвоём.' : 'Нажми «Найти матч». Если party нет, она создастся автоматически.');
   hide('joinQueueBtn', inQueue);
   hide('cancelQueueBtn', !inQueue);
-}
-
-function renderInviteOverlay() {
-  const root = $('inviteOverlay');
-  if (!root) return;
-
-  const invites = (state.party?.pendingInvites || []).filter((inv) => getInviteVisual(inv).showToast);
-  if (!invites.length) {
-    root.innerHTML = '';
-    return;
-  }
-
-  root.innerHTML = invites.map((inv) => {
-    const visual = getInviteVisual(inv);
-    const secondsLeft = Math.max(0, Math.ceil(visual.toastRemainingMs / 1000));
-    return `
-      <div class="invite-toast">
-        <div class="invite-toast-top">
-          <span class="pill live">PARTY INVITE</span>
-          <span class="invite-toast-timer">${secondsLeft}с</span>
-        </div>
-        <div class="invite-toast-body">
-          <img class="avatar" src="${esc(inv.fromAvatarUrl || '')}" alt="avatar">
-          <div>
-            <div class="invite-toast-title">${esc(inv.fromNickname || 'Игрок')} зовёт тебя в party</div>
-            <div class="muted">Уведомление висит 10 секунд. Сам invite ниже остаётся активным до backend expiry.</div>
-          </div>
-        </div>
-        <div class="invite-actions">
-          <button class="btn primary" type="button" data-accept-invite="${esc(inv.id)}">Принять</button>
-          <button class="btn ghost" type="button" data-decline-invite="${esc(inv.id)}">Отклонить</button>
-        </div>
-        <div class="invite-progress"><span style="width:${visual.toastProgress}%"></span></div>
-      </div>
-    `;
-  }).join('');
 }
 
 function renderHistory() {
@@ -490,7 +477,6 @@ async function searchUsers() {
         <button class="btn secondary" data-invite-user="${esc(item.id)}">Пригласить</button>
       </div>
     `).join('');
-    root.querySelectorAll('[data-invite-user]').forEach((btn) => btn.addEventListener('click', () => inviteUser(btn.dataset.inviteUser)));
   } catch (err) {
     root.innerHTML = `<div class="empty">Ошибка поиска: ${esc(err.message)}</div>`;
   }
@@ -512,6 +498,7 @@ async function inviteUser(userId) {
 async function acceptInvite(id) {
   try {
     await api(`/api/party/invite/${encodeURIComponent(id)}/accept`, { method: 'POST' });
+    removeInviteToast(id);
     await refreshAll();
     showAlert('Инвайт принят.');
   } catch (err) {
@@ -522,6 +509,7 @@ async function acceptInvite(id) {
 async function declineInvite(id) {
   try {
     await api(`/api/party/invite/${encodeURIComponent(id)}/decline`, { method: 'POST' });
+    dismissInviteToast(id);
     await refreshAll();
     showAlert('Инвайт отклонён.');
   } catch (err) {
@@ -555,6 +543,38 @@ async function copyConnect() {
   showAlert('Команда connect скопирована.');
 }
 
+async function handleDelegatedClick(event) {
+  const acceptBtn = event.target.closest('[data-accept-invite]');
+  if (acceptBtn) {
+    acceptBtn.disabled = true;
+    await acceptInvite(acceptBtn.dataset.acceptInvite);
+    return;
+  }
+
+  const declineBtn = event.target.closest('[data-decline-invite]');
+  if (declineBtn) {
+    declineBtn.disabled = true;
+    await declineInvite(declineBtn.dataset.declineInvite);
+    return;
+  }
+
+  const dismissBtn = event.target.closest('[data-dismiss-invite-toast]');
+  if (dismissBtn) {
+    dismissInviteToast(dismissBtn.dataset.dismissInviteToast);
+    return;
+  }
+
+  const inviteBtn = event.target.closest('[data-invite-user]');
+  if (inviteBtn) {
+    inviteBtn.disabled = true;
+    try {
+      await inviteUser(inviteBtn.dataset.inviteUser);
+    } finally {
+      inviteBtn.disabled = false;
+    }
+  }
+}
+
 window.addEventListener('DOMContentLoaded', async () => {
   $('appLoginBtn')?.addEventListener('click', login);
   $('appLogoutBtn')?.addEventListener('click', logout);
@@ -565,17 +585,10 @@ window.addEventListener('DOMContentLoaded', async () => {
   $('joinQueueBtn')?.addEventListener('click', joinQueue);
   $('cancelQueueBtn')?.addEventListener('click', cancelQueue);
   $('copyConnectBtn')?.addEventListener('click', copyConnect);
-  document.addEventListener('click', async (event) => {
-    const target = event.target.closest?.('[data-accept-invite], [data-decline-invite]');
-    if (!target) return;
-    event.preventDefault();
-    const acceptId = target.dataset.acceptInvite;
-    const declineId = target.dataset.declineInvite;
-    if (acceptId) await acceptInvite(acceptId);
-    if (declineId) await declineInvite(declineId);
+  document.addEventListener('click', (event) => {
+    void handleDelegatedClick(event);
   });
 
   await refreshAll();
   setInterval(() => { void refreshAll(); }, 5000);
-  setInterval(() => { renderInviteOverlay(); }, 1000);
 });

@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
+  <div id="inviteToastLayer" class="invite-toast-layer" aria-live="polite" aria-atomic="false"></div>
   <header class="topbar">
     <div class="container topbar-inner">
       <div class="brand">
@@ -31,13 +32,10 @@
       </div>
     </div>
   </header>
-
-  <div id="inviteOverlay" class="invite-overlay"></div>
-
   <main class="container app-shell">
     <div id="globalAlert" class="alert hidden"></div>
-    <div class="app-grid app-grid-wide">
-      <aside class="sidebar sidebar-compact">
+    <div class="app-grid">
+      <aside class="sidebar">
         <section class="card">
           <div class="section-title"><h3>Профиль</h3><span id="authBadge" class="pill idle">Гость</span></div>
           <div id="profileGuest" class="empty">Войди через Steam, чтобы открыть party, очередь и матчмейкинг.</div>
@@ -57,9 +55,33 @@
             </div>
           </div>
         </section>
+        <section class="card">
+          <div class="section-title"><h3>Party</h3><span id="partyBadge" class="pill idle">Нет party</span></div>
+          <div class="list">
+            <button class="btn secondary block" id="createPartyBtn">Создать party</button>
+            <button class="btn ghost block hidden" id="leavePartyBtn">Покинуть party</button>
+            <button class="btn ghost block hidden" id="disbandPartyBtn">Распустить party</button>
+          </div>
+          <div style="margin-top:18px">
+            <div class="label">Пригласить друга по нику</div>
+            <div class="inline">
+              <input class="input" id="userSearchInput" placeholder="Например: T1me1k">
+              <button class="btn secondary" id="userSearchBtn">Найти</button>
+            </div>
+            <div class="list" id="userSearchResults" style="margin-top:10px"></div>
+          </div>
+          <div style="margin-top:18px">
+            <div class="label">Состав party</div>
+            <div class="list" id="partyMembers"></div>
+          </div>
+          <div style="margin-top:18px">
+            <div class="label">Входящие инвайты</div>
+            <div class="list" id="partyInvites"></div>
+          </div>
+        </section>
       </aside>
       <section class="main">
-        <section class="card search-card search-card-enhanced">
+        <section class="card search-card">
           <div class="cta-panel">
             <span class="badge">2x2 MATCHMAKING</span>
             <h2>Найти матч</h2>
@@ -69,55 +91,17 @@
               <button class="btn ghost hidden" id="cancelQueueBtn">ОТМЕНИТЬ</button>
             </div>
           </div>
-
-          <div class="queue-stack">
-            <div class="queue-box">
-              <div>
-                <div class="section-title" style="margin-bottom:10px"><h3>Статус поиска</h3><span class="pill idle" id="matchmakingState">Ожидание</span></div>
-                <div class="muted" id="searchStateText">Когда party готова, лидер может запустить поиск.</div>
-              </div>
-              <div class="stats-grid" style="margin-top:16px">
-                <div class="stat"><span>Режим</span><strong>AUTO</strong></div>
-                <div class="stat"><span>Party</span><strong id="queuePartyStat">0/2</strong></div>
-              </div>
+          <div class="queue-box">
+            <div>
+              <div class="section-title" style="margin-bottom:10px"><h3>Статус</h3><span class="pill idle" id="matchmakingState">Ожидание</span></div>
+              <div class="muted" id="searchStateText">Когда party готова, лидер может запустить поиск.</div>
             </div>
-
-            <div class="party-dock">
-              <div class="section-title party-dock-title">
-                <div>
-                  <h3>Party</h3>
-                  <div class="muted party-dock-sub">Собери duo рядом с кнопкой поиска. Инвайты дублируются сверху справа.</div>
-                </div>
-                <span id="partyBadge" class="pill idle">Нет party</span>
-              </div>
-
-              <div class="party-toolbar">
-                <button class="btn secondary" id="createPartyBtn">Создать party</button>
-                <button class="btn ghost hidden" id="leavePartyBtn">Покинуть</button>
-                <button class="btn ghost hidden" id="disbandPartyBtn">Распустить</button>
-              </div>
-
-              <div class="party-search-row">
-                <input class="input" id="userSearchInput" placeholder="Найти игрока по нику">
-                <button class="btn secondary" id="userSearchBtn">Пригласить</button>
-              </div>
-
-              <div class="party-layout">
-                <div>
-                  <div class="label">Состав party</div>
-                  <div class="party-members-grid" id="partyMembers"></div>
-                </div>
-                <div>
-                  <div class="label">Входящие инвайты</div>
-                  <div class="invite-shelf" id="partyInvites"></div>
-                </div>
-              </div>
-
-              <div class="list" id="userSearchResults" style="margin-top:12px"></div>
+            <div class="stats-grid" style="margin-top:16px">
+              <div class="stat"><span>Режим</span><strong>AUTO</strong></div>
+              <div class="stat"><span>Party</span><strong id="queuePartyStat">0/2</strong></div>
             </div>
           </div>
         </section>
-
         <section class="card">
           <div class="section-title"><h3>Текущий матч</h3><span id="currentMatchBadge" class="pill idle">Нет матча</span></div>
           <div id="currentMatchEmpty" class="empty">Сейчас активного матча нет.</div>
@@ -142,7 +126,6 @@
             </div>
           </div>
         </section>
-
         <section class="card">
           <div class="section-title"><h3>История матчей</h3></div>
           <div class="list" id="historyList"></div>
