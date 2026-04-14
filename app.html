@@ -32,6 +32,7 @@
       </div>
     </div>
   </header>
+
   <main class="container app-shell">
     <div id="globalAlert" class="alert hidden"></div>
     <div class="app-grid">
@@ -47,14 +48,24 @@
                 <div id="profileSteamId" class="muted">—</div>
               </div>
             </div>
-            <div class="stats-grid" style="margin-top:18px">
+            <div class="stats-grid profile-sidebar-stats" style="margin-top:18px">
               <div class="stat"><span>Elo</span><strong id="profileElo">100</strong></div>
+              <div class="stat"><span>Winrate</span><strong id="profileWinRate">0%</strong></div>
               <div class="stat"><span>Матчи</span><strong id="profileMatches">0</strong></div>
-              <div class="stat"><span>Победы</span><strong id="profileWins">0</strong></div>
-              <div class="stat"><span>Поражения</span><strong id="profileLosses">0</strong></div>
+              <div class="stat"><span>W / L</span><strong id="profileRecord">0 / 0</strong></div>
+            </div>
+            <div class="profile-side-meta">
+              <div class="meta-row"><span class="muted">Серия</span><strong id="profileCurrentStreak">0W</strong></div>
+              <div class="meta-row"><span class="muted">Лучшая серия</span><strong id="profileBestStreak">0W</strong></div>
+              <div class="meta-row"><span class="muted">Лучшая карта</span><strong id="profileFavoriteMap">—</strong></div>
+            </div>
+            <div style="margin-top:16px">
+              <div class="label">Последняя форма</div>
+              <div id="profileRecentForm" class="recent-form"></div>
             </div>
           </div>
         </section>
+
         <section class="card">
           <div class="section-title"><h3>Party</h3><span id="partyBadge" class="pill idle">Нет party</span></div>
           <div class="list">
@@ -62,7 +73,7 @@
             <button class="btn ghost block hidden" id="leavePartyBtn">Покинуть party</button>
           </div>
           <div style="margin-top:18px">
-            <div class="label">Пригласить друга по нику</div>
+            <div class="label">Найти игрока</div>
             <div class="inline">
               <input class="input" id="userSearchInput" placeholder="Например: T1me1k">
               <button class="btn secondary" id="userSearchBtn">Найти</button>
@@ -79,6 +90,7 @@
           </div>
         </section>
       </aside>
+
       <section class="main">
         <section class="card search-card">
           <div class="cta-panel">
@@ -101,6 +113,40 @@
             </div>
           </div>
         </section>
+
+        <section class="card profile-overview-card">
+          <div class="section-title"><h3>Профиль игрока</h3><span id="profileStanding" class="pill idle">building</span></div>
+          <div id="profileOverviewGuest" class="empty">Профиль появится после входа через Steam.</div>
+          <div id="profileOverview" class="hidden">
+            <div class="profile-overview-grid">
+              <div class="profile-highlight">
+                <div class="profile-highlight-row">
+                  <img id="profileHeroAvatar" class="avatar profile-hero-avatar" alt="avatar">
+                  <div>
+                    <div id="profileHeroName" class="profile-hero-name">—</div>
+                    <div id="profileHeroSteam" class="muted">—</div>
+                  </div>
+                </div>
+                <div class="profile-hero-elo">Elo <strong id="profileHeroElo">100</strong></div>
+                <div class="profile-hero-form-wrap">
+                  <div class="label">Последние 10 матчей</div>
+                  <div id="profileHeroForm" class="recent-form"></div>
+                </div>
+              </div>
+              <div class="profile-summary-grid">
+                <div class="stat"><span>Победы</span><strong id="profileWins">0</strong></div>
+                <div class="stat"><span>Поражения</span><strong id="profileLosses">0</strong></div>
+                <div class="stat"><span>Winrate</span><strong id="profileHeroWinRate">0%</strong></div>
+                <div class="stat"><span>Сыграно</span><strong id="profileHeroMatches">0</strong></div>
+                <div class="stat"><span>Текущая серия</span><strong id="profileHeroCurrentStreak">0W</strong></div>
+                <div class="stat"><span>Лучшая серия</span><strong id="profileHeroBestStreak">0W</strong></div>
+                <div class="stat"><span>Любимая карта</span><strong id="profileHeroFavoriteMap">—</strong></div>
+                <div class="stat"><span>Статус</span><strong id="profileHeroStanding">building</strong></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section class="card">
           <div class="section-title"><h3>Текущий матч</h3><span id="currentMatchBadge" class="pill idle">Нет матча</span></div>
           <div id="currentMatchEmpty" class="empty">Сейчас активного матча нет.</div>
@@ -125,13 +171,29 @@
             </div>
           </div>
         </section>
+
         <section class="card">
-          <div class="section-title"><h3>История матчей</h3></div>
-          <div class="list" id="historyList"></div>
+          <div class="section-title"><h3>История матчей</h3><span class="pill idle" id="historyCountBadge">0</span></div>
+          <div class="list history-cards" id="historyList"></div>
         </section>
       </section>
     </div>
   </main>
+
+  <div id="matchDetailsModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-backdrop" data-close-modal="match-details"></div>
+    <div class="modal-dialog card">
+      <div class="section-title modal-head">
+        <div>
+          <h3 id="matchDetailsTitle">Детали матча</h3>
+          <div id="matchDetailsMeta" class="muted">—</div>
+        </div>
+        <button class="btn ghost" type="button" data-close-modal="match-details">Закрыть</button>
+      </div>
+      <div id="matchDetailsBody"></div>
+    </div>
+  </div>
+
   <script src="./frontend-config.js"></script>
   <script src="./app.js"></script>
 </body>
