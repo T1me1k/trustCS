@@ -35,6 +35,61 @@ function renderRankTooltip(activeRankKey) {
   `).join('');
 }
 
+
+function setupRankTooltipInteractions() {
+  const card = document.querySelector('.rank-hover-card');
+  const trigger = $('profileRankTrigger');
+  const tooltip = $('rankTooltip');
+  if (!card || !trigger || !tooltip || card.dataset.bound === '1') return;
+  card.dataset.bound = '1';
+
+  let closeTimer = null;
+  const open = () => {
+    if (closeTimer) {
+      clearTimeout(closeTimer);
+      closeTimer = null;
+    }
+    card.classList.add('is-open');
+    card.setAttribute('data-open', 'true');
+    trigger.setAttribute('aria-expanded', 'true');
+  };
+  const close = () => {
+    if (closeTimer) clearTimeout(closeTimer);
+    closeTimer = window.setTimeout(() => {
+      card.classList.remove('is-open');
+      card.setAttribute('data-open', 'false');
+      trigger.setAttribute('aria-expanded', 'false');
+    }, 40);
+  };
+  const toggle = () => {
+    if (card.classList.contains('is-open')) close(); else open();
+  };
+
+  ['mouseenter', 'pointerenter'].forEach((eventName) => {
+    card.addEventListener(eventName, open);
+    tooltip.addEventListener(eventName, open);
+  });
+  ['mouseleave', 'pointerleave'].forEach((eventName) => {
+    card.addEventListener(eventName, close);
+    tooltip.addEventListener(eventName, close);
+  });
+  trigger.addEventListener('focus', open);
+  trigger.addEventListener('blur', () => {
+    if (!card.matches(':hover')) close();
+  });
+  trigger.addEventListener('click', (event) => {
+    event.preventDefault();
+    toggle();
+  });
+  document.addEventListener('click', (event) => {
+    if (!card.contains(event.target)) {
+      card.classList.remove('is-open');
+      card.setAttribute('data-open', 'false');
+      trigger.setAttribute('aria-expanded', 'false');
+    }
+  });
+}
+
 const state = {
   user: null,
   party: null,
@@ -1001,6 +1056,7 @@ async function handleDelegatedClick(event) {
 }
 
 window.addEventListener('DOMContentLoaded', async () => {
+  setupRankTooltipInteractions();
   $('appLoginBtn')?.addEventListener('click', login);
   $('appLogoutBtn')?.addEventListener('click', logout);
   $('createPartyBtn')?.addEventListener('click', (event) => { event.preventDefault(); void createParty(); });

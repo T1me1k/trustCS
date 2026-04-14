@@ -334,3 +334,25 @@ button,input{font:inherit}
 @media (max-width: 1180px){.play-stage-grid,.party-main-grid{grid-template-columns:1fr}}
 @media (max-width: 980px){.app-grid-updated{grid-template-columns:1fr}.sidebar-profile-only{position:static}.current-match-hero-top{flex-direction:column}.current-match-hero-actions{justify-content:flex-start}}
 @media (max-width: 720px){.party-main-actions{grid-template-columns:1fr}.rank-tooltip{left:-12px;right:auto;width:min(360px,calc(100vw - 24px))}}
+
+
+.party-column{min-width:0}
+.party-subsection{margin-top:18px}
+.party-column-left .list,.party-column-right .list{min-width:0}
+.party-search-inline{align-items:stretch}
+.party-search-inline .input{min-width:0;flex:1 1 auto}
+.party-search-inline .btn{flex:0 0 auto}
+.rank-hover-card{position:relative;display:inline-flex;align-items:center}
+.rank-trigger{position:relative;z-index:2}
+.rank-hover-card.is-open .rank-tooltip,
+.rank-hover-card[data-open="true"] .rank-tooltip,
+.rank-hover-card:hover .rank-tooltip,
+.rank-hover-card:focus-within .rank-tooltip{opacity:1;transform:translateY(0);pointer-events:auto}
+.rank-tooltip{visibility:hidden}
+.rank-hover-card.is-open .rank-tooltip,
+.rank-hover-card[data-open="true"] .rank-tooltip,
+.rank-hover-card:hover .rank-tooltip,
+.rank-hover-card:focus-within .rank-tooltip{visibility:visible}
+@media (max-width: 1180px){
+  .party-main-grid{grid-template-columns:1fr}
+}
