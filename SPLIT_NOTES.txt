@@ -1,0 +1,1 @@
+Replace index.html, landing.js, landing.css for landing; replace app.html, app.js, app.css for app. Update app.html to use app.css and index.html to use landing.css. frontend-config.js stays as-is. If leaderboard.html still uses styles.css, leave it for now or create leaderboard.css later.
