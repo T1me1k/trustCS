@@ -18,7 +18,12 @@ const state = {
 };
 
 function $(id) { return document.getElementById(id); }
-function hide(id, on) { $(id)?.classList.toggle('hidden', on); }
+function hide(id, on) {
+  const el = $(id);
+  if (!el) return;
+  el.classList.toggle('hidden', on);
+  el.style.display = on ? 'none' : '';
+}
 function text(id, value) { const el = $(id); if (el) el.textContent = value; }
 function esc(v) { return String(v ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
 
@@ -107,6 +112,10 @@ function renderParty() {
   text('queuePartyStat', hasParty ? `${count}/2` : '1/2');
   hide('createPartyBtn', hasParty);
   hide('leavePartyBtn', !hasParty);
+  const createBtn = $('createPartyBtn');
+  const leaveBtn = $('leavePartyBtn');
+  if (createBtn) createBtn.style.display = hasParty ? 'none' : '';
+  if (leaveBtn) leaveBtn.style.display = hasParty ? '' : 'none';
 
   if (!hasParty) {
     membersEl.innerHTML = '<div class="empty">Party пока нет. Она создастся автоматически при поиске или по кнопке.</div>';
@@ -204,8 +213,12 @@ function createInviteToast(invite) {
 
   const progress = toast.querySelector('.invite-toast-progress-bar');
   if (progress) {
+    progress.style.width = '100%';
+    progress.style.transform = 'none';
     requestAnimationFrame(() => {
-      progress.style.transform = 'scaleX(0)';
+      requestAnimationFrame(() => {
+        progress.style.width = '0%';
+      });
     });
   }
 
