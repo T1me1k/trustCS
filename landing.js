@@ -168,6 +168,8 @@ function applyUser(user) {
   hide('landingAppBtn', !authed);
   hide('landingLogoutBtn', !authed);
   hide('landingLoginBtn', authed);
+  hide('heroLoginBtn', authed);
+  hide('bottomLoginBtn', authed);
   hide('landingGuestCard', authed);
   hide('landingUserCard', !authed);
 
