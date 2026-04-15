@@ -129,8 +129,7 @@ const state = {
   inviteToastDismissed: new Set(),
   inviteToastTimers: new Map(),
   postMatchSummary: null,
-  queueStats: null,
-  queueFallback: null
+  queueStats: null
 };
 
 let queueTimerInterval = null;
@@ -571,11 +570,8 @@ function renderQueue() {
   $('queueBadge').className = `pill ${inQueue ? 'ok' : 'idle'}`;
   $('matchmakingState').textContent = inQueue ? 'Поиск...' : (canQueue ? 'Ожидание' : 'Blocked');
   $('matchmakingState').className = `pill ${inQueue ? 'live' : canQueue ? 'idle' : 'warn'}`;
-  const fallbackText = stats.fallback && stats.fallback.reason && stats.fallback.reason !== 'created'
-    ? ` Диагностика: ${stats.fallback.reason}.`
-    : '';
   text('searchStateText', inQueue
-    ? `Матчмейкер подбирает 2x2 игру. Сейчас ищут ${searchingPlayers} игроков, LIVE матчей ${activeMatches}.${fallbackText}`
+    ? `Матчмейкер подбирает 2x2 игру. Сейчас ищут ${searchingPlayers} игроков, LIVE матчей ${activeMatches}.`
     : canQueue
       ? 'Нажми «Найти матч». Если party нет, она создастся автоматически.'
       : (restrictions?.restriction?.message || 'Поиск временно недоступен.'));
@@ -880,8 +876,7 @@ async function refreshProfile() {
 }
 async function refreshQueueStats() {
   const data = await api('/api/queue/stats');
-  state.queueStats = { ...(data.stats || {}), fallback: data.fallback || null };
-  state.queueFallback = data.fallback || null;
+  state.queueStats = data.stats || null;
 }
 async function refreshProfileHistory() {
   const data = await api('/api/profile/me/history?limit=12');

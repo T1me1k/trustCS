@@ -431,6 +431,14 @@ button,input{font:inherit}
   .search-item .btn,.member-item .btn,.row .btn,.history-item .btn{width:100%}
 }
 
-#queuePartyStat{font-size:34px;line-height:1.05;font-weight:800;letter-spacing:-0.02em}
-#queuePartyStat span{display:inline;color:inherit;font-size:inherit;margin:0}
-#queuePartyLabel{margin-bottom:14px}
+
+.queue-stage-stats .stat strong#queuePartyStat {
+  font-size: clamp(2rem, 3.5vw, 2.8rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.queue-stage-stats .stat strong#queuePartyStat span {
+  display: inline-block;
+  min-width: 1ch;
+}
