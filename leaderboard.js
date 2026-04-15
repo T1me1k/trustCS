@@ -5,27 +5,21 @@ const BACKEND_BASE_URL = (() => {
   return (fromWindow || fromMeta || fromStorage || 'https://YOUR-BACKEND.up.railway.app').replace(/\/+$/, '');
 })();
 
-
-const LEADERBOARD_I18N = {
-  en: {
-    brand_sub: '2x2 leaderboard', nav_home: 'Home', nav_play: 'Play', nav_leaderboard: 'Leaderboard', login: 'Sign in with Steam', season_badge: 'SEASON 1',
-    hero_title: 'TRUST 2x2 leaderboard', hero_text: 'Top players by Elo. The rating is calculated on the backend and shared between the website and launcher.',
-    col_player: 'Player', col_rank: 'Rank', loading: 'Loading...', empty: 'Leaderboard is empty for now.', error: 'Failed to load leaderboard.'
-  },
+const LB_I18N = {
   ru: {
-    brand_sub: 'лидерборд 2x2', nav_home: 'Главная', nav_play: 'Играть', nav_leaderboard: 'Лидерборд', login: 'Войти через Steam', season_badge: 'SEASON 1',
-    hero_title: 'Лидерборд TRUST 2x2', hero_text: 'Топ игроков по Elo. Рейтинг считается на backend и одинаков для сайта и launcher.',
-    col_player: 'Игрок', col_rank: 'Звание', loading: 'Загрузка...', empty: 'Лидерборд пока пустой.', error: 'Не удалось загрузить лидерборд.'
+    login: 'Войти через Steam', brandSub: '2x2 leaderboard', navHome: 'Главная', navPlay: 'Играть', navLeaderboard: 'Лидерборд',
+    title: 'Лидерборд TRUST 2x2', subtitle: 'Топ игроков по Elo. Рейтинг считается на backend и одинаков для сайта и launcher.',
+    headPlayer: 'Игрок', headRank: 'Звание', loading: 'Загрузка...', empty: 'Лидерборд пока пустой.', loadError: 'Не удалось загрузить лидерборд.'
+  },
+  en: {
+    login: 'Sign in with Steam', brandSub: '2x2 leaderboard', navHome: 'Home', navPlay: 'Play', navLeaderboard: 'Leaderboard',
+    title: 'TRUST 2v2 Leaderboard', subtitle: 'Top players by Elo. Rating is calculated on the backend and shared between the site and launcher.',
+    headPlayer: 'Player', headRank: 'Rank', loading: 'Loading...', empty: 'The leaderboard is empty for now.', loadError: 'Failed to load leaderboard.'
   }
 };
-const leaderboardState = { lang: localStorage.getItem('trust_leaderboard_lang') || 'en' };
-function t(key) { const dict = LEADERBOARD_I18N[leaderboardState.lang] || LEADERBOARD_I18N.en; return dict[key] ?? LEADERBOARD_I18N.en[key] ?? key; }
-function applyTranslations() {
-  document.documentElement.lang = leaderboardState.lang;
-  document.querySelectorAll('[data-i18n]').forEach((el) => { const key = el.dataset.i18n; if (key) el.textContent = t(key); });
-  document.querySelectorAll('.lang-btn').forEach((btn) => btn.classList.toggle('active', btn.dataset.lang === leaderboardState.lang));
-}
-function setLanguage(lang) { leaderboardState.lang = lang === 'ru' ? 'ru' : 'en'; localStorage.setItem('trust_leaderboard_lang', leaderboardState.lang); applyTranslations(); loadLeaderboard(); }
+const LB_LANG_KEY = 'trust_lang';
+let lbLang = localStorage.getItem(LB_LANG_KEY) === 'en' ? 'en' : 'ru';
+const lbT = (k) => (LB_I18N[lbLang] && LB_I18N[lbLang][k]) || LB_I18N.ru[k] || k;
 
 async function api(path, options = {}) {
   const response = await fetch(`${BACKEND_BASE_URL}${path}`, {
@@ -38,6 +32,19 @@ async function api(path, options = {}) {
   return data;
 }
 
+function applyLbLang() {
+  document.documentElement.lang = lbLang;
+  const map = {
+    lbLoginBtn: 'login', lbBrandSub: 'brandSub', lbNavHome: 'navHome', lbNavPlay: 'navPlay', lbNavLeaderboard: 'navLeaderboard',
+    lbTitle: 'title', lbSubtitle: 'subtitle', lbHeadPlayer: 'headPlayer', lbHeadRank: 'headRank'
+  };
+  Object.entries(map).forEach(([id, key]) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = lbT(key);
+  });
+  document.getElementById('lbLangRu')?.classList.toggle('active', lbLang === 'ru');
+  document.getElementById('lbLangEn')?.classList.toggle('active', lbLang === 'en');
+}
 
 function getRankByElo(rawElo) {
   const elo = Math.max(0, Number(rawElo) || 0);
@@ -59,21 +66,17 @@ function getRankByElo(rawElo) {
   }
   return { ...ranks[currentIndex] };
 }
-function normalizeRank(rank, elo) {
-  return rank && rank.name ? rank : getRankByElo(elo);
-}
-function esc(v) {
-  return String(v ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
-}
+function normalizeRank(rank, elo) { return rank && rank.name ? rank : getRankByElo(elo); }
+function esc(v) { return String(v ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
 
 async function loadLeaderboard() {
   const root = document.getElementById('leaderboardRows');
-  root.innerHTML = `<div class="empty">${t('loading')}</div>`;
+  root.innerHTML = `<div class="empty">${lbT('loading')}</div>`;
   try {
     const data = await api('/api/leaderboard');
     const items = data.items || [];
     if (!items.length) {
-      root.innerHTML = `<div class="empty">${t('empty')}</div>`;
+      root.innerHTML = `<div class="empty">${lbT('empty')}</div>`;
       return;
     }
     root.innerHTML = items.map((item, idx) => {
@@ -87,15 +90,36 @@ async function loadLeaderboard() {
       </div>
     `}).join('');
   } catch (_) {
-    root.innerHTML = `<div class="empty">${t('error')}</div>`;
+    root.innerHTML = `<div class="empty">${lbT('loadError')}</div>`;
   }
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-  applyTranslations();
-  document.querySelectorAll('.lang-btn').forEach((btn) => btn.addEventListener('click', () => setLanguage(btn.dataset.lang)));
+async function refreshLeaderboardAuth() {
+  try {
+    const data = await api('/auth/me');
+    const authed = !!data.user;
+    const btn = document.getElementById('lbLoginBtn');
+    if (btn) btn.classList.toggle('hidden', authed);
+  } catch (_) {}
+}
+
+window.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('lbLoginBtn')?.addEventListener('click', () => {
     window.location.href = `${BACKEND_BASE_URL}/auth/steam`;
   });
+  document.getElementById('lbLangRu')?.addEventListener('click', () => {
+    lbLang = 'ru';
+    localStorage.setItem(LB_LANG_KEY, lbLang);
+    applyLbLang();
+    loadLeaderboard();
+  });
+  document.getElementById('lbLangEn')?.addEventListener('click', () => {
+    lbLang = 'en';
+    localStorage.setItem(LB_LANG_KEY, lbLang);
+    applyLbLang();
+    loadLeaderboard();
+  });
+  applyLbLang();
+  await refreshLeaderboardAuth();
   loadLeaderboard();
 });
