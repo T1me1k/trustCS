@@ -614,7 +614,7 @@ function connectString(match) {
 function shouldDisplayMatchRoom(match) {
   if (!match) return false;
   const phase = String(match?.room?.phase || match?.phase || match?.status || '').trim().toLowerCase();
-  return !['finished', 'cancelled', 'canceled'].includes(phase);
+  return !['finished'].includes(phase);
 }
 
 function renderCurrentMatch() {

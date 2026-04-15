@@ -636,7 +636,7 @@ function connectString(match) {
 function shouldDisplayMatchRoom(match) {
   if (!match) return false;
   const phase = String(match?.room?.phase || match?.phase || match?.status || '').trim().toLowerCase();
-  return !['finished', 'cancelled', 'canceled'].includes(phase);
+  return !['finished'].includes(phase);
 }
 
 function renderCurrentMatch() {
@@ -1177,6 +1177,9 @@ function renderMatchRoomActions(match) {
     if (room.actions?.canConnect) actions.push('<button class="btn primary" data-room-action="connect">CONNECT TO SERVER</button>');
     if (room.actions?.canCopyCommand) actions.push('<button class="btn secondary" data-room-action="copy-command">Скопировать connect</button>');
   }
+  if (room.phase === 'cancelled' || room.phase === 'canceled') {
+    actions.push('<button class="btn primary" data-room-action="return">ВЕРНУТЬСЯ</button>');
+  }
   if (room.phase === 'live' && !actions.length) {
     actions.push('<div class="empty">Матч уже идёт.</div>');
   }
@@ -1206,6 +1209,7 @@ function renderCurrentMatch() {
     text('matchRoomCenterTimer', '—');
     text('matchRoomCenterServer', '—');
     text('matchRoomCenterMap', '—');
+    $('matchStageCard')?.classList.remove('match-room-cancelled');
     return;
   }
 
@@ -1216,9 +1220,11 @@ function renderCurrentMatch() {
   text('currentMatchStatus', room.statusText || match.status || '—');
   $('currentMatchStatus').className = `pill ${matchPhaseBadgeClass(room.phase)}`;
   text('serverConnectLine', room.server?.connectCommand || connectString(match));
-  text('matchRoomCenterTimer', phaseTimer);
+  const isCancelledRoom = ['cancelled', 'canceled'].includes(String(room.phase || '').toLowerCase());
+  text('matchRoomCenterTimer', isCancelledRoom ? 'МАТЧ ОТМЕНЁН' : phaseTimer);
   text('matchRoomCenterServer', room.server?.name || 'EU-1');
   text('matchRoomCenterMap', room.mapName || 'TBD');
+  $('matchStageCard')?.classList.toggle('match-room-cancelled', isCancelledRoom);
 
   $('currentMatchSummaryGrid').innerHTML = `
     <div class="match-room-summary-card"><span>Фаза</span><strong>${esc(room.phaseLabel || room.phase || '—')}</strong></div>
@@ -1309,6 +1315,13 @@ async function executeRoomAction(action, mapName) {
   if (action === 'result') { await openMatchDetails(match.publicMatchId); return; }
   if (action === 'profile') { document.querySelector('.sidebar .card')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
   if (action === 'play-again') { if (state.queue) await cancelQueue(); await joinQueue(); return; }
+  if (action === 'return') {
+    state.match = null;
+    renderCurrentMatch();
+    document.getElementById('queueStageCard')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setTimeout(() => { void refreshAll(); }, 150);
+    return;
+  }
   if (action === 'room') { showAlert('Ты уже в комнате матча.'); }
 }
 
