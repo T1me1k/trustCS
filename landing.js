@@ -6,6 +6,7 @@ const BACKEND_BASE_URL = (() => {
 })();
 
 const AUTH_RETURN_STORAGE_KEY = 'trust_post_auth_return';
+const AUTH_TOKEN_STORAGE_KEY = 'trust_auth_token';
 function getSteamAuthUrl() {
   const returnTo = encodeURIComponent(window.location.href);
   return `${BACKEND_BASE_URL}/auth/steam?returnTo=${returnTo}`;
@@ -14,6 +15,39 @@ function rememberAuthReturn() {
   try {
     sessionStorage.setItem(AUTH_RETURN_STORAGE_KEY, window.location.href);
   } catch (_) {}
+}
+
+function getStoredAuthToken() {
+  try {
+    return localStorage.getItem(AUTH_TOKEN_STORAGE_KEY) || '';
+  } catch (_) {
+    return '';
+  }
+}
+
+function setStoredAuthToken(token) {
+  try {
+    if (token) localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, token);
+    else localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+  } catch (_) {}
+}
+
+function consumeAuthTokenFromUrl() {
+  try {
+    const url = new URL(window.location.href);
+    const hashParams = new URLSearchParams(url.hash.startsWith('#') ? url.hash.slice(1) : url.hash);
+    const token = hashParams.get('auth_token');
+    if (!token) return false;
+    setStoredAuthToken(token);
+    hashParams.delete('auth_token');
+    hashParams.delete('steam_login');
+    const cleanHash = hashParams.toString();
+    url.hash = cleanHash ? `#${cleanHash}` : '';
+    window.history.replaceState({}, '', url.toString());
+    return true;
+  } catch (_) {
+    return false;
+  }
 }
 
 const LANDING_I18N = {
@@ -163,9 +197,10 @@ function applyTranslations() {
 }
 
 async function api(path, options = {}) {
+  const token = getStoredAuthToken();
   const response = await fetch(`${BACKEND_BASE_URL}${path}`, {
     credentials: 'include',
-    headers: { ...(options.headers || {}) },
+    headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}), ...(options.headers || {}) },
     ...options
   });
   const data = await response.json().catch(() => ({}));
@@ -274,6 +309,7 @@ async function logout() {
   try {
     await api('/auth/logout', { method: 'POST' });
   } catch (_) {}
+  setStoredAuthToken('');
   window.location.reload();
 }
 
@@ -308,6 +344,7 @@ function bindLandingEvents() {
 }
 
 async function initLanding() {
+  consumeAuthTokenFromUrl();
   bindLandingEvents();
   applyTranslations();
   await Promise.all([refreshAuth(), refreshHealth(), refreshConfig()]);
