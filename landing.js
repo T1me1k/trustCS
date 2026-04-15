@@ -7,7 +7,7 @@ const BACKEND_BASE_URL = (() => {
 
 const LANDING_I18N = {
   en: {
-    brand_sub: 'Competitive 2v2 matchmaking',
+    brand_sub: 'Competitive 2v2 platform',
     nav_platform: 'Platform',
     nav_status: 'Status',
     nav_leaderboard: 'Leaderboard',
@@ -15,8 +15,8 @@ const LANDING_I18N = {
     login: 'Sign in with Steam',
     logout: 'Log out',
     release_badge: 'TRUST RELEASE',
-    hero_title: 'Competitive 2v2 matchmaking',
-    hero_text: 'Unified 2x2 matchmaking with one rating, accept flow, map choice and direct server connection.',
+    hero_title: 'Competitive 2v2<br>matchmaking with<br>less noise.',
+    hero_text: 'Queue solo or as a duo, keep one shared rating, accept the match, vote the map and move straight into a clean server-driven flow.',
     hero_cta_login: 'Sign in with Steam',
     hero_cta_open: 'Open app',
     hero_cta_leaderboard: 'Leaderboard',
@@ -43,7 +43,7 @@ const LANDING_I18N = {
     principle_text: 'Nick and account come from Steam, the mode is only 2v2, and once all players accept the match the platform moves into map selection and server connect.',
     how_title: 'How it works',
     how_step_1: 'Sign in with Steam and open your profile.',
-    how_step_2: 'Start search, get matched and move through the match flow.',
+    how_step_2: 'Queue solo or invite one teammate into a duo.',
     how_step_3: 'Accept the match, vote the map and join the server.',
     cta_badge: 'TRUST 2v2',
     cta_title: 'Ready to play the final version of the platform, not a test page.',
@@ -62,7 +62,7 @@ const LANDING_I18N = {
     config_format: '{app} • latest {version} • mode {mode}'
   },
   ru: {
-    brand_sub: 'Соревновательный 2x2 матчмейкинг',
+    brand_sub: 'Соревновательная 2x2 платформа',
     nav_platform: 'Платформа',
     nav_status: 'Статус',
     nav_leaderboard: 'Лидерборд',
@@ -70,8 +70,8 @@ const LANDING_I18N = {
     login: 'Войти через Steam',
     logout: 'Выйти',
     release_badge: 'TRUST RELEASE',
-    hero_title: 'Соревновательный 2x2 матчмейкинг',
-    hero_text: 'Единый 2x2 матчмейкинг с одним рейтингом, принятием матча, выбором карты и прямым подключением к серверу.',
+    hero_title: 'Соревновательный 2x2<br>матчмейкинг без<br>лишнего шума.',
+    hero_text: 'Ищи матч соло или вдвоём, играй с единым рейтингом, принимай ready-check, выбирай карту и переходи в чистый серверный flow.',
     hero_cta_login: 'Войти через Steam',
     hero_cta_open: 'Открыть app',
     hero_cta_leaderboard: 'Лидерборд',
@@ -98,7 +98,7 @@ const LANDING_I18N = {
     principle_text: 'Ник и аккаунт берутся из Steam, режим только 2x2, а после принятия матча всеми игроками платформа переходит к выбору карты и подключению к серверу.',
     how_title: 'Как это работает',
     how_step_1: 'Войди через Steam и открой свой профиль.',
-    how_step_2: 'Запусти поиск, дождись матча и переходи по стадиям комнаты матча.',
+    how_step_2: 'Ищи матч соло или пригласи одного тиммейта в duo.',
     how_step_3: 'Прими матч, выбери карту и подключись к серверу.',
     cta_badge: 'TRUST 2x2',
     cta_title: 'Пора играть уже в финальную версию платформы, а не в тестовую страницу.',
@@ -122,7 +122,7 @@ const landingState = {
   user: null,
   config: null,
   backendOnline: null,
-  lang: localStorage.getItem('trust_lang') || 'en'
+  lang: localStorage.getItem('trust_landing_lang') || 'en'
 };
 
 function $(id) { return document.getElementById(id); }
@@ -267,7 +267,7 @@ async function logout() {
 
 function setLanguage(lang) {
   landingState.lang = lang === 'ru' ? 'ru' : 'en';
-  localStorage.setItem('trust_lang', landingState.lang);
+  localStorage.setItem('trust_landing_lang', landingState.lang);
   applyTranslations();
 }
 
