@@ -6,7 +6,6 @@ const BACKEND_BASE_URL = (() => {
 })();
 
 const AUTH_RETURN_STORAGE_KEY = 'trust_post_auth_return';
-const AUTH_TOKEN_STORAGE_KEY = 'trust_auth_token';
 function getSteamAuthUrl() {
   const returnTo = encodeURIComponent(window.location.href);
   return `${BACKEND_BASE_URL}/auth/steam?returnTo=${returnTo}`;
@@ -14,21 +13,6 @@ function getSteamAuthUrl() {
 function rememberAuthReturn() {
   try {
     sessionStorage.setItem(AUTH_RETURN_STORAGE_KEY, window.location.href);
-  } catch (_) {}
-}
-
-function getStoredAuthToken() {
-  try {
-    return localStorage.getItem(AUTH_TOKEN_STORAGE_KEY) || '';
-  } catch (_) {
-    return '';
-  }
-}
-
-function setStoredAuthToken(token) {
-  try {
-    if (token) localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, token);
-    else localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
   } catch (_) {}
 }
 
@@ -179,14 +163,10 @@ function applyTranslations() {
 }
 
 async function api(path, options = {}) {
-  const token = getStoredAuthToken();
   const response = await fetch(`${BACKEND_BASE_URL}${path}`, {
     credentials: 'include',
     cache: 'no-store',
-    headers: {
-      ...(options.headers || {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {})
-    },
+    headers: { ...(options.headers || {}) },
     ...options
   });
   const data = await response.json().catch(() => ({}));
@@ -221,8 +201,7 @@ async function refreshAuth() {
   try {
     const data = await api('/auth/me');
     applyUser(data.user || null);
-  } catch (err) {
-    if (String(err?.message || '').includes('401') || String(err?.message || '').includes('unauthorized')) setStoredAuthToken('');
+  } catch (_) {
     applyUser(null);
   }
 }
@@ -292,34 +271,10 @@ function login() {
   window.location.assign(getSteamAuthUrl());
 }
 
-async function completeSteamExchangeIfNeeded() {
-  const url = new URL(window.location.href);
-  const exchange = url.searchParams.get('auth_exchange');
-  if (!exchange) return false;
-
-  try {
-    const data = await api('/auth/exchange', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ exchange })
-    });
-
-    setStoredAuthToken(data?.token || '');
-    url.searchParams.delete('auth_exchange');
-    url.searchParams.delete('steam_login');
-    window.history.replaceState({}, document.title, url.toString());
-    return true;
-  } catch (err) {
-    console.error('steam auth exchange failed:', err);
-    return false;
-  }
-}
-
 async function logout() {
   try {
     await api('/auth/logout', { method: 'POST' });
   } catch (_) {}
-  setStoredAuthToken('');
   window.location.reload();
 }
 
@@ -356,7 +311,6 @@ function bindLandingEvents() {
 async function initLanding() {
   bindLandingEvents();
   applyTranslations();
-  await completeSteamExchangeIfNeeded();
   await Promise.all([refreshAuth(), refreshHealth(), refreshConfig()]);
 }
 

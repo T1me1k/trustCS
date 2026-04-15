@@ -6,7 +6,6 @@ const BACKEND_BASE_URL = (() => {
 })();
 
 const AUTH_RETURN_STORAGE_KEY = 'trust_post_auth_return';
-const AUTH_TOKEN_STORAGE_KEY = 'trust_auth_token';
 function getSteamAuthUrl() {
   const returnTo = encodeURIComponent(window.location.href);
   return `${BACKEND_BASE_URL}/auth/steam?returnTo=${returnTo}`;
@@ -14,21 +13,6 @@ function getSteamAuthUrl() {
 function rememberAuthReturn() {
   try {
     sessionStorage.setItem(AUTH_RETURN_STORAGE_KEY, window.location.href);
-  } catch (_) {}
-}
-
-function getStoredAuthToken() {
-  try {
-    return localStorage.getItem(AUTH_TOKEN_STORAGE_KEY) || '';
-  } catch (_) {
-    return '';
-  }
-}
-
-function setStoredAuthToken(token) {
-  try {
-    if (token) localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, token);
-    else localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
   } catch (_) {}
 }
 
@@ -49,14 +33,10 @@ let lbLang = localStorage.getItem(LB_LANG_KEY) === 'en' ? 'en' : 'ru';
 const lbT = (k) => (LB_I18N[lbLang] && LB_I18N[lbLang][k]) || LB_I18N.ru[k] || k;
 
 async function api(path, options = {}) {
-  const token = getStoredAuthToken();
   const response = await fetch(`${BACKEND_BASE_URL}${path}`, {
     credentials: 'include',
     cache: 'no-store',
-    headers: {
-      ...(options.headers || {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {})
-    },
+    headers: { ...(options.headers || {}) },
     ...options
   });
   const data = await response.json().catch(() => ({}));
@@ -132,9 +112,7 @@ async function refreshLeaderboardAuth() {
     const authed = !!data.user;
     const btn = document.getElementById('lbLoginBtn');
     if (btn) btn.classList.toggle('hidden', authed);
-  } catch (err) {
-    if (String(err?.message || '').includes('401') || String(err?.message || '').includes('unauthorized')) setStoredAuthToken('');
-  }
+  } catch (_) {}
 }
 
 
@@ -173,7 +151,6 @@ async function bootstrapLeaderboard() {
     void loadLeaderboard();
   });
   applyLbLang();
-  await completeSteamExchangeIfNeeded();
   await safeLeaderboardRefresh();
 }
 
