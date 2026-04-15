@@ -924,7 +924,7 @@ async function searchUsers() {
     root.innerHTML = items.map((item) => {
       const canPullFromParty = item.partyStatus && item.partyStatus !== 'closed';
       const presenceLabel = item.presenceLabel || 'Онлайн';
-      const inviteLabel = canPullFromParty ? 'Забрать в party' : 'Пригласить';
+      const inviteLabel = canPullFromParty ? 'Пригласить в party' : 'Пригласить';
       return `
       <div class="member-item">
         <div class="member-main">
@@ -1071,6 +1071,35 @@ async function handleDelegatedClick(event) {
 
 window.addEventListener('DOMContentLoaded', async () => {
   setupRankTooltipInteractions();
+  $('appLangRu')?.addEventListener('click', () => {
+    appLang = 'ru';
+    localStorage.setItem(APP_LANG_KEY, appLang);
+    applyAppLang();
+    renderAuth();
+    renderProfileOverview();
+    renderParty();
+    renderRestrictionCard();
+    renderQueue();
+    renderCurrentMatch();
+    renderHistory();
+    renderMatchDetailsModal();
+    renderPostMatchModal();
+  });
+  $('appLangEn')?.addEventListener('click', () => {
+    appLang = 'en';
+    localStorage.setItem(APP_LANG_KEY, appLang);
+    applyAppLang();
+    renderAuth();
+    renderProfileOverview();
+    renderParty();
+    renderRestrictionCard();
+    renderQueue();
+    renderCurrentMatch();
+    renderHistory();
+    renderMatchDetailsModal();
+    renderPostMatchModal();
+  });
+  applyAppLang();
   $('appLoginBtn')?.addEventListener('click', login);
   $('appLogoutBtn')?.addEventListener('click', logout);
   $('createPartyBtn')?.addEventListener('click', (event) => { event.preventDefault(); void createParty(); });

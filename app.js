@@ -1280,6 +1280,35 @@ document.addEventListener('click', (event) => {
 
 window.addEventListener('DOMContentLoaded', async () => {
   setupRankTooltipInteractions();
+  $('appLangRu')?.addEventListener('click', () => {
+    appLang = 'ru';
+    localStorage.setItem(APP_LANG_KEY, appLang);
+    applyAppLang();
+    renderAuth();
+    renderProfileOverview();
+    renderParty();
+    renderRestrictionCard();
+    renderQueue();
+    renderCurrentMatch();
+    renderHistory();
+    renderMatchDetailsModal();
+    renderPostMatchModal();
+  });
+  $('appLangEn')?.addEventListener('click', () => {
+    appLang = 'en';
+    localStorage.setItem(APP_LANG_KEY, appLang);
+    applyAppLang();
+    renderAuth();
+    renderProfileOverview();
+    renderParty();
+    renderRestrictionCard();
+    renderQueue();
+    renderCurrentMatch();
+    renderHistory();
+    renderMatchDetailsModal();
+    renderPostMatchModal();
+  });
+  applyAppLang();
   $('appLoginBtn')?.addEventListener('click', login);
   $('appLogoutBtn')?.addEventListener('click', logout);
   $('createPartyBtn')?.addEventListener('click', (event) => { event.preventDefault(); void createParty(); });

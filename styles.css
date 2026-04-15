@@ -276,6 +276,7 @@ button,input{font:inherit}
 
 
 .lang-switch { display:inline-flex; align-items:center; gap:4px; padding:4px; border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.04); border-radius:999px; }
-.lang-btn { border:0; background:transparent; color:rgba(255,255,255,.7); padding:6px 10px; border-radius:999px; font:inherit; font-weight:700; cursor:pointer; }
+.lang-btn { border:0; background:transparent; color:rgba(255,255,255,.7); padding:8px 10px; border-radius:999px; font:inherit; font-size:12px; letter-spacing:.08em; font-weight:700; cursor:pointer; transition:background .2s ease,color .2s ease,transform .2s ease; }
+.lang-btn:hover { color:#fff; }
 .lang-btn.active { background:rgba(139,92,246,.22); color:#fff; }
 .actions { display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:flex-end; }
