@@ -5,6 +5,17 @@ const BACKEND_BASE_URL = (() => {
   return (fromWindow || fromMeta || fromStorage || 'https://YOUR-BACKEND.up.railway.app').replace(/\/+$/, '');
 })();
 
+const AUTH_RETURN_STORAGE_KEY = 'trust_post_auth_return';
+function getSteamAuthUrl() {
+  const returnTo = encodeURIComponent(window.location.href);
+  return `${BACKEND_BASE_URL}/auth/steam?returnTo=${returnTo}`;
+}
+function rememberAuthReturn() {
+  try {
+    sessionStorage.setItem(AUTH_RETURN_STORAGE_KEY, window.location.href);
+  } catch (_) {}
+}
+
 
 
 const RANK_TABLE = [
@@ -884,7 +895,7 @@ async function refreshAll() {
   renderPostMatchModal();
 }
 
-function login() { window.location.href = `${BACKEND_BASE_URL}/auth/steam`; }
+function login() { rememberAuthReturn(); window.location.assign(getSteamAuthUrl()); }
 async function logout() { try { await api('/auth/logout', { method: 'POST' }); } catch (_) {} window.location.reload(); }
 
 async function createParty() {

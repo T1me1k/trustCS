@@ -5,6 +5,17 @@ const BACKEND_BASE_URL = (() => {
   return (fromWindow || fromMeta || fromStorage || 'https://YOUR-BACKEND.up.railway.app').replace(/\/+$/, '');
 })();
 
+const AUTH_RETURN_STORAGE_KEY = 'trust_post_auth_return';
+function getSteamAuthUrl() {
+  const returnTo = encodeURIComponent(window.location.href);
+  return `${BACKEND_BASE_URL}/auth/steam?returnTo=${returnTo}`;
+}
+function rememberAuthReturn() {
+  try {
+    sessionStorage.setItem(AUTH_RETURN_STORAGE_KEY, window.location.href);
+  } catch (_) {}
+}
+
 const LB_I18N = {
   ru: {
     login: 'Войти через Steam', brandSub: '2x2 leaderboard', navHome: 'Главная', navPlay: 'Играть', navLeaderboard: 'Лидерборд',
@@ -35,7 +46,7 @@ async function api(path, options = {}) {
 function applyLbLang() {
   document.documentElement.lang = lbLang;
   const map = {
-    lbLoginBtn: 'login', lbBrandSub: 'brandSub', lbNavHome: 'navHome', lbNavPlay: 'navPlay', lbNavLeaderboard: 'navLeaderboard',
+    lbLoginBtn: 'login', lbBrandSub: 'brandSub', lbNavHome: 'navHome', lbNavPlay: 'navPlay', lbNavLeaderboard: 'navLeaderboard', lbMobileNavHome: 'navHome', lbMobileNavPlay: 'navPlay', lbMobileNavLeaderboard: 'navLeaderboard',
     lbTitle: 'title', lbSubtitle: 'subtitle', lbHeadPlayer: 'headPlayer', lbHeadRank: 'headRank'
   };
   Object.entries(map).forEach(([id, key]) => {
@@ -105,7 +116,8 @@ async function refreshLeaderboardAuth() {
 
 window.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('lbLoginBtn')?.addEventListener('click', () => {
-    window.location.href = `${BACKEND_BASE_URL}/auth/steam`;
+    rememberAuthReturn();
+    window.location.assign(getSteamAuthUrl());
   });
   document.getElementById('lbLangRu')?.addEventListener('click', () => {
     lbLang = 'ru';

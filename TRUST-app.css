@@ -367,3 +367,39 @@ button,input{font:inherit}
 .search-user-meta{margin-top:4px;font-size:12px;}
 @media (max-width: 1180px){.party-column-right{gap:14px}.party-main-actions-corner{align-items:stretch}.party-main-actions-corner .btn{width:100%;}}
 @media (max-width: 720px){.party-search-inline{grid-template-columns:1fr}.party-search-inline .btn,.party-search-inline .input{width:100%}.party-main-actions-corner{margin-top:0;align-items:stretch}}
+
+
+.mobile-nav{display:none}
+.mobile-nav-link{display:inline-flex;align-items:center;justify-content:center;padding:11px 14px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--muted);font-weight:700;white-space:nowrap;min-width:0}
+.mobile-nav-link.active{color:var(--text);background:rgba(139,92,246,.12);border-color:rgba(139,92,246,.28)}
+@media (max-width:980px){
+  .topbar-inner{height:auto;min-height:80px;padding:14px 0;align-items:flex-start;flex-wrap:wrap}
+  .brand{min-width:0;flex:1 1 auto}
+  .actions,.landing-actions,.app-header-actions{width:100%;justify-content:flex-start}
+  .mobile-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px auto 0}
+}
+@media (max-width:720px){
+  .container{width:min(1180px,calc(100% - 24px))}
+  .card{padding:18px}
+  .brand-name{font-size:22px}
+  .topbar-inner{padding:12px 0}
+  .actions,.landing-actions,.app-header-actions{gap:8px}
+  .actions .btn,.landing-actions .btn,.app-header-actions .btn{width:100%}
+  .hero{padding:30px 0 14px}
+  .hero h1{font-size:clamp(30px,10vw,42px)}
+  .section-title{flex-direction:column;align-items:flex-start}
+}
+
+@media (max-width:980px){
+  .app-header-actions .btn{flex:1 1 180px}
+  .profile-box-updated,.history-item,.search-item,.member-item,.row{min-width:0}
+}
+@media (max-width:720px){
+  .app-header-actions .lang-switch{width:100%;justify-content:center}
+  .profile-box-updated,.history-item,.search-item,.member-item,.row{flex-direction:column;align-items:flex-start}
+  .stats-grid,.queue-stage-stats,.profile-sidebar-stats,.match-grid-compact{grid-template-columns:1fr}
+  .rank-progress-head,.rank-progress-foot,.meta-row,.history-card-top,.history-card-actions{flex-direction:column;align-items:flex-start}
+  .cta-actions .btn,.party-main-actions .btn,.current-match-hero-actions .btn,.match-room-actions .btn{width:100%}
+  .search-item>div:last-child,.member-item>div:last-child,.row>div:last-child,.history-item>div:last-child{width:100%}
+  .search-item .btn,.member-item .btn,.row .btn,.history-item .btn{width:100%}
+}
