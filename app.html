@@ -153,11 +153,10 @@
               </div>
               <div class="current-match-hero-actions">
                 <span id="currentMatchStatus" class="pill live">—</span>
-                <button class="btn secondary" id="copyConnectBtn">Скопировать connect</button>
               </div>
             </div>
             <div id="currentMatchSummaryGrid" class="match-room-summary-grid"></div>
-            <div class="match-room-layout">
+            <div class="match-room-layout match-room-layout-wide">
               <div class="match-room-maincol">
                 <div class="match-room-panel">
                   <div class="label">Прогресс матча</div>
@@ -168,22 +167,35 @@
                     <div class="label">Составы команд</div>
                     <div class="muted" id="matchRoomWhyBlocked">—</div>
                   </div>
-                  <div class="match-room-teams-grid">
+                  <div class="match-room-battle-grid">
                     <div class="team match-room-team"><div class="match-room-team-title">Team A</div><div class="list" id="teamAPlayers"></div></div>
+                    <div class="match-room-center-col">
+                      <div class="match-room-center-card">
+                        <div class="match-room-center-timer-wrap">
+                          <div class="label">Time to connect</div>
+                          <div id="matchRoomCenterTimer" class="match-room-center-timer">—</div>
+                        </div>
+                        <div id="matchRoomActions" class="match-room-actions match-room-actions-center"></div>
+                        <div class="match-room-center-meta">
+                          <div class="match-room-center-meta-card">
+                            <span>Сервер</span>
+                            <strong id="matchRoomCenterServer">—</strong>
+                          </div>
+                          <div class="match-room-center-meta-card">
+                            <span>Карта</span>
+                            <strong id="matchRoomCenterMap">—</strong>
+                          </div>
+                        </div>
+                        <div class="server-connect-box match-room-connect-box">
+                          <div class="label">Connect</div>
+                          <div id="serverConnectLine" class="server-connect-line">—</div>
+                        </div>
+                      </div>
+                    </div>
                     <div class="team match-room-team"><div class="match-room-team-title">Team B</div><div class="list" id="teamBPlayers"></div></div>
                   </div>
                 </div>
               </div>
-              <aside class="match-room-sidecol">
-                <div class="match-room-panel compact">
-                  <div class="label">Сервер</div>
-                  <div id="serverConnectLine" class="server-connect-line">—</div>
-                </div>
-                <div class="match-room-panel compact">
-                  <div class="label">Действия</div>
-                  <div id="matchRoomActions" class="match-room-actions"></div>
-                </div>
-              </aside>
             </div>
           </div>
         </section>
