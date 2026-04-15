@@ -430,3 +430,7 @@ button,input{font:inherit}
   .search-item>div:last-child,.member-item>div:last-child,.row>div:last-child,.history-item>div:last-child{width:100%}
   .search-item .btn,.member-item .btn,.row .btn,.history-item .btn{width:100%}
 }
+
+#queuePartyStat{font-size:34px;line-height:1.05;font-weight:800;letter-spacing:-0.02em}
+#queuePartyStat span{display:inline;color:inherit;font-size:inherit;margin:0}
+#queuePartyLabel{margin-bottom:14px}

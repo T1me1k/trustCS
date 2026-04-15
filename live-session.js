@@ -101,7 +101,7 @@
   async function acceptInvite(inviteId, btn) {
     if (btn) btn.disabled = true;
     try {
-      await api(`/api/party/invites/${encodeURIComponent(inviteId)}/accept`, { method: 'POST' });
+      await api(`/api/party/invite/${encodeURIComponent(inviteId)}/accept`, { method: 'POST' });
       closeModal();
       await refresh();
     } catch (error) {
@@ -113,7 +113,7 @@
   async function declineInvite(inviteId, btn) {
     if (btn) btn.disabled = true;
     try {
-      await api(`/api/party/invites/${encodeURIComponent(inviteId)}/decline`, { method: 'POST' });
+      await api(`/api/party/invite/${encodeURIComponent(inviteId)}/decline`, { method: 'POST' });
       closeModal();
       await refresh();
     } catch (error) {
@@ -256,6 +256,7 @@
       state.match = match.status === 'fulfilled' ? (match.value.match || null) : null;
       if (state.match && Array.isArray(match.value.mapPool)) state.match.mapPool = match.value.mapPool;
       state.stats = stats.status === 'fulfilled' ? (stats.value.stats || null) : null;
+      state.statsFallback = stats.status === 'fulfilled' ? (stats.value.fallback || null) : null;
       updateStatsBadges();
       if (!state.user) return;
       maybeShowInviteNotice();
@@ -270,7 +271,7 @@
     state.started = true;
     ensureShell();
     void refresh();
-    state.pollTimer = window.setInterval(() => { void refresh(); }, 1500);
+    state.pollTimer = window.setInterval(() => { void refresh(); }, 1200);
   }
 
   if (document.readyState === 'loading') {
