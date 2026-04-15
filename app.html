@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -17,18 +17,22 @@
         <div class="brand-mark">T</div>
         <div>
           <div class="brand-name">TRUST</div>
-          <div class="brand-sub">matchmaking app</div>
+          <div class="brand-sub" data-i18n="brand_sub">matchmaking app</div>
         </div>
       </div>
       <nav class="nav">
-        <a class="active" href="./app.html">Играть</a>
-        <a href="./leaderboard.html">Лидерборд</a>
-        <a href="./index.html">Главная</a>
+        <a class="active" href="./app.html" data-i18n="nav_play">Play</a>
+        <a href="./leaderboard.html" data-i18n="nav_leaderboard">Leaderboard</a>
+        <a href="./index.html" data-i18n="nav_home">Home</a>
       </nav>
-      <div class="actions">
-        <span class="pill idle" id="queueBadge">Не в очереди</span>
-        <button class="btn primary hidden" id="appLoginBtn">Войти через Steam</button>
-        <button class="btn ghost hidden" id="appLogoutBtn">Выйти</button>
+      <div class="actions app-header-actions">
+        <div class="lang-switch" aria-label="Language switch">
+          <button type="button" class="lang-btn active" data-lang="en">ENG</button>
+          <button type="button" class="lang-btn" data-lang="ru">RU</button>
+        </div>
+        <span class="pill idle" id="queueBadge">Not in queue</span>
+        <button class="btn primary hidden" id="appLoginBtn" data-i18n="login">Sign in with Steam</button>
+        <button class="btn ghost hidden" id="appLogoutBtn" data-i18n="logout">Log out</button>
       </div>
     </div>
   </header>
@@ -38,8 +42,8 @@
     <div class="app-grid app-grid-updated">
       <aside class="sidebar sidebar-profile-only">
         <section class="card profile-card-shell">
-          <div class="section-title"><h3>Профиль</h3><span id="authBadge" class="pill idle">Гость</span></div>
-          <div id="profileGuest" class="empty">Войди через Steam, чтобы открыть party, очередь и матчмейкинг.</div>
+          <div class="section-title"><h3 data-i18n="profile_title">Profile</h3><span id="authBadge" class="pill idle">Guest</span></div>
+          <div id="profileGuest" class="empty" data-i18n="profile_guest">Sign in with Steam to unlock party, queue and matchmaking.</div>
           <div id="profileCard" class="hidden">
             <div class="profile-box profile-box-updated">
               <img id="profileAvatar" class="avatar" alt="avatar">
@@ -48,13 +52,13 @@
                 <div id="profileSteamId" class="muted">—</div>
                 <div class="profile-rank-line">
                   <div class="rank-hover-card" tabindex="0">
-                    <button id="profileRankTrigger" type="button" class="rank-trigger" aria-label="Показать таблицу званий" aria-expanded="false">
+                    <button id="profileRankTrigger" type="button" class="rank-trigger" aria-label="Show rank table" aria-expanded="false">
                       <span id="profileRankPill" class="rank-pill iron">Iron</span>
                     </button>
                     <div id="rankTooltip" class="rank-tooltip">
                       <div class="rank-tooltip-head">
-                        <strong>Звания TRUST</strong>
-                        <span class="muted">Рейтинг 2x2</span>
+                        <strong data-i18n="rank_table_title">TRUST ranks</strong>
+                        <span class="muted" data-i18n="rank_table_sub">2x2 rating</span>
                       </div>
                       <div id="rankTooltipList" class="rank-tooltip-list"></div>
                     </div>
@@ -65,27 +69,27 @@
             <div class="stats-grid profile-sidebar-stats profile-stats-compact">
               <div class="stat"><span>Elo</span><strong id="profileElo">100</strong></div>
               <div class="stat"><span>Winrate</span><strong id="profileWinRate">0%</strong></div>
-              <div class="stat"><span>Матчи</span><strong id="profileMatches">0</strong></div>
+              <div class="stat"><span data-i18n="matches">Matches</span><strong id="profileMatches">0</strong></div>
               <div class="stat"><span>W / L</span><strong id="profileRecord">0 / 0</strong></div>
             </div>
             <div class="profile-side-meta">
               <div class="rank-progress-card rank-progress-card-updated">
                 <div class="rank-progress-head">
-                  <span class="muted">Звание</span>
+                  <span class="muted" data-i18n="rank_label">Rank</span>
                   <strong id="profileRankName">Iron</strong>
                 </div>
                 <div class="rank-progress-bar"><div id="profileRankProgressFill" class="rank-progress-fill"></div></div>
                 <div class="rank-progress-foot">
-                  <span id="profileRankProgressText" class="muted">До следующего звания: —</span>
+                  <span id="profileRankProgressText" class="muted">To next rank: —</span>
                   <strong id="profileRankNext">—</strong>
                 </div>
               </div>
-              <div class="meta-row"><span class="muted">Серия</span><strong id="profileCurrentStreak">0W</strong></div>
-              <div class="meta-row"><span class="muted">Лучшая серия</span><strong id="profileBestStreak">0W</strong></div>
-              <div class="meta-row"><span class="muted">Лучшая карта</span><strong id="profileFavoriteMap">—</strong></div>
+              <div class="meta-row"><span class="muted" data-i18n="streak">Streak</span><strong id="profileCurrentStreak">0W</strong></div>
+              <div class="meta-row"><span class="muted" data-i18n="best_streak">Best streak</span><strong id="profileBestStreak">0W</strong></div>
+              <div class="meta-row"><span class="muted" data-i18n="best_map">Best map</span><strong id="profileFavoriteMap">—</strong></div>
             </div>
             <div style="margin-top:16px">
-              <div class="label">Последняя форма</div>
+              <div class="label" data-i18n="recent_form">Recent form</div>
               <div id="profileRecentForm" class="recent-form"></div>
             </div>
           </div>
@@ -94,15 +98,15 @@
 
       <section class="main main-updated">
         <section class="card restriction-card hidden" id="restrictionCard">
-          <div class="section-title"><h3>Queue Guard</h3><span id="restrictionBadge" class="pill warn">Blocked</span></div>
+          <div class="section-title"><h3 data-i18n="queue_guard">Queue Guard</h3><span id="restrictionBadge" class="pill warn">Blocked</span></div>
           <div class="restriction-grid">
             <div>
-              <div id="restrictionTitle" class="restriction-title">Поиск временно недоступен</div>
+              <div id="restrictionTitle" class="restriction-title">Queue is temporarily unavailable</div>
               <div id="restrictionMessage" class="muted">—</div>
             </div>
             <div class="restriction-meta">
-              <div class="restriction-meta-row"><span>Причина</span><strong id="restrictionReason">—</strong></div>
-              <div class="restriction-meta-row"><span>Осталось</span><strong id="restrictionRemaining">—</strong></div>
+              <div class="restriction-meta-row"><span data-i18n="reason">Reason</span><strong id="restrictionReason">—</strong></div>
+              <div class="restriction-meta-row"><span data-i18n="remaining">Remaining</span><strong id="restrictionRemaining">—</strong></div>
             </div>
           </div>
         </section>
@@ -110,22 +114,22 @@
         <section class="card play-stage-card" id="queueStageCard">
           <div class="play-stage-grid">
             <div class="cta-panel cta-panel-updated">
-              <span class="badge">2x2 MATCHMAKING</span>
-              <h2>Найти матч</h2>
-              <div class="muted" id="playCtaText">Сначала войди через Steam. Потом можно искать матч соло или с другом.</div>
+              <span class="badge" data-i18n="matchmaking_badge">2x2 MATCHMAKING</span>
+              <h2 data-i18n="find_match">Find match</h2>
+              <div class="muted" id="playCtaText">Sign in with Steam first. Then you can queue solo or with a friend.</div>
               <div class="cta-actions">
-                <button type="button" class="btn primary" id="joinQueueBtn">НАЙТИ МАТЧ</button>
-                <button type="button" class="btn ghost hidden" id="cancelQueueBtn">ОТМЕНИТЬ</button>
+                <button type="button" class="btn primary" id="joinQueueBtn" data-i18n="join_queue">FIND MATCH</button>
+                <button type="button" class="btn ghost hidden" id="cancelQueueBtn" data-i18n="cancel">CANCEL</button>
               </div>
             </div>
             <div class="queue-box queue-box-updated">
               <div>
-                <div class="section-title" style="margin-bottom:10px"><h3>Статус</h3><span class="pill idle" id="matchmakingState">Ожидание</span></div>
-                <div class="muted" id="searchStateText">Когда party готова, лидер может запустить поиск.</div>
-                <div id="queueTimerRow" class="status-subline hidden">В поиске: <span id="queueTimerValue">00:00</span></div>
+                <div class="section-title" style="margin-bottom:10px"><h3 data-i18n="status">Status</h3><span class="pill idle" id="matchmakingState">Waiting</span></div>
+                <div class="muted" id="searchStateText">When the party is ready, the leader can start queue.</div>
+                <div id="queueTimerRow" class="status-subline hidden"><span data-i18n="in_queue_for">In queue:</span> <span id="queueTimerValue">00:00</span></div>
               </div>
               <div class="stats-grid queue-stage-stats" style="margin-top:16px">
-                <div class="stat"><span>Режим</span><strong>AUTO</strong></div>
+                <div class="stat"><span data-i18n="mode">Mode</span><strong>AUTO</strong></div>
                 <div class="stat"><span>Party</span><strong id="queuePartyStat">0/2</strong></div>
               </div>
             </div>
@@ -133,7 +137,7 @@
         </section>
 
         <section class="card current-match-hero hidden match-room-shell" id="matchStageCard">
-          <div class="section-title section-title-match"><h3>Match Room 2.0</h3><span id="currentMatchBadge" class="pill idle">Нет матча</span></div>
+          <div class="section-title section-title-match"><h3>Match Room 2.0</h3><span id="currentMatchBadge" class="pill idle">No match</span></div>
           <div id="currentMatchCard" class="match-room-root">
             <div class="match-room-topbar">
               <div>
@@ -142,19 +146,19 @@
               </div>
               <div class="current-match-hero-actions">
                 <span id="currentMatchStatus" class="pill live">—</span>
-                <button class="btn secondary" id="copyConnectBtn">Скопировать connect</button>
+                <button class="btn secondary" id="copyConnectBtn" data-i18n="copy_connect">Copy connect</button>
               </div>
             </div>
             <div id="currentMatchSummaryGrid" class="match-room-summary-grid"></div>
             <div class="match-room-layout">
               <div class="match-room-maincol">
                 <div class="match-room-panel">
-                  <div class="label">Прогресс матча</div>
+                  <div class="label" data-i18n="match_progress">Match progress</div>
                   <div id="currentMatchStageTimeline" class="match-room-stage-timeline"></div>
                 </div>
                 <div class="match-room-panel">
                   <div class="match-room-panel-head">
-                    <div class="label">Составы команд</div>
+                    <div class="label" data-i18n="team_lineups">Team lineups</div>
                     <div class="muted" id="matchRoomWhyBlocked">—</div>
                   </div>
                   <div class="match-room-teams-grid">
@@ -172,11 +176,11 @@
               </div>
               <aside class="match-room-sidecol">
                 <div class="match-room-panel compact">
-                  <div class="label">Сервер</div>
+                  <div class="label" data-i18n="server">Server</div>
                   <div id="serverConnectLine" class="server-connect-line">—</div>
                 </div>
                 <div class="match-room-panel compact">
-                  <div class="label">Действия</div>
+                  <div class="label" data-i18n="actions">Actions</div>
                   <div id="matchRoomActions" class="match-room-actions"></div>
                 </div>
               </aside>
@@ -185,35 +189,35 @@
         </section>
 
         <section class="card party-card-main" id="partySection">
-          <div class="section-title"><h3>Party</h3><span id="partyBadge" class="pill idle">Нет party</span></div>
+          <div class="section-title"><h3>Party</h3><span id="partyBadge" class="pill idle">No party</span></div>
           <div class="party-main-grid">
             <div class="party-column party-column-left">
-              <div class="label">Состав party</div>
+              <div class="label" data-i18n="party_members">Party members</div>
               <div class="list" id="partyMembers"></div>
               <div class="party-subsection">
-                <div class="label">Входящие инвайты</div>
+                <div class="label" data-i18n="incoming_invites">Incoming invites</div>
                 <div class="list" id="partyInvites"></div>
               </div>
             </div>
             <div class="party-column party-column-right">
               <div class="party-subsection party-search-wrap">
-                <div class="label">Найти игрока</div>
+                <div class="label" data-i18n="find_player">Find player</div>
                 <div class="inline party-search-inline">
-                  <button class="btn secondary" id="userSearchBtn">Найти</button>
-                  <input class="input" id="userSearchInput" placeholder="Например: T1me1k">
+                  <button class="btn secondary" id="userSearchBtn" data-i18n="find">Find</button>
+                  <input class="input" id="userSearchInput" placeholder="For example: T1me1k" data-i18n-placeholder="player_example">
                 </div>
                 <div class="list" id="userSearchResults" style="margin-top:10px"></div>
               </div>
               <div class="list party-main-actions party-main-actions-corner">
-                <button type="button" class="btn secondary block" id="createPartyBtn">Создать party</button>
-                <button type="button" class="btn ghost block hidden" id="leavePartyBtn">Покинуть party</button>
+                <button type="button" class="btn secondary block" id="createPartyBtn" data-i18n="create_party">Create party</button>
+                <button type="button" class="btn ghost block hidden" id="leavePartyBtn" data-i18n="leave_party">Leave party</button>
               </div>
             </div>
           </div>
         </section>
 
         <section class="card">
-          <div class="section-title"><h3>История матчей</h3><span class="pill idle" id="historyCountBadge">0</span></div>
+          <div class="section-title"><h3 data-i18n="match_history">Match history</h3><span class="pill idle" id="historyCountBadge">0</span></div>
           <div class="list history-cards" id="historyList"></div>
         </section>
       </section>
@@ -225,10 +229,10 @@
     <div class="modal-dialog card">
       <div class="section-title modal-head">
         <div>
-          <h3 id="matchDetailsTitle">Детали матча</h3>
+          <h3 id="matchDetailsTitle">Match details</h3>
           <div id="matchDetailsMeta" class="muted">—</div>
         </div>
-        <button class="btn ghost" type="button" data-close-modal="match-details">Закрыть</button>
+        <button class="btn ghost" type="button" data-close-modal="match-details" data-i18n="close">Close</button>
       </div>
       <div id="matchDetailsBody"></div>
     </div>
@@ -241,30 +245,30 @@
     <div class="modal-dialog card">
       <div class="section-title modal-head">
         <div>
-          <h3>Проблема с матчем</h3>
-          <div class="muted">Tech-report flow для Match Room</div>
+          <h3 data-i18n="match_issue">Match issue</h3>
+          <div class="muted" data-i18n="match_issue_sub">Tech-report flow for Match Room</div>
         </div>
-        <button class="btn ghost" type="button" data-close-modal="match-issue">Закрыть</button>
+        <button class="btn ghost" type="button" data-close-modal="match-issue" data-i18n="close">Close</button>
       </div>
       <div class="issue-form-grid">
         <div>
-          <div class="label">Причина</div>
+          <div class="label" data-i18n="reason">Reason</div>
           <select id="matchIssueReason" class="input issue-select">
-            <option value="server_not_responding">Сервер не отвечает</option>
-            <option value="cannot_connect">Не могу подключиться</option>
-            <option value="player_not_connecting">Игрок не подключается</option>
-            <option value="match_stuck">Матч завис</option>
-            <option value="result_not_recorded">Результат не записался</option>
-            <option value="other">Другое</option>
+            <option value="server_not_responding">Server is not responding</option>
+            <option value="cannot_connect">Cannot connect</option>
+            <option value="player_not_connecting">Player is not connecting</option>
+            <option value="match_stuck">Match is stuck</option>
+            <option value="result_not_recorded">Result was not recorded</option>
+            <option value="other">Other</option>
           </select>
         </div>
         <div>
-          <div class="label">Комментарий</div>
-          <textarea id="matchIssueComment" class="input issue-textarea" placeholder="Коротко опиши проблему"></textarea>
+          <div class="label" data-i18n="comment">Comment</div>
+          <textarea id="matchIssueComment" class="input issue-textarea" placeholder="Briefly describe the problem" data-i18n-placeholder="issue_placeholder"></textarea>
         </div>
       </div>
       <div class="post-match-actions" style="margin-top:16px">
-        <button class="btn secondary" id="submitMatchIssueBtn">Отправить репорт</button>
+        <button class="btn secondary" id="submitMatchIssueBtn" data-i18n="submit_report">Send report</button>
       </div>
     </div>
   </div>
@@ -293,8 +297,8 @@
             <div class="post-match-stat"><span>Finished</span><strong id="postMatchFinishedAt">—</strong></div>
           </div>
           <div class="post-match-actions">
-            <button class="btn primary" id="postMatchContinueBtn">Продолжить</button>
-            <button class="btn ghost" id="postMatchProfileBtn">Открыть профиль</button>
+            <button class="btn primary" id="postMatchContinueBtn" data-i18n="continue">Continue</button>
+            <button class="btn ghost" id="postMatchProfileBtn" data-i18n="open_profile">Open profile</button>
           </div>
         </div>
       </section>
