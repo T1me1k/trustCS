@@ -19,6 +19,8 @@
     busy: false
   };
 
+  const isAppPage = /(?:^|\/)app\.html$/i.test(window.location.pathname) || document.body?.dataset?.page === 'app';
+
   function el(tag, cls, html) {
     const node = document.createElement(tag);
     if (cls) node.className = cls;
@@ -154,7 +156,6 @@
     body.querySelectorAll('[data-live-decline-invite]').forEach((btn) => btn.addEventListener('click', () => declineInvite(btn.dataset.liveDeclineInvite, btn)));
     body.querySelectorAll('[data-live-accept-match]').forEach((btn) => btn.addEventListener('click', () => acceptMatch(btn.dataset.liveAcceptMatch, btn)));
     body.querySelectorAll('[data-live-vote-map]').forEach((btn) => btn.addEventListener('click', () => voteMap(btn.dataset.liveMatchId, btn.dataset.liveVoteMap, btn)));
-    body.querySelectorAll('[data-live-open-app]').forEach((btn) => btn.addEventListener('click', () => { window.location.href = './app.html'; }));
   }
 
   function renderInviteModal(invite) {
@@ -166,10 +167,20 @@
         <div class="live-modal-actions">
           <button type="button" class="btn primary" data-live-accept-invite="${esc(invite.id)}">Принять</button>
           <button type="button" class="btn ghost" data-live-decline-invite="${esc(invite.id)}">Отклонить</button>
-          <button type="button" class="btn secondary" data-live-open-app>Открыть app</button>
+          
         </div>`
     );
     bindModalActions();
+  }
+
+
+  function getVoteMeta(match) {
+    const totalPlayers = Number(match.totalPlayers || match.room?.counts?.totalPlayers || (match.players || []).length || 4);
+    const counts = Object.create(null);
+    (match.players || []).forEach((player) => {
+      if (player?.mapVote) counts[player.mapVote] = (counts[player.mapVote] || 0) + 1;
+    });
+    return { counts, totalPlayers };
   }
 
   function renderMatchModal(match) {
@@ -184,17 +195,17 @@
       </div>`;
 
     if (canAccept) {
-      body += `<div class="live-modal-actions"><button type="button" class="btn primary" data-live-accept-match="${esc(match.publicMatchId)}">Принять матч</button><button type="button" class="btn secondary" data-live-open-app>Открыть app</button></div>`;
+      body += `<div class="live-modal-actions"><button type="button" class="btn primary" data-live-accept-match="${esc(match.publicMatchId)}">Принять матч</button></div>`;
     } else if (canVoteMap) {
       const maps = Array.isArray(match.mapPool) ? match.mapPool : ['shortdust', 'lake', 'overpass', 'vertigo', 'nuke'];
-      body += `<div class="live-info-line">Все приняли матч. Выбери карту прямо здесь:</div><div class="live-map-grid">${maps.map((map) => `<button type="button" class="btn secondary block" data-live-match-id="${esc(match.publicMatchId)}" data-live-vote-map="${esc(map)}">${esc(map)}</button>`).join('')}</div>`;
+      const { counts, totalPlayers } = getVoteMeta(match);
+      body += `<div class="live-info-line">Все приняли матч. Выбери карту прямо здесь:</div><div class="live-map-grid">${maps.map((map) => `<button type=\"button\" class=\"btn secondary block vote-btn\" data-live-match-id=\"${esc(match.publicMatchId)}\" data-live-vote-map=\"${esc(map)}\"><span>${esc(map)}</span><span class=\"vote-count-badge\">${esc(`${counts[map] || 0}/${totalPlayers}`)}</span></button>`).join('')}</div>`;
     } else if (match.mapName) {
       body += `<div class="live-info-line">Карта: <strong>${esc(match.mapName)}</strong></div>`;
     }
 
     if (['server_assigned', 'live'].includes(match.status)) {
       body += `<div class="live-connect-box"><div class="live-connect-label">Connect</div><code>${esc(connectString(match))}</code></div>`;
-      body += `<div class="live-modal-actions"><button type="button" class="btn secondary" data-live-open-app>Открыть Match Room</button></div>`;
     }
 
     openModal('Матч найден', 'Матч доступен на любой странице', body);
@@ -226,17 +237,20 @@
 
   function maybeShowMatchNotice(forceModal = false) {
     const match = state.match;
-    const currentKey = match ? `${match.publicMatchId}:${match.status}:${match.mapName || ''}:${match.acceptedCount || 0}` : null;
+    const currentKey = match ? `${match.publicMatchId}:${match.status}:${match.mapName || ''}:${match.acceptedCount || 0}:${match.connectedCount || 0}` : null;
     const changed = currentKey && currentKey !== state.lastMatchState;
-    if (match && (forceModal || changed)) {
-      pushToast(`match-${match.publicMatchId}-${match.status}`, `
-        <div class="live-toast-title">Матч найден</div>
-        <div class="live-toast-text">${esc((match.room && match.room.statusText) || match.status || 'Матч готов')}</div>
-        <div class="live-toast-actions"><button type="button" class="btn secondary live-toast-open">Открыть</button></div>
-      `, true)?.querySelector('.live-toast-open')?.addEventListener('click', () => renderMatchModal(match));
-      if (forceModal || match.status === 'pending_acceptance' || match.status === 'map_voting') {
-        renderMatchModal(match);
+    if (!match) {
+      state.lastMatchState = null;
+      return;
+    }
+    if (!isAppPage && ['pending_acceptance', 'map_voting', 'server_assigned', 'live'].includes(match.status)) {
+      if (window.location.pathname !== '/app.html' && !window.location.pathname.endsWith('/app.html')) {
+        window.location.href = './app.html';
+        return;
       }
+    }
+    if (!isAppPage && (forceModal || changed) && ['pending_acceptance', 'map_voting'].includes(match.status)) {
+      renderMatchModal(match);
     }
     state.lastMatchState = currentKey;
   }
@@ -266,7 +280,7 @@
   }
 
   function start() {
-    if (state.started) return;
+    if (state.started || isAppPage) return;
     state.started = true;
     ensureShell();
     void refresh();

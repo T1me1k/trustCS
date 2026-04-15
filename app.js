@@ -547,7 +547,8 @@ function renderRestrictionCard() {
   const restrictions = state.restrictions || null;
   const block = restrictions?.restriction || null;
   const isQueuePresenceOnly = block?.reasonKey === 'already_in_queue';
-  const visible = !!block?.isActive && !isQueuePresenceOnly;
+  const blockedByCurrentMatch = !!state.match && ['already_in_match_flow', 'already_in_live_match'].includes(block?.reasonKey);
+  const visible = !!block?.isActive && !isQueuePresenceOnly && !blockedByCurrentMatch;
   hide('restrictionCard', !visible);
   if (!visible) return;
   text('restrictionTitle', block.title || 'Поиск временно недоступен');
@@ -1118,7 +1119,7 @@ function matchPhaseBadgeClass(phase) {
 function getPlayerDelayReason(player) {
   if (!player) return '';
   if (!player.accepted) return `${player.nickname || 'Игрок'} ещё не принял матч`;
-  if (player.connectionState === 'waiting_connect') return `${player.nickname || 'Игрок'} ещё не подключился`;
+  if (['waiting_connect', 'pending_connect'].includes(player.connectionState)) return `${player.nickname || 'Игрок'} ещё не подключился`;
   if (player.connectionState === 'disconnected') return `${player.nickname || 'Игрок'} вылетел и ждёт reconnect`;
   if (player.connectionState === 'abandoned') return `${player.nickname || 'Игрок'} получил abandon`;
   return '';
@@ -1144,12 +1145,27 @@ function renderMatchPlayerCard(p) {
     </div>`;
 }
 
+
+function getMapVoteCounts(match) {
+  const totalPlayers = Number(match?.totalPlayers || match?.room?.counts?.totalPlayers || (match?.players || []).length || 4);
+  const counts = Object.create(null);
+  (match?.players || []).forEach((player) => {
+    if (player?.mapVote) counts[player.mapVote] = (counts[player.mapVote] || 0) + 1;
+  });
+  return { counts, totalPlayers };
+}
+
 function renderMatchRoomActions(match) {
   const room = match?.room || {};
   const actions = [];
   if (room.actions?.canAccept) actions.push('<button class="btn primary" data-room-action="accept">ПРИНЯТЬ МАТЧ</button>');
   if (room.actions?.canVoteMap) {
-    actions.push(state.mapPool.map((map) => `<button class="btn secondary" data-room-action="vote" data-map-name="${esc(map)}">Карта: ${esc(map)}</button>`).join(''));
+    const { counts, totalPlayers } = getMapVoteCounts(match);
+    actions.push(state.mapPool.map((map) => `
+      <button class="btn secondary vote-btn" data-room-action="vote" data-map-name="${esc(map)}">
+        <span>Карта: ${esc(map)}</span>
+        <span class="vote-count-badge">${esc(`${counts[map] || 0}/${totalPlayers}`)}</span>
+      </button>`).join(''));
   }
   if (room.phase === 'connect' || room.phase === 'live') {
     if (room.actions?.canConnect) actions.push('<button class="btn primary" data-room-action="connect">Подключиться</button>');
@@ -1203,17 +1219,6 @@ function renderCurrentMatch() {
 
   const blocker = (match.players || []).map(getPlayerDelayReason).find(Boolean);
   text('matchRoomWhyBlocked', blocker || (room.finalMessage || 'Все игроки синхронизированы.'));
-
-  $('matchRoomEvents').innerHTML = (room.eventTimeline || []).length
-    ? room.eventTimeline.map((event) => `
-      <div class="match-event-item">
-        <div class="match-event-time">${esc(formatDate(event.createdAt))}</div>
-        <div>
-          <div class="match-event-title">${esc(event.title || event.type || 'Event')}</div>
-          <div class="muted">${esc(event.description || '')}</div>
-        </div>
-      </div>`).join('')
-    : '<div class="empty">Пока нет событий комнаты матча.</div>';
 
   renderMatchRoomActions(match);
 }

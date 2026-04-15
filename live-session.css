@@ -63,3 +63,7 @@
   .live-toast-card, .live-modal-card { width: auto; }
   .live-match-grid, .live-map-grid { grid-template-columns: 1fr; }
 }
+
+
+.vote-btn{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.vote-count-badge{display:inline-flex;align-items:center;justify-content:center;min-width:58px;padding:6px 10px;border-radius:999px;border:1px solid rgba(139,92,246,.35);background:rgba(139,92,246,.14);font-size:13px;font-weight:800;color:#f5f3ff}

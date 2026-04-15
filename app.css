@@ -442,3 +442,11 @@ button,input{font:inherit}
   display: inline-block;
   min-width: 1ch;
 }
+
+
+.vote-btn{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.vote-count-badge{display:inline-flex;align-items:center;justify-content:center;min-width:58px;padding:6px 10px;border-radius:999px;border:1px solid rgba(139,92,246,.35);background:rgba(139,92,246,.14);font-size:13px;font-weight:800;color:#f5f3ff}
+#queuePartyStat{font-size:38px;line-height:1;font-weight:900;letter-spacing:-.04em}
+#queuePartyStat [data-live-searching-count],#queuePartyStat [data-live-active-matches]{font-size:44px}
+#queuePartyStat br{display:none}
+.match-room-actions .vote-btn{width:100%}
