@@ -639,6 +639,20 @@ function shouldDisplayMatchRoom(match) {
   return !['finished'].includes(phase);
 }
 
+function isMatchRoomTimedOut(match) {
+  if (!match) return false;
+  const room = match.room || {};
+  const phase = String(room.phase || match.phase || match.status || '').trim().toLowerCase();
+  const currentDeadlineSec = Number(room.currentDeadlineSec);
+  const connectRemainingSec = Number(match.connectRemainingSec ?? room?.deadlines?.connectRemainingSec);
+  const acceptRemainingSec = Number(match.acceptRemainingSec ?? room?.deadlines?.acceptRemainingSec);
+  if (phase === 'connect' && Number.isFinite(currentDeadlineSec) && currentDeadlineSec <= 0) return true;
+  if (phase === 'connect' && Number.isFinite(connectRemainingSec) && connectRemainingSec <= 0) return true;
+  if (phase === 'accept' && Number.isFinite(currentDeadlineSec) && currentDeadlineSec <= 0) return true;
+  if (phase === 'accept' && Number.isFinite(acceptRemainingSec) && acceptRemainingSec <= 0) return true;
+  return false;
+}
+
 function renderCurrentMatch() {
   const match = state.match;
   const hasMatch = !!match;
@@ -1164,6 +1178,7 @@ function getMapVoteCounts(match) {
 function renderMatchRoomActions(match) {
   const room = match?.room || {};
   const actions = [];
+  const roomTimedOut = isMatchRoomTimedOut(match);
   if (room.actions?.canAccept) actions.push('<button class="btn primary" data-room-action="accept">ПРИНЯТЬ МАТЧ</button>');
   if (room.actions?.canVoteMap) {
     const { counts, totalPlayers } = getMapVoteCounts(match);
@@ -1173,11 +1188,11 @@ function renderMatchRoomActions(match) {
         <span class="vote-count-badge">${esc(`${counts[map] || 0}/${totalPlayers}`)}</span>
       </button>`).join(''));
   }
-  if (room.phase === 'connect' || room.phase === 'live') {
+  if (!roomTimedOut && (room.phase === 'connect' || room.phase === 'live')) {
     if (room.actions?.canConnect) actions.push('<button class="btn primary" data-room-action="connect">CONNECT TO SERVER</button>');
     if (room.actions?.canCopyCommand) actions.push('<button class="btn secondary" data-room-action="copy-command">Скопировать connect</button>');
   }
-  if (room.phase === 'cancelled' || room.phase === 'canceled') {
+  if (roomTimedOut || room.phase === 'cancelled' || room.phase === 'canceled') {
     actions.push('<button class="btn primary" data-room-action="return">ВЕРНУТЬСЯ</button>');
   }
   if (room.phase === 'live' && !actions.length) {
@@ -1214,13 +1229,14 @@ function renderCurrentMatch() {
   }
 
   const room = match.room || {};
+  const roomTimedOut = isMatchRoomTimedOut(match);
   const phaseTimer = formatDuration(room.currentDeadlineSec);
   text('currentMatchId', room.publicMatchId || match.publicMatchId || '—');
   text('currentMatchMeta', `${match.mode || '2x2'} • карта: ${room.mapName || 'не выбрана'} • сервер: ${room.server?.name || 'EU-1'}`);
   text('currentMatchStatus', room.statusText || match.status || '—');
   $('currentMatchStatus').className = `pill ${matchPhaseBadgeClass(room.phase)}`;
   text('serverConnectLine', room.server?.connectCommand || connectString(match));
-  const isCancelledRoom = ['cancelled', 'canceled'].includes(String(room.phase || '').toLowerCase());
+  const isCancelledRoom = roomTimedOut || ['cancelled', 'canceled'].includes(String(room.phase || '').toLowerCase());
   text('matchRoomCenterTimer', isCancelledRoom ? 'МАТЧ ОТМЕНЁН' : phaseTimer);
   text('matchRoomCenterServer', room.server?.name || 'EU-1');
   text('matchRoomCenterMap', room.mapName || 'TBD');
