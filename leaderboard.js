@@ -6,6 +6,7 @@ const BACKEND_BASE_URL = (() => {
 })();
 
 const AUTH_RETURN_STORAGE_KEY = 'trust_post_auth_return';
+const AUTH_TOKEN_STORAGE_KEY = 'trust_auth_token';
 function getSteamAuthUrl() {
   const returnTo = encodeURIComponent(window.location.href);
   return `${BACKEND_BASE_URL}/auth/steam?returnTo=${returnTo}`;
@@ -16,29 +17,20 @@ function rememberAuthReturn() {
   } catch (_) {}
 }
 
-
-async function completeSteamExchangeIfNeeded() {
-  const url = new URL(window.location.href);
-  const exchange = url.searchParams.get('auth_exchange');
-  if (!exchange) return false;
-
+function getStoredAuthToken() {
   try {
-    await api('/auth/exchange', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ exchange })
-    });
-
-    url.searchParams.delete('auth_exchange');
-    url.searchParams.delete('steam_login');
-    window.history.replaceState({}, document.title, url.toString());
-    return true;
-  } catch (err) {
-    console.error('steam auth exchange failed:', err);
-    return false;
+    return localStorage.getItem(AUTH_TOKEN_STORAGE_KEY) || '';
+  } catch (_) {
+    return '';
   }
 }
 
+function setStoredAuthToken(token) {
+  try {
+    if (token) localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, token);
+    else localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+  } catch (_) {}
+}
 
 const LB_I18N = {
   ru: {
@@ -57,10 +49,14 @@ let lbLang = localStorage.getItem(LB_LANG_KEY) === 'en' ? 'en' : 'ru';
 const lbT = (k) => (LB_I18N[lbLang] && LB_I18N[lbLang][k]) || LB_I18N.ru[k] || k;
 
 async function api(path, options = {}) {
+  const token = getStoredAuthToken();
   const response = await fetch(`${BACKEND_BASE_URL}${path}`, {
     credentials: 'include',
     cache: 'no-store',
-    headers: { ...(options.headers || {}) },
+    headers: {
+      ...(options.headers || {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    },
     ...options
   });
   const data = await response.json().catch(() => ({}));
@@ -136,7 +132,9 @@ async function refreshLeaderboardAuth() {
     const authed = !!data.user;
     const btn = document.getElementById('lbLoginBtn');
     if (btn) btn.classList.toggle('hidden', authed);
-  } catch (_) {}
+  } catch (err) {
+    if (String(err?.message || '').includes('401') || String(err?.message || '').includes('unauthorized')) setStoredAuthToken('');
+  }
 }
 
 

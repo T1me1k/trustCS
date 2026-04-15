@@ -1,6 +1,7 @@
 const API_BASE = "https://trust-backend-production-e1d1.up.railway.app";
 const INSTALLER_URL = "https://t1me1k.github.io/trustCS/downloads/TRUST-Setup-0.1.0.exe";
 const INSTALLER_FILENAME = "TRUST-Setup-0.1.0.exe";
+const AUTH_TOKEN_STORAGE_KEY = "trust_auth_token";
 
 const onlineCountEl = document.getElementById("onlineCount");
 const serverStateEl = document.getElementById("serverState");
@@ -172,6 +173,21 @@ const translations = {
   }
 };
 
+function getStoredAuthToken() {
+  try {
+    return localStorage.getItem(AUTH_TOKEN_STORAGE_KEY) || "";
+  } catch (_) {
+    return "";
+  }
+}
+
+function setStoredAuthToken(token) {
+  try {
+    if (token) localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, token);
+    else localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+  } catch (_) {}
+}
+
 function t(key) {
   const dict = translations[currentLang] || translations.en;
   return dict[key] || translations.en[key] || key;
@@ -222,8 +238,13 @@ function bindLanguageToggle() {
 }
 
 async function fetchJson(url, options = {}) {
+  const token = getStoredAuthToken();
   const response = await fetch(url, {
     credentials: "include",
+    headers: {
+      ...(options.headers || {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    },
     ...options
   });
 
@@ -272,7 +293,11 @@ async function fetchAuthMe() {
 }
 
 async function logoutTrust() {
-  return fetchJson(`${API_BASE}/auth/logout`, { method: "POST" });
+  try {
+    return await fetchJson(`${API_BASE}/auth/logout`, { method: "POST" });
+  } finally {
+    setStoredAuthToken("");
+  }
 }
 
 function setLinkStatus(text) {
