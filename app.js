@@ -90,6 +90,119 @@ function setupRankTooltipInteractions() {
   });
 }
 
+
+const APP_I18N = {
+  en: {
+    nav_play: 'Play', nav_leaderboard: 'Leaderboard', nav_home: 'Home',
+    queue_idle: 'Not in queue', queue_active: 'In queue', login: 'Sign in with Steam', logout: 'Log out',
+    profile_title: 'Profile', guest: 'Guest', profile_guest: 'Sign in with Steam to unlock party, queue and matchmaking.',
+    rank_rating: '2v2 rating', rank_title: 'TRUST ranks', rank_label: 'Rank', next_rank: 'To next rank: —',
+    streak: 'Streak', best_streak: 'Best streak', best_map: 'Best map', recent_form: 'Recent form',
+    restriction_guard: 'Queue Guard', blocked: 'Blocked', restriction_default_title: 'Queue is temporarily unavailable', restriction_default_message: 'The player has an active restriction.',
+    find_match: 'Find match', play_cta_guest: 'Sign in with Steam first. Then you can start 2x2 matchmaking.',
+    play_cta_ready: '2x2 only: start matchmaking solo or as a duo. Ready duos stay together and solo players get a teammate.',
+    queue_prompt: 'Press “Find match”. If there is no party yet, it will be created automatically.',
+    status: 'Status', waiting: 'Waiting', search_ready: 'When the party is ready, the leader can start search.', join_queue: 'FIND MATCH', cancel: 'CANCEL',
+    match_progress: 'Match progress', team_rosters: 'Team rosters', timeline: 'Timeline', live_room_events: 'Live room events', server: 'Server', actions: 'Actions',
+    no_match: 'No match', party_title: 'Party', no_party: 'No party', party_roster: 'Party roster', invites: 'Incoming invites', find_player: 'Find player', find: 'Find', create_party: 'Create party', leave_party: 'Leave party',
+    history_title: 'Match history', close: 'Close', match_problem: 'Match problem', tech_report_flow: 'Tech-report flow for Match Room', reason: 'Reason', comment: 'Comment', submit_report: 'Send report',
+    continue: 'Continue', open_profile: 'Open profile', copy_connect: 'Copy connect', play_again: 'Play again',
+    issue_server_not_responding: 'Server not responding', issue_cannot_connect: 'Cannot connect', issue_player_not_connecting: 'Player is not connecting', issue_match_stuck: 'Match is stuck', issue_result_not_recorded: 'Result was not recorded', issue_other: 'Other'
+  },
+  ru: {
+    nav_play: 'Играть', nav_leaderboard: 'Лидерборд', nav_home: 'Главная',
+    queue_idle: 'Не в очереди', queue_active: 'В очереди', login: 'Войти через Steam', logout: 'Выйти',
+    profile_title: 'Профиль', guest: 'Гость', profile_guest: 'Войди через Steam, чтобы открыть party, очередь и матчмейкинг.',
+    rank_rating: 'Рейтинг 2x2', rank_title: 'Звания TRUST', rank_label: 'Звание', next_rank: 'До следующего звания: —',
+    streak: 'Серия', best_streak: 'Лучшая серия', best_map: 'Лучшая карта', recent_form: 'Последняя форма',
+    restriction_guard: 'Queue Guard', blocked: 'Blocked', restriction_default_title: 'Поиск временно недоступен', restriction_default_message: 'У игрока есть активное ограничение.',
+    find_match: 'Найти матч', play_cta_guest: 'Сначала войди через Steam. Потом можно искать матч в 2x2.',
+    play_cta_ready: 'Режим только 2x2: можно искать матч соло или вдвоём. Готовая пати из двух не разделяется, соло-игроку подбирается тиммейт.',
+    queue_prompt: 'Нажми «Найти матч». Если party нет, она создастся автоматически.',
+    status: 'Статус', waiting: 'Ожидание', search_ready: 'Когда party готова, лидер может запустить поиск.', join_queue: 'НАЙТИ МАТЧ', cancel: 'ОТМЕНИТЬ',
+    match_progress: 'Прогресс матча', team_rosters: 'Составы команд', timeline: 'Timeline', live_room_events: 'Live room events', server: 'Сервер', actions: 'Действия',
+    no_match: 'Нет матча', party_title: 'Party', no_party: 'Нет party', party_roster: 'Состав party', invites: 'Входящие инвайты', find_player: 'Найти игрока', find: 'Найти', create_party: 'Создать party', leave_party: 'Покинуть party',
+    history_title: 'История матчей', close: 'Закрыть', match_problem: 'Проблема с матчем', tech_report_flow: 'Tech-report flow для Match Room', reason: 'Причина', comment: 'Комментарий', submit_report: 'Отправить репорт',
+    continue: 'Продолжить', open_profile: 'Открыть профиль', copy_connect: 'Скопировать connect', play_again: 'Играть ещё',
+    issue_server_not_responding: 'Сервер не отвечает', issue_cannot_connect: 'Не могу подключиться', issue_player_not_connecting: 'Игрок не подключается', issue_match_stuck: 'Матч завис', issue_result_not_recorded: 'Результат не записался', issue_other: 'Другое'
+  }
+};
+
+function appLang() {
+  return (localStorage.getItem('trust_lang') || 'en') === 'ru' ? 'ru' : 'en';
+}
+function appT(key) {
+  const lang = appLang();
+  return APP_I18N[lang]?.[key] ?? APP_I18N.en[key] ?? key;
+}
+function applyAppLanguage() {
+  document.documentElement.lang = appLang();
+  document.querySelectorAll('.lang-btn').forEach((btn) => btn.classList.toggle('active', btn.dataset.lang === appLang()));
+  const nav = document.querySelectorAll('.nav a');
+  if (nav[0]) nav[0].textContent = appT('nav_play');
+  if (nav[1]) nav[1].textContent = appT('nav_leaderboard');
+  if (nav[2]) nav[2].textContent = appT('nav_home');
+  if ($('appLoginBtn')) $('appLoginBtn').textContent = appT('login');
+  if ($('appLogoutBtn')) $('appLogoutBtn').textContent = appT('logout');
+  if ($('queueBadge') && !state.queue?.joinedAt) $('queueBadge').textContent = appT('queue_idle');
+  document.querySelector('.profile-card-shell .section-title h3')?.replaceChildren(document.createTextNode(appT('profile_title')));
+  if ($('authBadge') && !state.user) $('authBadge').textContent = appT('guest');
+  if ($('profileGuest')) $('profileGuest').textContent = appT('profile_guest');
+  document.querySelector('#rankTooltip .rank-tooltip-head strong')?.replaceChildren(document.createTextNode(appT('rank_title')));
+  const rankMuted = document.querySelector('#rankTooltip .rank-tooltip-head .muted'); if (rankMuted) rankMuted.textContent = appT('rank_rating');
+  const rankProgressHead = document.querySelector('.rank-progress-head .muted'); if (rankProgressHead) rankProgressHead.textContent = appT('rank_label');
+  if ($('profileRankProgressText') && $('profileRankProgressText').textContent.trim() === 'До следующего звания: —') $('profileRankProgressText').textContent = appT('next_rank');
+  const metaRows = document.querySelectorAll('.profile-side-meta .meta-row span.muted');
+  if (metaRows[0]) metaRows[0].textContent = appT('streak');
+  if (metaRows[1]) metaRows[1].textContent = appT('best_streak');
+  if (metaRows[2]) metaRows[2].textContent = appT('best_map');
+  const recentForm = document.querySelector('.profile-side-meta + div .label'); if (recentForm) recentForm.textContent = appT('recent_form');
+  const restrictionTitle = document.querySelector('#restrictionCard .section-title h3'); if (restrictionTitle) restrictionTitle.textContent = appT('restriction_guard');
+  if ($('restrictionBadge')) $('restrictionBadge').textContent = appT('blocked');
+  document.querySelector('#queueStageCard .badge')?.replaceChildren(document.createTextNode('2x2 MATCHMAKING'));
+  document.querySelector('#queueStageCard h2')?.replaceChildren(document.createTextNode(appT('find_match')));
+  if (!state.user) text('playCtaText', appT('play_cta_guest'));
+  if ($('joinQueueBtn')) $('joinQueueBtn').textContent = appT('join_queue');
+  if ($('cancelQueueBtn')) $('cancelQueueBtn').textContent = appT('cancel');
+  const statusH3 = document.querySelector('.queue-box .section-title h3'); if (statusH3) statusH3.textContent = appT('status');
+  if ($('matchmakingState') && !$('matchmakingState').dataset.dynamic) $('matchmakingState').textContent = appT('waiting');
+  if ($('searchStateText') && !state.queue?.joinedAt) $('searchStateText').textContent = appT('search_ready');
+  const matchLabels = document.querySelectorAll('#matchStageCard .label');
+  if (matchLabels[0]) matchLabels[0].textContent = appT('match_progress');
+  if (matchLabels[1]) matchLabels[1].textContent = appT('team_rosters');
+  if (matchLabels[2]) matchLabels[2].textContent = appT('timeline');
+  const tlMuted = document.querySelector('#matchStageCard .timeline-column .muted'); if (tlMuted) tlMuted.textContent = appT('live_room_events');
+  if (matchLabels[3]) matchLabels[3].textContent = appT('server');
+  if (matchLabels[4]) matchLabels[4].textContent = appT('actions');
+  if ($('currentMatchBadge') && !state.match) $('currentMatchBadge').textContent = appT('no_match');
+  const partyTitle = document.querySelector('#partyCard .section-title h3'); if (partyTitle) partyTitle.textContent = appT('party_title');
+  if ($('partyBadge') && !state.party) $('partyBadge').textContent = appT('no_party');
+  const partyLabels = document.querySelectorAll('#partyCard .label');
+  if (partyLabels[0]) partyLabels[0].textContent = appT('party_roster');
+  if (partyLabels[1]) partyLabels[1].textContent = appT('invites');
+  if (partyLabels[2]) partyLabels[2].textContent = appT('find_player');
+  if ($('userSearchBtn')) $('userSearchBtn').textContent = appT('find');
+  if ($('createPartyBtn')) $('createPartyBtn').textContent = appT('create_party');
+  if ($('leavePartyBtn')) $('leavePartyBtn').textContent = appT('leave_party');
+  const historyTitle = document.querySelector('#matchHistoryCard .section-title h3'); if (historyTitle) historyTitle.textContent = appT('history_title');
+  if (document.querySelector('[data-close-modal="match-details"]')) document.querySelector('[data-close-modal="match-details"]').textContent = appT('close');
+  if (document.querySelector('#matchIssueModal h3')) document.querySelector('#matchIssueModal h3').textContent = appT('match_problem');
+  const issueSub = document.querySelector('#matchIssueModal .modal-head .muted'); if (issueSub) issueSub.textContent = appT('tech_report_flow');
+  if (document.querySelector('[data-close-modal="match-issue"]')) document.querySelector('[data-close-modal="match-issue"]').textContent = appT('close');
+  const issueLabels = document.querySelectorAll('#matchIssueModal .label');
+  if (issueLabels[0]) issueLabels[0].textContent = appT('reason');
+  if (issueLabels[1]) issueLabels[1].textContent = appT('comment');
+  if ($('submitMatchIssueBtn')) $('submitMatchIssueBtn').textContent = appT('submit_report');
+  const issueReason = $('matchIssueReason');
+  if (issueReason) {
+    const labels = ['issue_server_not_responding','issue_cannot_connect','issue_player_not_connecting','issue_match_stuck','issue_result_not_recorded','issue_other'];
+    [...issueReason.options].forEach((opt, idx) => { if (labels[idx]) opt.textContent = appT(labels[idx]); });
+  }
+  if ($('postMatchContinueBtn')) $('postMatchContinueBtn').textContent = appT('continue');
+  if ($('postMatchProfileBtn')) $('postMatchProfileBtn').textContent = appT('open_profile');
+  if ($('copyConnectBtn')) $('copyConnectBtn').textContent = appT('copy_connect');
+}
+
 const state = {
   user: null,
   party: null,
@@ -303,7 +416,7 @@ function renderAuth() {
   $('authBadge').className = `pill ${authed ? 'ok' : 'idle'}`;
 
   if (!authed) {
-    text('playCtaText', 'Сначала войди через Steam. Потом можно искать матч в 2x2 соло или вдвоём.');
+    text('playCtaText', appT('play_cta_guest'));
     return;
   }
 
@@ -328,7 +441,7 @@ function renderAuth() {
   text('profileBestStreak', `${profile.bestWinStreak ?? 0}W`);
   text('profileFavoriteMap', profile.favoriteMap || '—');
   renderRecentForm('profileRecentForm', profile.recentForm || []);
-  text('playCtaText', 'Режим только 2x2: можно искать матч соло или вдвоём. Готовая пати из двух не разделяется, соло-игроку подбирается тиммейт.');
+  text('playCtaText', appT('play_cta_ready'));
 }
 
 function renderProfileOverview() {
@@ -522,8 +635,8 @@ function renderRestrictionCard() {
   const visible = !!block?.isActive && !isQueuePresenceOnly;
   hide('restrictionCard', !visible);
   if (!visible) return;
-  text('restrictionTitle', block.title || 'Поиск временно недоступен');
-  text('restrictionMessage', block.message || 'У игрока есть активное ограничение.');
+  text('restrictionTitle', block.title || appT('restriction_default_title'));
+  text('restrictionMessage', block.message || appT('restriction_default_message'));
   text('restrictionReason', block.reasonKey || block.type || 'queue_lock');
   text('restrictionRemaining', block.remainingText || 'до разблокировки');
   text('restrictionBadge', block.category === 'queue_lock' ? 'Locked' : 'Cooldown');
@@ -535,14 +648,14 @@ function renderQueue() {
   const inQueue = !!queue;
   const restrictions = state.restrictions || null;
   const canQueue = restrictions?.canQueue !== false;
-  $('queueBadge').textContent = inQueue ? 'В очереди' : 'Не в очереди';
+  $('queueBadge').textContent = inQueue ? appT('queue_active') : appT('queue_idle');
   $('queueBadge').className = `pill ${inQueue ? 'ok' : 'idle'}`;
   $('matchmakingState').textContent = inQueue ? 'Поиск...' : (canQueue ? 'Ожидание' : 'Blocked');
   $('matchmakingState').className = `pill ${inQueue ? 'live' : canQueue ? 'idle' : 'warn'}`;
   text('searchStateText', inQueue
     ? 'Матчмейкер подбирает 2x2 игру. Можно играть соло или вдвоём.'
     : canQueue
-      ? 'Нажми «Найти матч». Если party нет, она создастся автоматически.'
+      ? appT('queue_prompt')
       : (restrictions?.restriction?.message || 'Поиск временно недоступен.'));
   hide('joinQueueBtn', inQueue);
   hide('cancelQueueBtn', !inQueue);
@@ -1125,7 +1238,7 @@ function renderMatchRoomActions(match) {
   if (room.phase === 'finished' || room.phase === 'cancelled') {
     actions.push('<button class="btn secondary" data-room-action="result">Открыть результат</button>');
     actions.push('<button class="btn ghost" data-room-action="profile">Открыть профиль</button>');
-    actions.push('<button class="btn primary" data-room-action="play-again">Играть ещё</button>');
+    actions.push(`<button class="btn primary" data-room-action="play-again">${esc(appT('play_again'))}</button>`);
   }
   $('matchRoomActions').innerHTML = actions.join('') || '<div class="empty">Ожидание следующего шага матча.</div>';
 }
