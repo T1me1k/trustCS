@@ -165,6 +165,7 @@ function applyTranslations() {
 async function api(path, options = {}) {
   const response = await fetch(`${BACKEND_BASE_URL}${path}`, {
     credentials: 'include',
+    cache: 'no-store',
     headers: { ...(options.headers || {}) },
     ...options
   });
@@ -318,3 +319,27 @@ if (document.readyState === 'loading') {
 } else {
   initLanding();
 }
+
+
+let landingRefreshInFlight = false;
+async function safeLandingRefresh() {
+  if (landingRefreshInFlight) return;
+  landingRefreshInFlight = true;
+  try {
+    await Promise.all([refreshAuth(), refreshHealth(), refreshConfig()]);
+  } finally {
+    landingRefreshInFlight = false;
+  }
+}
+
+window.addEventListener('pageshow', () => {
+  void safeLandingRefresh();
+});
+
+window.addEventListener('focus', () => {
+  void safeLandingRefresh();
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) void safeLandingRefresh();
+});

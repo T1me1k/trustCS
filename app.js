@@ -264,6 +264,7 @@ function getAvatarMarkup(avatarUrl, fallback, className = 'avatar sm') {
 async function api(path, options = {}) {
   const response = await fetch(`${BACKEND_BASE_URL}${path}`, {
     credentials: 'include',
+    cache: 'no-store',
     headers: {
       'Content-Type': 'application/json',
       ...(options.headers || {})
@@ -1289,7 +1290,25 @@ document.addEventListener('click', (event) => {
   }
 });
 
-window.addEventListener('DOMContentLoaded', async () => {
+
+let appBootstrapped = false;
+let appRefreshInFlight = false;
+let appRefreshTimer = null;
+
+async function safeRefreshAll() {
+  if (appRefreshInFlight) return;
+  appRefreshInFlight = true;
+  try {
+    await refreshAll();
+  } finally {
+    appRefreshInFlight = false;
+  }
+}
+
+async function bootstrapApp() {
+  if (appBootstrapped) return;
+  appBootstrapped = true;
+
   setupRankTooltipInteractions();
   $('appLangRu')?.addEventListener('click', () => {
     appLang = 'ru';
@@ -1335,6 +1354,24 @@ window.addEventListener('DOMContentLoaded', async () => {
     void handleDelegatedClick(event);
   });
 
-  await refreshAll();
-  setInterval(() => { void refreshAll(); }, 5000);
+  await safeRefreshAll();
+  if (!appRefreshTimer) {
+    appRefreshTimer = setInterval(() => { void safeRefreshAll(); }, 5000);
+  }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  void bootstrapApp();
+});
+
+window.addEventListener('pageshow', () => {
+  void safeRefreshAll();
+});
+
+window.addEventListener('focus', () => {
+  void safeRefreshAll();
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) void safeRefreshAll();
 });

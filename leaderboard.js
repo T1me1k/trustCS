@@ -35,6 +35,7 @@ const lbT = (k) => (LB_I18N[lbLang] && LB_I18N[lbLang][k]) || LB_I18N.ru[k] || k
 async function api(path, options = {}) {
   const response = await fetch(`${BACKEND_BASE_URL}${path}`, {
     credentials: 'include',
+    cache: 'no-store',
     headers: { ...(options.headers || {}) },
     ...options
   });
@@ -114,7 +115,25 @@ async function refreshLeaderboardAuth() {
   } catch (_) {}
 }
 
-window.addEventListener('DOMContentLoaded', async () => {
+
+let leaderboardBootstrapped = false;
+let leaderboardRefreshInFlight = false;
+
+async function safeLeaderboardRefresh() {
+  if (leaderboardRefreshInFlight) return;
+  leaderboardRefreshInFlight = true;
+  try {
+    await refreshLeaderboardAuth();
+    await loadLeaderboard();
+  } finally {
+    leaderboardRefreshInFlight = false;
+  }
+}
+
+async function bootstrapLeaderboard() {
+  if (leaderboardBootstrapped) return;
+  leaderboardBootstrapped = true;
+
   document.getElementById('lbLoginBtn')?.addEventListener('click', () => {
     rememberAuthReturn();
     window.location.assign(getSteamAuthUrl());
@@ -123,15 +142,30 @@ window.addEventListener('DOMContentLoaded', async () => {
     lbLang = 'ru';
     localStorage.setItem(LB_LANG_KEY, lbLang);
     applyLbLang();
-    loadLeaderboard();
+    void loadLeaderboard();
   });
   document.getElementById('lbLangEn')?.addEventListener('click', () => {
     lbLang = 'en';
     localStorage.setItem(LB_LANG_KEY, lbLang);
     applyLbLang();
-    loadLeaderboard();
+    void loadLeaderboard();
   });
   applyLbLang();
-  await refreshLeaderboardAuth();
-  loadLeaderboard();
+  await safeLeaderboardRefresh();
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  void bootstrapLeaderboard();
+});
+
+window.addEventListener('pageshow', () => {
+  void safeLeaderboardRefresh();
+});
+
+window.addEventListener('focus', () => {
+  void safeLeaderboardRefresh();
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) void safeLeaderboardRefresh();
 });
