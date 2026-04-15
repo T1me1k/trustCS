@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./app.css" />
+  <link rel="stylesheet" href="./live-session.css" />
 </head>
 <body>
   <div id="inviteToastLayer" class="invite-toast-layer" aria-live="polite" aria-atomic="false"></div>
@@ -136,7 +137,7 @@
               </div>
               <div class="stats-grid queue-stage-stats" style="margin-top:16px">
                 <div class="stat"><span id="queueModeLabel">Режим</span><strong>AUTO</strong></div>
-                <div class="stat"><span id="queuePartyLabel">Party</span><strong id="queuePartyStat">0/2</strong></div>
+                <div class="stat"><span id="queuePartyLabel">В поиске / LIVE</span><strong id="queuePartyStat"><span data-live-searching-count>0</span> / <span data-live-active-matches>0</span></strong></div>
               </div>
             </div>
           </div>
@@ -313,5 +314,6 @@
 
   <script src="./frontend-config.js"></script>
   <script src="./app.js"></script>
+  <script src="./live-session.js" defer></script>
 </body>
 </html>

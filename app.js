@@ -128,7 +128,8 @@ const state = {
   inviteToastSeen: new Set(),
   inviteToastDismissed: new Set(),
   inviteToastTimers: new Map(),
-  postMatchSummary: null
+  postMatchSummary: null,
+  queueStats: null
 };
 
 let queueTimerInterval = null;
@@ -562,18 +563,23 @@ function renderQueue() {
   const inQueue = !!queue;
   const restrictions = state.restrictions || null;
   const canQueue = restrictions?.canQueue !== false;
+  const stats = state.queueStats || {};
+  const searchingPlayers = Number(stats.searchingPlayers || 0);
+  const activeMatches = Number(stats.activeMatches || 0);
   $('queueBadge').textContent = inQueue ? 'В очереди' : 'Не в очереди';
   $('queueBadge').className = `pill ${inQueue ? 'ok' : 'idle'}`;
   $('matchmakingState').textContent = inQueue ? 'Поиск...' : (canQueue ? 'Ожидание' : 'Blocked');
   $('matchmakingState').className = `pill ${inQueue ? 'live' : canQueue ? 'idle' : 'warn'}`;
   text('searchStateText', inQueue
-    ? 'Матчмейкер подбирает 2x2 игру. Можно играть соло или вдвоём.'
+    ? `Матчмейкер подбирает 2x2 игру. Сейчас ищут ${searchingPlayers} игроков, LIVE матчей ${activeMatches}.`
     : canQueue
       ? 'Нажми «Найти матч». Если party нет, она создастся автоматически.'
       : (restrictions?.restriction?.message || 'Поиск временно недоступен.'));
   hide('joinQueueBtn', inQueue);
   hide('cancelQueueBtn', !inQueue);
   if ($('joinQueueBtn')) $('joinQueueBtn').disabled = !inQueue && !canQueue;
+  text('queuePartyLabel', 'В поиске / LIVE');
+  if ($('queuePartyStat')) $('queuePartyStat').innerHTML = `<span data-live-searching-count>${searchingPlayers}</span> / <span data-live-active-matches>${activeMatches}</span>`;
 
   const queueStartedAt = queue?.queuedAt || queue?.joinedAt || queue?.createdAt || queue?.startedAt || queue?.searchStartedAt || null;
   if (inQueue && queueStartedAt) {
@@ -868,6 +874,10 @@ async function refreshProfile() {
   const data = await api('/api/profile/me');
   state.profile = data.profile || null;
 }
+async function refreshQueueStats() {
+  const data = await api('/api/queue/stats');
+  state.queueStats = data.stats || null;
+}
 async function refreshProfileHistory() {
   const data = await api('/api/profile/me/history?limit=12');
   state.profileHistory = data.items || [];
@@ -895,6 +905,7 @@ async function refreshAll() {
     refreshParty(),
     refreshQueue(),
     refreshMatch(),
+    refreshQueueStats(),
     refreshProfile(),
     refreshProfileHistory(),
     refreshPostMatchSummary()

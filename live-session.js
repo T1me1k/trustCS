@@ -1,4 +1,5 @@
-(function () {
+
+(() => {
   const BACKEND_BASE_URL = (() => {
     const fromWindow = window.TRUST_BACKEND_BASE_URL;
     const fromMeta = document.querySelector('meta[name="trust-backend-url"]')?.content;
@@ -6,339 +7,275 @@
     return (fromWindow || fromMeta || fromStorage || 'https://YOUR-BACKEND.up.railway.app').replace(/\/+$/, '');
   })();
 
-  const POLL_MS = 2000;
-  const toastSeen = new Set();
-  const toastDismissed = new Set();
-  const toastTimers = new Map();
-  let refreshInFlight = false;
-  let booted = false;
-  let timer = null;
-  let currentUser = null;
-  let currentParty = null;
-  let currentMatch = null;
-  let matchBannerDismissedFor = null;
+  const state = {
+    started: false,
+    user: null,
+    party: null,
+    match: null,
+    stats: null,
+    lastInviteIds: new Set(),
+    lastMatchState: null,
+    pollTimer: null,
+    busy: false
+  };
 
-  function t(key) {
-    const lang = localStorage.getItem('trust_lang') === 'en' ? 'en' : 'ru';
-    const dict = {
-      ru: {
-        inviteTitle: 'Инвайт в party',
-        inviteSub: 'приглашает тебя в лобби. Инвайт живёт 10 секунд.',
-        accept: 'Принять',
-        decline: 'Отклонить',
-        openApp: 'Открыть app',
-        matchTitle: 'Матч найден',
-        matchPending: 'Все 4 игрока должны подтвердить матч.',
-        matchMap: 'Матч принят. Идёт стадия выбора карты.',
-        matchConnect: 'Сервер готов. Можно подключаться к матчу.',
-        matchLive: 'Матч уже идёт.',
-        matchFinished: 'Матч завершён.',
-        acceptMatch: 'Принять матч',
-        accepted: 'Принято',
-        invitedAccepted: 'Инвайт принят.',
-        invitedDeclined: 'Инвайт отклонён.',
-        matchAccepted: 'Матч принят.',
-        loading: 'Загрузка...',
-        queue: '2x2',
-        map: 'Карта',
-        status: 'Статус',
-        playersAccepted: 'приняли',
-        viewApp: 'Открыть матч',
-        connect: 'Steam connect',
-        close: 'Закрыть'
-      },
-      en: {
-        inviteTitle: 'Party invite',
-        inviteSub: 'invited you to a lobby. Invite lasts 10 seconds.',
-        accept: 'Accept',
-        decline: 'Decline',
-        openApp: 'Open app',
-        matchTitle: 'Match found',
-        matchPending: 'All 4 players must accept the match.',
-        matchMap: 'Match accepted. Map voting is in progress.',
-        matchConnect: 'Server is ready. You can join the match.',
-        matchLive: 'The match is already live.',
-        matchFinished: 'The match has finished.',
-        acceptMatch: 'Accept match',
-        accepted: 'Accepted',
-        invitedAccepted: 'Invite accepted.',
-        invitedDeclined: 'Invite declined.',
-        matchAccepted: 'Match accepted.',
-        loading: 'Loading...',
-        queue: '2v2',
-        map: 'Map',
-        status: 'Status',
-        playersAccepted: 'accepted',
-        viewApp: 'Open match',
-        connect: 'Steam connect',
-        close: 'Close'
-      }
-    };
-    return dict[lang][key] || dict.ru[key] || key;
+  function el(tag, cls, html) {
+    const node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (html != null) node.innerHTML = html;
+    return node;
   }
 
-  function esc(v) { return String(v ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
-  function api(path, options = {}) {
-    return fetch(`${BACKEND_BASE_URL}${path}`, {
+  function esc(value) {
+    return String(value ?? '').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch] || ch));
+  }
+
+  async function api(path, options = {}) {
+    const response = await fetch(`${BACKEND_BASE_URL}${path}`, {
       credentials: 'include',
       cache: 'no-store',
       headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
       ...options
-    }).then(async (response) => {
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok || data.ok === false) throw new Error(data.error || `request_failed_${response.status}`);
-      return data;
     });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || data.ok === false) throw new Error(data.error || `request_failed_${response.status}`);
+    return data;
   }
 
-  function showInlineNotice(message, tone) {
-    const root = ensureNoticeRoot();
-    root.textContent = message;
-    root.className = `alert live-session-inline-notice ${tone === 'error' ? 'live-session-inline-notice-error' : ''}`;
-    root.classList.remove('hidden');
-    window.clearTimeout(root._hideTimer);
-    root._hideTimer = window.setTimeout(() => root.classList.add('hidden'), 3200);
-  }
-
-  function ensureNoticeRoot() {
-    let root = document.getElementById('liveSessionInlineNotice');
-    if (root) return root;
-    root = document.createElement('div');
-    root.id = 'liveSessionInlineNotice';
-    root.className = 'alert live-session-inline-notice hidden';
-    root.style.position = 'fixed';
-    root.style.left = '16px';
-    root.style.right = '16px';
-    root.style.top = '92px';
-    root.style.zIndex = '140';
-    document.body.appendChild(root);
-    return root;
-  }
-
-  function ensureUi() {
-    if (!document.getElementById('liveSessionLayer')) {
-      const layer = document.createElement('div');
-      layer.id = 'liveSessionLayer';
-      layer.className = 'live-session-layer';
-      document.body.appendChild(layer);
-    }
-    if (!document.getElementById('liveSessionBanner')) {
-      const banner = document.createElement('div');
-      banner.id = 'liveSessionBanner';
-      banner.className = 'live-session-banner hidden';
-      document.body.appendChild(banner);
-    }
-  }
-
-  function initials(name) {
-    return String(name || '?').trim().slice(0, 1).toUpperCase() || '?';
-  }
-
-  function clearToastTimer(inviteId) {
-    const timerId = toastTimers.get(inviteId);
-    if (timerId) window.clearTimeout(timerId);
-    toastTimers.delete(inviteId);
-  }
-
-  function removeInviteToast(inviteId) {
-    clearToastTimer(inviteId);
-    const node = document.querySelector(`[data-live-invite-id="${inviteId}"]`);
-    if (node) node.remove();
-  }
-
-  async function acceptInvite(inviteId) {
-    try {
-      await api(`/api/party/invite/${encodeURIComponent(inviteId)}/accept`, { method: 'POST' });
-      removeInviteToast(inviteId);
-      showInlineNotice(t('invitedAccepted'));
-      await refresh();
-    } catch (err) {
-      showInlineNotice(`Invite: ${err.message}`, 'error');
-      await refresh();
-    }
-  }
-
-  async function declineInvite(inviteId) {
-    try {
-      await api(`/api/party/invite/${encodeURIComponent(inviteId)}/decline`, { method: 'POST' });
-      removeInviteToast(inviteId);
-      toastDismissed.add(String(inviteId));
-      showInlineNotice(t('invitedDeclined'));
-      await refresh();
-    } catch (err) {
-      showInlineNotice(`Invite: ${err.message}`, 'error');
-    }
-  }
-
-  function renderInviteToasts() {
-    ensureUi();
-    const layer = document.getElementById('liveSessionLayer');
-    const invites = currentParty?.pendingInvites || [];
-    const activeIds = new Set(invites.map((invite) => String(invite.id)));
-
-    layer.querySelectorAll('[data-live-invite-id]').forEach((node) => {
-      if (!activeIds.has(node.dataset.liveInviteId)) removeInviteToast(node.dataset.liveInviteId);
-    });
-
-    invites.forEach((invite) => {
-      const inviteId = String(invite.id);
-      if (toastDismissed.has(inviteId) || document.querySelector(`[data-live-invite-id="${inviteId}"]`)) return;
-      toastSeen.add(inviteId);
-      const card = document.createElement('div');
-      card.className = 'live-session-toast';
-      card.dataset.liveInviteId = inviteId;
-      card.innerHTML = `
-        <button class="live-session-close" type="button" data-live-action="dismiss-invite" data-invite-id="${esc(inviteId)}">×</button>
-        <div class="live-session-toast-head">
-          <div class="live-session-toast-title">${esc(t('inviteTitle'))}</div>
-        </div>
-        <div class="live-session-toast-body">
-          <div class="live-session-toast-avatar">${invite.fromAvatarUrl ? `<img src="${esc(invite.fromAvatarUrl)}" alt="avatar">` : esc(initials(invite.fromNickname))}</div>
-          <div>
-            <div class="live-session-toast-name">${esc(invite.fromNickname || 'Unknown')}</div>
-            <div class="live-session-toast-sub">${esc(t('inviteSub'))}</div>
+  function ensureShell() {
+    if (document.getElementById('liveSessionRoot')) return;
+    const root = el('div');
+    root.id = 'liveSessionRoot';
+    root.innerHTML = `
+      <div id="liveToastStack" class="live-toast-stack"></div>
+      <div id="liveOverlay" class="live-overlay hidden">
+        <div class="live-backdrop"></div>
+        <div class="live-modal-card">
+          <div class="live-modal-head">
+            <div>
+              <div class="live-modal-title" id="liveModalTitle">TRUST</div>
+              <div class="live-modal-subtitle" id="liveModalSubtitle">Live update</div>
+            </div>
+            <button type="button" class="live-close-btn" id="liveModalClose">✕</button>
           </div>
+          <div id="liveModalBody" class="live-modal-body"></div>
         </div>
-        <div class="live-session-actions">
-          <button class="btn primary" type="button" data-live-action="accept-invite" data-invite-id="${esc(inviteId)}">${esc(t('accept'))}</button>
-          <button class="btn ghost" type="button" data-live-action="decline-invite" data-invite-id="${esc(inviteId)}">${esc(t('decline'))}</button>
-        </div>
-        <div class="live-session-progress"><div class="live-session-progress-bar"></div></div>
-      `;
-      layer.appendChild(card);
-      const bar = card.querySelector('.live-session-progress-bar');
-      window.requestAnimationFrame(() => bar?.classList.add('animate'));
-
-      const expiresAt = invite.expiresAt ? new Date(invite.expiresAt).getTime() : Date.now() + 10000;
-      const msLeft = Math.max(250, expiresAt - Date.now());
-      const timeoutId = window.setTimeout(() => removeInviteToast(inviteId), msLeft + 50);
-      toastTimers.set(inviteId, timeoutId);
-    });
+      </div>`;
+    document.body.appendChild(root);
+    root.querySelector('#liveModalClose')?.addEventListener('click', closeModal);
+    root.querySelector('.live-backdrop')?.addEventListener('click', closeModal);
   }
 
-  function connectCommand(match) {
-    if (!match?.serverIp || !match?.serverPort) return null;
-    return `steam://connect/${match.serverIp}:${match.serverPort}`;
+  function closeModal() {
+    document.getElementById('liveOverlay')?.classList.add('hidden');
   }
 
-  async function acceptMatch(publicMatchId) {
+  function openModal(title, subtitle, bodyHtml) {
+    ensureShell();
+    document.getElementById('liveModalTitle').textContent = title || 'TRUST';
+    document.getElementById('liveModalSubtitle').textContent = subtitle || '';
+    document.getElementById('liveModalBody').innerHTML = bodyHtml || '';
+    document.getElementById('liveOverlay')?.classList.remove('hidden');
+  }
+
+  function pushToast(id, html, sticky = false) {
+    ensureShell();
+    const stack = document.getElementById('liveToastStack');
+    if (!stack || document.querySelector(`[data-live-toast-id="${id}"]`)) return;
+    const toast = el('div', 'live-toast-card', html);
+    toast.dataset.liveToastId = id;
+    stack.appendChild(toast);
+    if (!sticky) {
+      window.setTimeout(() => toast.remove(), 6000);
+    }
+    return toast;
+  }
+
+  function connectString(match) {
+    const room = match?.room || {};
+    const server = room.server || {};
+    if (!server.ip || !server.port) return 'Сервер ещё назначается';
+    return `connect ${server.ip}:${server.port}${server.password ? `; password ${server.password}` : ''}`;
+  }
+
+  async function acceptInvite(inviteId, btn) {
+    if (btn) btn.disabled = true;
+    try {
+      await api(`/api/party/invites/${encodeURIComponent(inviteId)}/accept`, { method: 'POST' });
+      closeModal();
+      await refresh();
+    } catch (error) {
+      alert(`Не удалось принять инвайт: ${error.message}`);
+      if (btn) btn.disabled = false;
+    }
+  }
+
+  async function declineInvite(inviteId, btn) {
+    if (btn) btn.disabled = true;
+    try {
+      await api(`/api/party/invites/${encodeURIComponent(inviteId)}/decline`, { method: 'POST' });
+      closeModal();
+      await refresh();
+    } catch (error) {
+      alert(`Не удалось отклонить инвайт: ${error.message}`);
+      if (btn) btn.disabled = false;
+    }
+  }
+
+  async function acceptMatch(publicMatchId, btn) {
+    if (btn) btn.disabled = true;
     try {
       await api(`/api/matches/${encodeURIComponent(publicMatchId)}/accept`, { method: 'POST' });
-      showInlineNotice(t('matchAccepted'));
-      matchBannerDismissedFor = null;
-      await refresh();
-    } catch (err) {
-      showInlineNotice(`Match: ${err.message}`, 'error');
-      await refresh();
+      await refresh(true);
+    } catch (error) {
+      alert(`Не удалось принять матч: ${error.message}`);
+      if (btn) btn.disabled = false;
     }
   }
 
-  function statusDescription(match) {
-    if (!match) return '';
-    if (match.status === 'pending_acceptance') return t('matchPending');
-    if (match.status === 'map_voting') return t('matchMap');
-    if (match.status === 'server_assigned') return t('matchConnect');
-    if (match.status === 'live') return t('matchLive');
-    return t('matchFinished');
-  }
-
-  function renderMatchBanner() {
-    ensureUi();
-    const banner = document.getElementById('liveSessionBanner');
-    const match = currentMatch;
-    if (!currentUser || !match || matchBannerDismissedFor === match.publicMatchId) {
-      banner.classList.add('hidden');
-      banner.innerHTML = '';
-      return;
-    }
-
-    const canAccept = match.status === 'pending_acceptance' && !match.accepted;
-    const canConnect = ['server_assigned', 'live'].includes(match.status) && !!connectCommand(match);
-    const acceptedLabel = `${match.acceptedCount || 0}/${match.totalPlayers || 4} ${t('playersAccepted')}`;
-    banner.classList.remove('hidden');
-    banner.innerHTML = `
-      <button class="live-session-close live-session-banner-close" type="button" data-live-action="dismiss-match">×</button>
-      <div class="live-session-banner-main">
-        <div class="live-session-banner-badge">M</div>
-        <div>
-          <div class="live-session-banner-title">${esc(t('matchTitle'))}</div>
-          <div class="live-session-banner-sub">${esc(statusDescription(match))}</div>
-          <div class="live-session-toast-meta">
-            <span class="live-session-mini-pill live">ID ${esc(match.publicMatchId || '—')}</span>
-            <span class="live-session-mini-pill ${match.status === 'pending_acceptance' ? 'warn' : 'ok'}">${esc(match.status || 'pending')}</span>
-            <span class="live-session-mini-pill">${esc(acceptedLabel)}</span>
-            ${match.mapName ? `<span class="live-session-mini-pill">${esc(t('map'))}: ${esc(match.mapName)}</span>` : ''}
-          </div>
-        </div>
-      </div>
-      <div class="live-session-banner-actions">
-        ${canAccept ? `<button class="btn primary" type="button" data-live-action="accept-match" data-match-id="${esc(match.publicMatchId)}">${esc(t('acceptMatch'))}</button>` : ''}
-        ${canConnect ? `<a class="btn secondary" href="${esc(connectCommand(match))}">${esc(t('connect'))}</a>` : ''}
-        <a class="btn ghost" href="./app.html">${esc(t('viewApp'))}</a>
-      </div>
-    `;
-  }
-
-  async function refresh() {
-    if (refreshInFlight) return;
-    refreshInFlight = true;
+  async function voteMap(publicMatchId, mapName, btn) {
+    if (btn) btn.disabled = true;
     try {
-      const auth = await api('/auth/me').catch(() => ({ user: null }));
-      currentUser = auth.user || null;
-      if (!currentUser) {
-        currentParty = null;
-        currentMatch = null;
-        renderInviteToasts();
-        renderMatchBanner();
-        return;
+      await api(`/api/matches/${encodeURIComponent(publicMatchId)}/map-vote`, {
+        method: 'POST',
+        body: JSON.stringify({ mapName })
+      });
+      await refresh(true);
+    } catch (error) {
+      alert(`Не удалось выбрать карту: ${error.message}`);
+      if (btn) btn.disabled = false;
+    }
+  }
+
+  function bindModalActions() {
+    const body = document.getElementById('liveModalBody');
+    if (!body) return;
+    body.querySelectorAll('[data-live-accept-invite]').forEach((btn) => btn.addEventListener('click', () => acceptInvite(btn.dataset.liveAcceptInvite, btn)));
+    body.querySelectorAll('[data-live-decline-invite]').forEach((btn) => btn.addEventListener('click', () => declineInvite(btn.dataset.liveDeclineInvite, btn)));
+    body.querySelectorAll('[data-live-accept-match]').forEach((btn) => btn.addEventListener('click', () => acceptMatch(btn.dataset.liveAcceptMatch, btn)));
+    body.querySelectorAll('[data-live-vote-map]').forEach((btn) => btn.addEventListener('click', () => voteMap(btn.dataset.liveMatchId, btn.dataset.liveVoteMap, btn)));
+    body.querySelectorAll('[data-live-open-app]').forEach((btn) => btn.addEventListener('click', () => { window.location.href = './app.html'; }));
+  }
+
+  function renderInviteModal(invite) {
+    openModal(
+      'Инвайт в party',
+      'Можно принять прямо на этой странице',
+      `
+        <div class="live-info-line">Игрок <strong>${esc(invite.fromNickname || invite.fromUserNickname || 'Unknown')}</strong> приглашает тебя в duo.</div>
+        <div class="live-modal-actions">
+          <button type="button" class="btn primary" data-live-accept-invite="${esc(invite.id)}">Принять</button>
+          <button type="button" class="btn ghost" data-live-decline-invite="${esc(invite.id)}">Отклонить</button>
+          <button type="button" class="btn secondary" data-live-open-app>Открыть app</button>
+        </div>`
+    );
+    bindModalActions();
+  }
+
+  function renderMatchModal(match) {
+    const room = match.room || {};
+    const canAccept = room.actions?.canAccept || (match.status === 'pending_acceptance' && !match.accepted);
+    const canVoteMap = room.actions?.canVoteMap || (['map_voting', 'server_assigned'].includes(match.status) && !match.mapName);
+    let body = `
+      <div class="live-match-grid">
+        <div class="live-stat-card"><span>Статус</span><strong>${esc(room.statusText || match.status || '—')}</strong></div>
+        <div class="live-stat-card"><span>Приняли</span><strong>${esc(`${match.acceptedCount || room.counts?.accepted || 0}/${match.totalPlayers || room.counts?.totalPlayers || 4}`)}</strong></div>
+        <div class="live-stat-card"><span>Матч</span><strong>${esc(match.publicMatchId || match.matchId || '—')}</strong></div>
+      </div>`;
+
+    if (canAccept) {
+      body += `<div class="live-modal-actions"><button type="button" class="btn primary" data-live-accept-match="${esc(match.publicMatchId)}">Принять матч</button><button type="button" class="btn secondary" data-live-open-app>Открыть app</button></div>`;
+    } else if (canVoteMap) {
+      const maps = Array.isArray(match.mapPool) ? match.mapPool : ['shortdust', 'lake', 'overpass', 'vertigo', 'nuke'];
+      body += `<div class="live-info-line">Все приняли матч. Выбери карту прямо здесь:</div><div class="live-map-grid">${maps.map((map) => `<button type="button" class="btn secondary block" data-live-match-id="${esc(match.publicMatchId)}" data-live-vote-map="${esc(map)}">${esc(map)}</button>`).join('')}</div>`;
+    } else if (match.mapName) {
+      body += `<div class="live-info-line">Карта: <strong>${esc(match.mapName)}</strong></div>`;
+    }
+
+    if (['server_assigned', 'live'].includes(match.status)) {
+      body += `<div class="live-connect-box"><div class="live-connect-label">Connect</div><code>${esc(connectString(match))}</code></div>`;
+      body += `<div class="live-modal-actions"><button type="button" class="btn secondary" data-live-open-app>Открыть Match Room</button></div>`;
+    }
+
+    openModal('Матч найден', 'Матч доступен на любой странице', body);
+    bindModalActions();
+  }
+
+  function updateStatsBadges() {
+    const stats = state.stats || {};
+    const searchingPlayers = Number(stats.searchingPlayers || 0);
+    const activeMatches = Number(stats.activeMatches || 0);
+    document.querySelectorAll('[data-live-searching-count]').forEach((node) => { node.textContent = searchingPlayers; });
+    document.querySelectorAll('[data-live-active-matches]').forEach((node) => { node.textContent = activeMatches; });
+  }
+
+  function maybeShowInviteNotice() {
+    const invites = state.party?.pendingInvites || [];
+    const currentIds = new Set(invites.map((invite) => String(invite.id)));
+    invites.forEach((invite) => {
+      const inviteId = String(invite.id);
+      if (state.lastInviteIds.has(inviteId)) return;
+      pushToast(`invite-${inviteId}`, `
+        <div class="live-toast-title">Новый инвайт в party</div>
+        <div class="live-toast-text">${esc(invite.fromNickname || invite.fromUserNickname || 'Игрок')} приглашает тебя в duo.</div>
+        <div class="live-toast-actions"><button type="button" class="btn secondary live-toast-open">Открыть</button></div>
+      `, true)?.querySelector('.live-toast-open')?.addEventListener('click', () => renderInviteModal(invite));
+    });
+    state.lastInviteIds = currentIds;
+  }
+
+  function maybeShowMatchNotice(forceModal = false) {
+    const match = state.match;
+    const currentKey = match ? `${match.publicMatchId}:${match.status}:${match.mapName || ''}:${match.acceptedCount || 0}` : null;
+    const changed = currentKey && currentKey !== state.lastMatchState;
+    if (match && (forceModal || changed)) {
+      pushToast(`match-${match.publicMatchId}-${match.status}`, `
+        <div class="live-toast-title">Матч найден</div>
+        <div class="live-toast-text">${esc((match.room && match.room.statusText) || match.status || 'Матч готов')}</div>
+        <div class="live-toast-actions"><button type="button" class="btn secondary live-toast-open">Открыть</button></div>
+      `, true)?.querySelector('.live-toast-open')?.addEventListener('click', () => renderMatchModal(match));
+      if (forceModal || match.status === 'pending_acceptance' || match.status === 'map_voting') {
+        renderMatchModal(match);
       }
-      const [partyData, matchData] = await Promise.all([
-        api('/api/party/me').catch(() => ({ party: null })),
-        api('/api/matches/me/current').catch(() => ({ match: null }))
+    }
+    state.lastMatchState = currentKey;
+  }
+
+  async function refresh(forceModal = false) {
+    if (state.busy) return;
+    state.busy = true;
+    try {
+      const [auth, party, match, stats] = await Promise.allSettled([
+        api('/auth/me'),
+        api('/api/party/me'),
+        api('/api/matches/me/current'),
+        api('/api/queue/stats')
       ]);
-      currentParty = partyData.party || null;
-      currentMatch = matchData.match || null;
-      if (!currentMatch) matchBannerDismissedFor = null;
-      renderInviteToasts();
-      renderMatchBanner();
+      state.user = auth.status === 'fulfilled' ? (auth.value.user || null) : null;
+      state.party = party.status === 'fulfilled' ? (party.value.party || null) : null;
+      state.match = match.status === 'fulfilled' ? (match.value.match || null) : null;
+      if (state.match && Array.isArray(match.value.mapPool)) state.match.mapPool = match.value.mapPool;
+      state.stats = stats.status === 'fulfilled' ? (stats.value.stats || null) : null;
+      updateStatsBadges();
+      if (!state.user) return;
+      maybeShowInviteNotice();
+      maybeShowMatchNotice(forceModal);
     } finally {
-      refreshInFlight = false;
+      state.busy = false;
     }
   }
 
-  function handleClicks(event) {
-    const action = event.target.closest('[data-live-action]');
-    if (!action) return;
-    event.preventDefault();
-    const type = action.dataset.liveAction;
-    if (type === 'accept-invite') return void acceptInvite(action.dataset.inviteId);
-    if (type === 'decline-invite') return void declineInvite(action.dataset.inviteId);
-    if (type === 'dismiss-invite') {
-      const inviteId = String(action.dataset.inviteId || '');
-      toastDismissed.add(inviteId);
-      removeInviteToast(inviteId);
-      return;
-    }
-    if (type === 'accept-match') return void acceptMatch(action.dataset.matchId);
-    if (type === 'dismiss-match') {
-      matchBannerDismissedFor = currentMatch?.publicMatchId || '__none__';
-      renderMatchBanner();
-    }
-  }
-
-  function boot() {
-    if (booted) return;
-    booted = true;
-    ensureUi();
-    document.addEventListener('click', handleClicks);
+  function start() {
+    if (state.started) return;
+    state.started = true;
+    ensureShell();
     void refresh();
-    timer = window.setInterval(() => void refresh(), POLL_MS);
-    window.addEventListener('focus', () => void refresh());
-    window.addEventListener('pageshow', () => void refresh());
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) void refresh(); });
+    state.pollTimer = window.setInterval(() => { void refresh(); }, 1500);
   }
 
-  window.TRUST_LIVE_SESSION = { refresh, boot };
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
-  else boot();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start, { once: true });
+  } else {
+    start();
+  }
 })();

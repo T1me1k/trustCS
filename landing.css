@@ -421,6 +421,3 @@ button,input{font:inherit}
   .landing-step span{width:44px;height:44px}
   .hero-cta .btn{width:100%}
 }
-
-.live-session-inline-notice{max-width:720px;margin:0 auto}
-.live-session-inline-notice-error{border-color:rgba(239,68,68,.24)!important;background:rgba(239,68,68,.10)!important}
