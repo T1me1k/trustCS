@@ -238,9 +238,9 @@
   function maybeShowMatchNotice(forceModal = false) {
     const match = state.match;
     const currentKey = match ? `${match.publicMatchId}:${match.status}:${match.mapName || ''}:${match.acceptedCount || 0}:${match.connectedCount || 0}` : null;
-    const changed = currentKey && currentKey !== state.lastMatchState;
-    if (!match) {
+    if (!match || ['finished', 'cancelled', 'canceled'].includes(String(match.status || '').toLowerCase())) {
       state.lastMatchState = null;
+      closeModal();
       return;
     }
     if (!isAppPage && ['pending_acceptance', 'map_voting', 'server_assigned', 'live'].includes(match.status)) {
@@ -248,9 +248,6 @@
         window.location.href = './app.html';
         return;
       }
-    }
-    if (!isAppPage && (forceModal || changed) && ['pending_acceptance', 'map_voting'].includes(match.status)) {
-      renderMatchModal(match);
     }
     state.lastMatchState = currentKey;
   }

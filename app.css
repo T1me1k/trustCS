@@ -327,7 +327,7 @@ button,input{font:inherit}
 .current-match-id{font-weight:800;font-size:28px;letter-spacing:-.05em}
 .current-match-hero-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
 .server-connect-box{margin-top:14px;padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid var(--line)}
-.server-connect-line{font-weight:700;word-break:break-word}
+.server-connect-line{font-weight:700;word-break:break-word;overflow-wrap:anywhere}
 .match-grid-compact{grid-template-columns:1fr 1fr}
 #matchActions{margin-top:16px}
 @media (max-width: 1180px){.play-stage-grid,.party-main-grid{grid-template-columns:1fr}}
@@ -382,6 +382,8 @@ button,input{font:inherit}
 .match-player-main{display:flex;align-items:center;gap:12px;min-width:0}.match-player-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.tag{display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;border:1px solid var(--line);font-size:11px;color:var(--muted)}
 .tag.ok{border-color:rgba(34,197,94,.26);color:#9ee7b0}.tag.warn{border-color:rgba(245,158,11,.28);color:#fcd18b}.tag.danger{border-color:rgba(239,68,68,.28);color:#ffb4b4}.tag.duo{border-color:rgba(139,92,246,.28);color:#d9c2ff}
 .match-room-actions{display:flex;flex-direction:column;gap:10px}.match-room-actions .btn{width:100%}.match-room-events{display:flex;flex-direction:column;gap:10px;max-height:420px;overflow:auto}
+.match-room-layout,.match-room-maincol,.match-room-sidecol,.match-room-panel,.match-room-team,.match-player-card,.match-player-main,.match-player-info,.match-room-summary-card{min-width:0}
+.match-room-stage-step,.match-room-summary-card strong,.current-match-id{overflow-wrap:anywhere;word-break:break-word}
 .match-event-item{display:grid;grid-template-columns:110px minmax(0,1fr);gap:12px;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.02)}.match-event-time{font-size:12px;color:var(--muted)}.match-event-title{font-weight:800;margin-bottom:4px}
 .issue-form-grid{display:grid;grid-template-columns:1fr;gap:16px}.issue-select{width:100%}.issue-textarea{min-height:140px;resize:vertical}
 @media (max-width:1180px){.match-room-layout{grid-template-columns:1fr}.match-room-summary-grid{grid-template-columns:repeat(3,1fr)}}

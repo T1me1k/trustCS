@@ -633,6 +633,12 @@ function connectString(match) {
   return `connect ${match.serverIp}:${match.serverPort}; password ${match.serverPassword || ''}`.trim();
 }
 
+function shouldDisplayMatchRoom(match) {
+  if (!match) return false;
+  const phase = String(match?.room?.phase || match?.phase || match?.status || '').trim().toLowerCase();
+  return !['finished', 'cancelled', 'canceled'].includes(phase);
+}
+
 function renderCurrentMatch() {
   const match = state.match;
   const hasMatch = !!match;
@@ -1186,12 +1192,21 @@ function renderMatchRoomActions(match) {
 
 function renderCurrentMatch() {
   const match = state.match;
-  const hasMatch = !!match;
+  const hasMatch = shouldDisplayMatchRoom(match);
   hide('queueStageCard', hasMatch);
   hide('matchStageCard', !hasMatch);
   $('currentMatchBadge').textContent = hasMatch ? ((match.room?.phaseLabel) || match.status || 'Матч') : 'Нет матча';
   $('currentMatchBadge').className = `pill ${hasMatch ? matchPhaseBadgeClass(match.room?.phase) : 'idle'}`;
-  if (!hasMatch) return;
+  if (!hasMatch) {
+    $('currentMatchSummaryGrid').innerHTML = '';
+    $('currentMatchStageTimeline').innerHTML = '';
+    $('teamAPlayers').innerHTML = '';
+    $('teamBPlayers').innerHTML = '';
+    $('matchRoomActions').innerHTML = '';
+    text('serverConnectLine', '—');
+    text('matchRoomWhyBlocked', '—');
+    return;
+  }
 
   const room = match.room || {};
   text('currentMatchId', room.publicMatchId || match.publicMatchId || '—');

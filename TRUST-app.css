@@ -327,7 +327,7 @@ button,input{font:inherit}
 .current-match-id{font-weight:800;font-size:28px;letter-spacing:-.05em}
 .current-match-hero-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
 .server-connect-box{margin-top:14px;padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid var(--line)}
-.server-connect-line{font-weight:700;word-break:break-word}
+.server-connect-line{font-weight:700;word-break:break-word;overflow-wrap:anywhere}
 .match-grid-compact{grid-template-columns:1fr 1fr}
 #matchActions{margin-top:16px}
 @media (max-width: 1180px){.play-stage-grid,.party-main-grid{grid-template-columns:1fr}}

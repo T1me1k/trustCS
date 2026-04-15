@@ -611,6 +611,12 @@ function connectString(match) {
   return `connect ${match.serverIp}:${match.serverPort}; password ${match.serverPassword || ''}`.trim();
 }
 
+function shouldDisplayMatchRoom(match) {
+  if (!match) return false;
+  const phase = String(match?.room?.phase || match?.phase || match?.status || '').trim().toLowerCase();
+  return !['finished', 'cancelled', 'canceled'].includes(phase);
+}
+
 function renderCurrentMatch() {
   const match = state.match;
   const hasMatch = !!match;
