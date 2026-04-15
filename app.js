@@ -237,6 +237,20 @@ function formatDate(value) {
   return dt.toLocaleString('ru-RU', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
 }
 
+
+function rerenderLocalizedApp() {
+  renderAuth();
+  renderProfileOverview();
+  renderParty();
+  renderRestrictionCard();
+  renderQueue();
+  renderCurrentMatch();
+  renderHistory();
+  renderMatchDetailsModal();
+  renderPostMatchModal();
+  applyAppLanguage();
+}
+
 function formatQueueElapsed(totalSeconds) {
   const sec = Math.max(0, Math.floor(Number(totalSeconds) || 0));
   const hours = Math.floor(sec / 3600);
@@ -995,6 +1009,7 @@ async function refreshAll() {
   evaluatePostMatchSummary();
   renderMatchDetailsModal();
   renderPostMatchModal();
+  applyAppLanguage();
 }
 
 function login() { window.location.href = `${BACKEND_BASE_URL}/auth/steam`; }
@@ -1377,7 +1392,16 @@ document.addEventListener('click', (event) => {
 });
 
 window.addEventListener('DOMContentLoaded', async () => {
+  applyAppLanguage();
   setupRankTooltipInteractions();
+  document.addEventListener('click', (event) => {
+    const langBtn = event.target.closest('[data-lang]');
+    if (langBtn) {
+      localStorage.setItem('trust_lang', langBtn.dataset.lang === 'ru' ? 'ru' : 'en');
+      rerenderLocalizedApp();
+      return;
+    }
+  });
   $('appLoginBtn')?.addEventListener('click', login);
   $('appLogoutBtn')?.addEventListener('click', logout);
   $('createPartyBtn')?.addEventListener('click', (event) => { event.preventDefault(); void createParty(); });
