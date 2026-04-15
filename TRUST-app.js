@@ -17,6 +17,30 @@ function rememberAuthReturn() {
 }
 
 
+async function completeSteamExchangeIfNeeded() {
+  const url = new URL(window.location.href);
+  const exchange = url.searchParams.get('auth_exchange');
+  if (!exchange) return false;
+
+  try {
+    await api('/auth/exchange', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ exchange })
+    });
+
+    url.searchParams.delete('auth_exchange');
+    url.searchParams.delete('steam_login');
+    window.history.replaceState({}, document.title, url.toString());
+    return true;
+  } catch (err) {
+    console.error('steam auth exchange failed:', err);
+    return false;
+  }
+}
+
+
+
 
 const RANK_TABLE = [
   { key: 'iron', name: 'Iron', minElo: 0, color: 'iron' },
@@ -1145,6 +1169,7 @@ async function bootstrapApp() {
     void handleDelegatedClick(event);
   });
 
+  await completeSteamExchangeIfNeeded();
   await safeRefreshAll();
   if (!appRefreshTimer) {
     appRefreshTimer = setInterval(() => { void safeRefreshAll(); }, 5000);

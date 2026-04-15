@@ -16,6 +16,30 @@ function rememberAuthReturn() {
   } catch (_) {}
 }
 
+
+async function completeSteamExchangeIfNeeded() {
+  const url = new URL(window.location.href);
+  const exchange = url.searchParams.get('auth_exchange');
+  if (!exchange) return false;
+
+  try {
+    await api('/auth/exchange', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ exchange })
+    });
+
+    url.searchParams.delete('auth_exchange');
+    url.searchParams.delete('steam_login');
+    window.history.replaceState({}, document.title, url.toString());
+    return true;
+  } catch (err) {
+    console.error('steam auth exchange failed:', err);
+    return false;
+  }
+}
+
+
 const LANDING_I18N = {
   en: {
     brand_sub: 'Competitive 2v2 platform',
@@ -311,6 +335,7 @@ function bindLandingEvents() {
 async function initLanding() {
   bindLandingEvents();
   applyTranslations();
+  await completeSteamExchangeIfNeeded();
   await Promise.all([refreshAuth(), refreshHealth(), refreshConfig()]);
 }
 
