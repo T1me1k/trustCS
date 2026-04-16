@@ -1147,8 +1147,6 @@ function getPlayerDelayReason(player) {
 
 function renderMatchPlayerCard(p) {
   const tags = [];
-  if (p.partyMarker) tags.push(`<span class="tag duo">${esc(p.partyMarker)}</span>`);
-  tags.push(`<span class="tag ${esc(p.statusTone || 'idle')}">${esc(p.statusLabel || 'Pending')}</span>`);
   if (p.mapVote) tags.push(`<span class="tag">vote: ${esc(p.mapVote)}</span>`);
   if (p.isReconnecting) tags.push(`<span class="tag warn">reconnect ${esc(formatDuration(p.reconnectRemainingSec))}</span>`);
   if (p.isAbandoned) tags.push('<span class="tag danger">abandon</span>');
@@ -1156,10 +1154,13 @@ function renderMatchPlayerCard(p) {
     <div class="match-player-card">
       <div class="match-player-main">
         ${getAvatarMarkup(p.avatarUrl, p.nickname, 'avatar sm')}
-        <div>
-          <div>${esc(p.nickname || 'Unknown')}</div>
-          <div class="muted rank-inline">${getRankPillMarkup(p.rank, p.elo || p.elo2v2 || 100)} <span class="muted">Elo ${esc(p.elo || p.elo2v2 || 100)}</span></div>
-          <div class="match-player-meta">${tags.join('')}</div>
+        <div class="match-player-info">
+          <div class="match-player-topline">
+            <div class="match-player-name" title="${esc(p.nickname || 'Unknown')}">${esc(p.nickname || 'Unknown')}</div>
+            ${getRankPillMarkup(p.rank, p.elo || p.elo2v2 || 100)}
+          </div>
+          <div class="muted rank-inline"><span class="muted">Elo ${esc(p.elo || p.elo2v2 || 100)}</span></div>
+          ${tags.length ? `<div class="match-player-meta">${tags.join('')}</div>` : ''}
         </div>
       </div>
     </div>`;
@@ -1220,7 +1221,7 @@ function renderCurrentMatch() {
     $('teamBPlayers').innerHTML = '';
     $('matchRoomActions').innerHTML = '';
     text('serverConnectLine', '—');
-    text('matchRoomWhyBlocked', '—');
+    text('matchRoomWhyBlocked', '');
     text('matchRoomCenterTimer', '—');
     text('matchRoomCenterServer', '—');
     text('matchRoomCenterMap', '—');
@@ -1259,8 +1260,7 @@ function renderCurrentMatch() {
   $('teamAPlayers').innerHTML = ((room.teams?.teamA) || []).map(renderMatchPlayerCard).join('') || '<div class="empty">Нет игроков</div>';
   $('teamBPlayers').innerHTML = ((room.teams?.teamB) || []).map(renderMatchPlayerCard).join('') || '<div class="empty">Нет игроков</div>';
 
-  const blocker = (match.players || []).map(getPlayerDelayReason).find(Boolean);
-  text('matchRoomWhyBlocked', blocker || (room.finalMessage || 'Все игроки синхронизированы.'));
+  text('matchRoomWhyBlocked', '');
 
   renderMatchRoomActions(match);
 }
