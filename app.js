@@ -1238,9 +1238,10 @@ function renderCurrentMatch() {
   $('currentMatchStatus').className = `pill ${matchPhaseBadgeClass(room.phase)}`;
   text('serverConnectLine', room.server?.connectCommand || connectString(match));
   const isCancelledRoom = roomTimedOut || ['cancelled', 'canceled'].includes(String(room.phase || '').toLowerCase());
-  text('matchRoomCenterTimer', isCancelledRoom ? 'МАТЧ ОТМЕНЁН' : phaseTimer);
+  const cancellationLabel = room.finishReasonLabel || room.statusText || 'МАТЧ ОТМЕНЁН';
+  text('matchRoomCenterTimer', isCancelledRoom ? cancellationLabel : phaseTimer);
   text('matchRoomCenterServer', room.server?.name || 'EU-1');
-  text('matchRoomCenterMap', room.mapName || 'TBD');
+  text('matchRoomCenterMap', room.mapName || (isCancelledRoom ? 'cancelled' : 'TBD'));
   $('matchStageCard')?.classList.toggle('match-room-cancelled', isCancelledRoom);
 
   $('currentMatchSummaryGrid').innerHTML = `
