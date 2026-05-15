@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="trust_elite rank emblem">
+  <defs>
+    <linearGradient id="g" x1="38" x2="218" y1="28" y2="226" gradientUnits="userSpaceOnUse"><stop stop-color="#6F5BFF"/><stop offset="1" stop-color="#F3C969"/></linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <path d="M128 14 218 52v72c0 58-38 96-90 118-52-22-90-60-90-118V52l90-38Z" fill="#0A0B10" stroke="url(#g)" stroke-width="8"/>
+  <path d="M128 40 194 68v55c0 42-27 71-66 90-39-19-66-48-66-90V68l66-28Z" fill="url(#g)" opacity=".22"/>
+  <path d="M128 62 160 116h-24l22 58-54-74h26L96 62h32Z" fill="url(#g)" filter="url(#glow)"/>
+  <text x="128" y="224" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="800" fill="#6F5BFF">TE</text>
+</svg>
