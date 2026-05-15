@@ -1,192 +1,345 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TRUST — Competitive 2v2 Platform</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./landing.css" />
-  <link rel="stylesheet" href="./live-session.css" />
-</head>
-<body class="landing-page">
-  <header class="topbar landing-topbar">
-    <div class="container topbar-inner">
-      <div class="brand reveal reveal-1">
-        <div class="brand-mark">T</div>
-        <div>
-          <div class="brand-name">TRUST</div>
-          <div class="brand-sub" data-i18n="brand_sub">Competitive 2v2 platform</div>
-        </div>
-      </div>
-      <nav class="nav reveal reveal-2">
-        <a href="#platform" data-i18n="nav_platform">Platform</a>
-        <a href="#ranks">Ranks</a>
-        <a href="#status" data-i18n="nav_status">Status</a>
-        <a href="./leaderboard.html" data-i18n="nav_leaderboard">Leaderboard</a>
-      </nav>
-      <div class="actions reveal reveal-3 landing-actions">
-        <div class="lang-switch" aria-label="Language switch">
-          <button type="button" class="lang-btn active" data-lang="en">ENG</button>
-          <button type="button" class="lang-btn" data-lang="ru">RU</button>
-        </div>
-        <a class="btn ghost hidden" id="landingAppBtn" href="./app.html" data-i18n="cabinet">Cabinet</a>
-        <button class="btn primary" id="landingLoginBtn" data-i18n="login">Sign in with Steam</button>
-        <button class="btn ghost hidden" id="landingLogoutBtn" data-i18n="logout">Log out</button>
-      </div>
-    </div>
-  </header>
+const BACKEND_BASE_URL = (() => {
+  const fromWindow = window.TRUST_BACKEND_BASE_URL;
+  const fromMeta = document.querySelector('meta[name="trust-backend-url"]')?.content;
+  const fromStorage = window.localStorage.getItem('trust_backend_base_url');
+  return (fromWindow || fromMeta || fromStorage || 'https://YOUR-BACKEND.up.railway.app').replace(/\/+$/, '');
+})();
 
-  <div class="container mobile-nav mobile-nav-landing" aria-label="Mobile navigation">
-    <a class="mobile-nav-link" href="#platform" data-i18n="nav_platform">Platform</a>
-    <a class="mobile-nav-link" href="#ranks">Ranks</a>
-    <a class="mobile-nav-link" href="#status" data-i18n="nav_status">Status</a>
-    <a class="mobile-nav-link" href="./leaderboard.html" data-i18n="nav_leaderboard">Leaderboard</a>
-  </div>
+const AUTH_RETURN_STORAGE_KEY = 'trust_post_auth_return';
+function getSteamAuthUrl() {
+  const returnTo = encodeURIComponent(window.location.href);
+  return `${BACKEND_BASE_URL}/auth/steam?returnTo=${returnTo}`;
+}
+function rememberAuthReturn() {
+  try {
+    sessionStorage.setItem(AUTH_RETURN_STORAGE_KEY, window.location.href);
+  } catch (_) {}
+}
 
-  <main class="landing-main">
-    <section class="hero landing-hero" id="platform">
-      <div class="container hero-grid landing-hero-grid">
-        <section class="card landing-hero-card reveal reveal-1">
-          <div class="hero-glow"></div>
-          <span class="badge" data-i18n="release_badge">TRUST RELEASE</span>
-          <h1 data-i18n="hero_title">Queue. Compete. Climb.</h1>
-          <p class="muted landing-lead" data-i18n="hero_text">
-            A premium ranked arena for CS:GO: 2v2 queue, clean match flow, seasonal rank progression and profile status that players want to flex.
-          </p>
-          <div class="hero-cta">
-            <a class="btn primary" href="./app.html" data-i18n="hero_cta_open">Open app</a>
-          </div>
-          <div class="metrics landing-metrics">
-            <div class="metric reveal reveal-2">
-              <span data-i18n="metric_format">Format</span>
-              <strong>2v2</strong>
-            </div>
-            <div class="metric reveal reveal-3">
-              <span>ELO</span>
-              <strong>100 / +25 / -25</strong>
-            </div>
-            <div class="metric reveal reveal-4">
-              <span data-i18n="metric_platforms">Platforms</span>
-              <strong data-i18n="metric_platforms_value">Web + Launcher</strong>
-            </div>
-          </div>
-        </section>
+const LANDING_I18N = {
+  en: {
+    brand_sub: 'Competitive 2v2 platform',
+    nav_platform: 'Platform',
+    nav_status: 'Status',
+    nav_leaderboard: 'Leaderboard',
+    cabinet: 'Cabinet',
+    login: 'Sign in with Steam',
+    logout: 'Log out',
+    release_badge: 'TRUST RELEASE',
+    hero_title: 'Queue. Compete.<br>Climb.',
+    hero_text: 'Premium ranked arena for CS:GO: 2v2 queue, seasonal TRUST ranks, clean match flow and profile status players want to flex.',
+    hero_cta_login: 'Sign in with Steam',
+    hero_cta_open: 'Open app',
+    hero_cta_leaderboard: 'Leaderboard',
+    metric_format: 'Format',
+    metric_platforms: 'Platforms',
+    metric_platforms_value: 'Web + Launcher',
+    account_title: 'Account',
+    account_guest: 'Sign in with Steam to unlock party, queue and profile.',
+    account_matches: 'Matches',
+    account_wins: 'Wins',
+    account_mode: 'Mode',
+    account_open: 'Open player cabinet',
+    feature_ready_title: 'Built around the real match flow',
+    feature_ready_text: 'Party, ready-check, map choice, connect, live state and result all live in one backend-driven flow instead of separate scripts.',
+    feature_server_title: 'Server-authoritative logic',
+    feature_server_text: 'The match server controls connection state, reconnect windows and whitelist access so the platform stays consistent during real games.',
+    feature_simple_title: 'Minimal surface, serious core',
+    feature_simple_text: 'No overloaded hubs. Just profile, party, queue, current match, history and a clean route back into the next game.',
+    backend_title: 'Backend',
+    backend_text_loading: 'Checking TRUST backend availability.',
+    config_title: 'Config',
+    config_text_loading: 'Loading matchmaking config.',
+    principle_title: 'Principle',
+    principle_text: 'Nick and account come from Steam, the mode is only 2v2, and once all players accept the match the platform moves into map selection and server connect.',
+    how_title: 'How it works',
+    how_step_1: 'Sign in with Steam and open your profile.',
+    how_step_2: 'Queue solo or invite one teammate into a duo.',
+    how_step_3: 'Accept the match, vote the map and join the server.',
+    cta_badge: 'TRUST 2v2',
+    cta_title: 'Ready to play the final version of the platform, not a test page.',
+    cta_text: 'The landing is now focused on status, identity and direct access into the real app flow.',
+    auth_guest: 'Guest',
+    auth_connected: 'Steam connected',
+    backend_online: 'ONLINE',
+    backend_offline: 'OFFLINE',
+    backend_online_text: 'Backend is reachable and responding.',
+    backend_offline_text: 'Backend did not respond. Check Railway deploy, URL and CORS.',
+    config_waiting: 'Waiting',
+    config_on: 'MATCHMAKING ON',
+    config_off: 'OFF',
+    config_error: 'Error',
+    config_error_text: 'Failed to load config.',
+    config_format: '{app} • latest {version} • mode {mode}'
+  },
+  ru: {
+    brand_sub: 'Соревновательная 2x2 платформа',
+    nav_platform: 'Платформа',
+    nav_status: 'Статус',
+    nav_leaderboard: 'Лидерборд',
+    cabinet: 'Кабинет',
+    login: 'Войти через Steam',
+    logout: 'Выйти',
+    release_badge: 'TRUST RELEASE',
+    hero_title: 'Играй. Побеждай.<br>Поднимайся.',
+    hero_text: 'Премиальная ranked-арена для CS:GO: очередь 2x2, сезонные TRUST-звания, чистый match flow и профиль, который хочется показать.',
+    hero_cta_login: 'Войти через Steam',
+    hero_cta_open: 'Открыть app',
+    hero_cta_leaderboard: 'Лидерборд',
+    metric_format: 'Формат',
+    metric_platforms: 'Платформы',
+    metric_platforms_value: 'Web + Launcher',
+    account_title: 'Аккаунт',
+    account_guest: 'Войди через Steam, чтобы открыть party, очередь и профиль.',
+    account_matches: 'Матчи',
+    account_wins: 'Победы',
+    account_mode: 'Режим',
+    account_open: 'Открыть кабинет игрока',
+    feature_ready_title: 'Построено вокруг реального матча',
+    feature_ready_text: 'Party, ready-check, выбор карты, connect, live-state и результат живут в одном backend-driven flow, а не в разрозненных скриптах.',
+    feature_server_title: 'Сервер — источник истины',
+    feature_server_text: 'Матч-сервер контролирует состояние подключений, окна переподключения и whitelist, чтобы платформа оставалась консистентной в живых играх.',
+    feature_simple_title: 'Минимальная оболочка, серьёзное ядро',
+    feature_simple_text: 'Без перегруженных хабов. Только профиль, party, очередь, текущий матч, история и быстрый возврат в следующую игру.',
+    backend_title: 'Backend',
+    backend_text_loading: 'Проверяем доступность TRUST backend.',
+    config_title: 'Конфиг',
+    config_text_loading: 'Загружаем конфиг матчмейкинга.',
+    principle_title: 'Принцип',
+    principle_text: 'Ник и аккаунт берутся из Steam, режим только 2x2, а после принятия матча всеми игроками платформа переходит к выбору карты и подключению к серверу.',
+    how_title: 'Как это работает',
+    how_step_1: 'Войди через Steam и открой свой профиль.',
+    how_step_2: 'Ищи матч соло или пригласи одного тиммейта в duo.',
+    how_step_3: 'Прими матч, выбери карту и подключись к серверу.',
+    cta_badge: 'TRUST 2x2',
+    cta_title: 'Пора играть уже в финальную версию платформы, а не в тестовую страницу.',
+    cta_text: 'Теперь landing сфокусирован на статусе, айдентике и прямом входе в реальный app flow.',
+    auth_guest: 'Гость',
+    auth_connected: 'Steam connected',
+    backend_online: 'ONLINE',
+    backend_offline: 'OFFLINE',
+    backend_online_text: 'Backend доступен и отвечает.',
+    backend_offline_text: 'Backend не ответил. Проверь Railway deploy, URL и CORS.',
+    config_waiting: 'Ожидание',
+    config_on: 'MATCHMAKING ON',
+    config_off: 'OFF',
+    config_error: 'Ошибка',
+    config_error_text: 'Не удалось загрузить config.',
+    config_format: '{app} • latest {version} • режим {mode}'
+  }
+};
 
-        <aside class="card landing-account-card reveal reveal-2">
-          <div class="section-title"><h3 data-i18n="account_title">Account</h3><span class="pill idle" id="landingAuthBadge">Checking...</span></div>
-          <div class="empty" id="landingGuestCard" data-i18n="account_guest">Sign in with Steam to unlock party, queue and profile.</div>
-          <div class="hidden" id="landingUserCard">
-            <div class="profile-box">
-              <img id="landingAvatar" class="avatar" alt="avatar">
-              <div>
-                <div id="landingNickname" style="font-weight:700;font-size:20px">—</div>
-                <div id="landingSteamId" class="muted">—</div>
-              </div>
-            </div>
-            <div class="landing-account-grid landing-account-grid-soft">
-              <div class="stat"><span>ELO</span><strong id="landingElo">100</strong></div>
-              <div class="stat"><span data-i18n="account_matches">Matches</span><strong id="landingMatches">0</strong></div>
-              <div class="stat"><span data-i18n="account_wins">Wins</span><strong id="landingWins">0</strong></div>
-              <div class="stat"><span data-i18n="account_mode">Mode</span><strong>2v2</strong></div>
-            </div>
-            <a href="./app.html" class="btn secondary landing-account-open" data-i18n="account_open">Open player cabinet</a>
-          </div>
-        </aside>
-      </div>
-    </section>
+const landingState = {
+  user: null,
+  config: null,
+  backendOnline: null,
+  lang: localStorage.getItem('trust_landing_lang') || 'en'
+};
 
-    <section class="section landing-section reveal reveal-2">
-      <div class="container landing-feature-grid">
-        <article class="card landing-feature-card">
-          <div class="section-title"><h3 data-i18n="feature_ready_title">Built around the real match flow</h3><span class="pill live">2v2</span></div>
-          <p class="muted" data-i18n="feature_ready_text">Party, ready-check, map choice, connect, live state and result all live in one backend-driven flow instead of separate scripts.</p>
-        </article>
-        <article class="card landing-feature-card">
-          <div class="section-title"><h3 data-i18n="feature_server_title">Server-authoritative logic</h3><span class="pill ok">Live</span></div>
-          <p class="muted" data-i18n="feature_server_text">The match server controls connection state, reconnect windows and whitelist access so the platform stays consistent during real games.</p>
-        </article>
-        <article class="card landing-feature-card">
-          <div class="section-title"><h3 data-i18n="feature_simple_title">Minimal surface, serious core</h3><span class="pill idle">TRUST</span></div>
-          <p class="muted" data-i18n="feature_simple_text">No overloaded hubs. Just profile, party, queue, current match, history and a clean route back into the next game.</p>
-        </article>
-      </div>
-    </section>
+function $(id) { return document.getElementById(id); }
+function hide(id, on) { $(id)?.classList.toggle('hidden', on); }
+function t(key) {
+  const dict = LANDING_I18N[landingState.lang] || LANDING_I18N.en;
+  return dict[key] ?? LANDING_I18N.en[key] ?? key;
+}
+
+function formatString(template, params) {
+  return String(template).replace(/\{(\w+)\}/g, (_, key) => String(params?.[key] ?? '—'));
+}
+
+function applyTranslations() {
+  document.documentElement.lang = landingState.lang;
+  document.querySelectorAll('[data-i18n]').forEach((el) => {
+    const key = el.dataset.i18n;
+    if (!key) return;
+    el.innerHTML = t(key);
+  });
+  document.querySelectorAll('.lang-btn').forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.lang === landingState.lang);
+  });
+  applyUser(landingState.user);
+  renderBackendStatus();
+  renderConfigStatus();
+}
+
+async function api(path, options = {}) {
+  const response = await fetch(`${BACKEND_BASE_URL}${path}`, {
+    credentials: 'include',
+    cache: 'no-store',
+    headers: { ...(options.headers || {}) },
+    ...options
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || data.ok === false) throw new Error(data.error || `request_failed_${response.status}`);
+  return data;
+}
+
+function applyUser(user) {
+  landingState.user = user || null;
+  const authed = !!landingState.user;
+  hide('landingAppBtn', !authed);
+  hide('landingLogoutBtn', !authed);
+  hide('landingLoginBtn', authed);
+  hide('heroLoginBtn', authed);
+  hide('bottomLoginBtn', authed);
+  hide('landingGuestCard', authed);
+  hide('landingUserCard', !authed);
+
+  $('landingAuthBadge').textContent = authed ? t('auth_connected') : t('auth_guest');
+  $('landingAuthBadge').className = `pill ${authed ? 'ok' : 'idle'}`;
+
+  if (!authed) return;
+  $('landingAvatar').src = landingState.user.avatarUrl || '';
+  $('landingNickname').textContent = landingState.user.nickname || 'Unknown';
+  $('landingSteamId').textContent = landingState.user.steamId || landingState.user.steamId64 || '';
+  $('landingElo').textContent = landingState.user.elo2v2 ?? 100;
+  $('landingMatches').textContent = landingState.user.matchesPlayed2v2 ?? 0;
+  $('landingWins').textContent = landingState.user.wins2v2 ?? 0;
+}
+
+async function refreshAuth() {
+  try {
+    const data = await api('/auth/me');
+    applyUser(data.user || null);
+  } catch (_) {
+    applyUser(null);
+  }
+}
+
+function renderBackendStatus() {
+  if (landingState.backendOnline === true) {
+    $('backendBadge').textContent = t('backend_online');
+    $('backendBadge').className = 'pill ok';
+    $('backendText').textContent = t('backend_online_text');
+    return;
+  }
+  if (landingState.backendOnline === false) {
+    $('backendBadge').textContent = t('backend_offline');
+    $('backendBadge').className = 'pill warn';
+    $('backendText').textContent = t('backend_offline_text');
+    return;
+  }
+  $('backendBadge').textContent = '...';
+  $('backendBadge').className = 'pill idle';
+  $('backendText').textContent = t('backend_text_loading');
+}
+
+async function refreshHealth() {
+  try {
+    await api('/health');
+    landingState.backendOnline = true;
+  } catch (_) {
+    landingState.backendOnline = false;
+  }
+  renderBackendStatus();
+}
+
+function renderConfigStatus() {
+  const cfg = landingState.config;
+  if (!cfg) {
+    $('configBadge').textContent = t('config_waiting');
+    $('configBadge').className = 'pill idle';
+    $('configText').textContent = t('config_text_loading');
+    return;
+  }
+
+  $('configBadge').textContent = cfg.matchmakingEnabled ? t('config_on') : t('config_off');
+  $('configBadge').className = `pill ${cfg.matchmakingEnabled ? 'ok' : 'warn'}`;
+  $('configText').textContent = formatString(t('config_format'), {
+    app: cfg.appName || 'TRUST',
+    version: cfg.latestVersion || '—',
+    mode: cfg.mode || 'auto'
+  });
+}
+
+async function refreshConfig() {
+  try {
+    const data = await api('/config');
+    landingState.config = data.config || {};
+  } catch (_) {
+    landingState.config = null;
+    $('configBadge').textContent = t('config_error');
+    $('configBadge').className = 'pill warn';
+    $('configText').textContent = t('config_error_text');
+    return;
+  }
+  renderConfigStatus();
+}
+
+function login() {
+  rememberAuthReturn();
+  window.location.assign(getSteamAuthUrl());
+}
+
+async function logout() {
+  try {
+    await api('/auth/logout', { method: 'POST' });
+  } catch (_) {}
+  window.location.reload();
+}
+
+function setLanguage(lang) {
+  landingState.lang = lang === 'ru' ? 'ru' : 'en';
+  localStorage.setItem('trust_landing_lang', landingState.lang);
+  applyTranslations();
+}
+
+function bindLandingEvents() {
+  document.addEventListener('click', async (e) => {
+    const langBtn = e.target.closest('[data-lang]');
+    if (langBtn) {
+      e.preventDefault();
+      setLanguage(langBtn.dataset.lang);
+      return;
+    }
+
+    const loginBtn = e.target.closest('#landingLoginBtn, #heroLoginBtn, #bottomLoginBtn');
+    if (loginBtn) {
+      e.preventDefault();
+      login();
+      return;
+    }
+
+    const logoutBtn = e.target.closest('#landingLogoutBtn');
+    if (logoutBtn) {
+      e.preventDefault();
+      await logout();
+    }
+  });
+}
+
+async function initLanding() {
+  bindLandingEvents();
+  applyTranslations();
+  await Promise.all([refreshAuth(), refreshHealth(), refreshConfig()]);
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initLanding, { once: true });
+} else {
+  initLanding();
+}
 
 
-    <section class="section landing-section reveal reveal-3" id="ranks">
-      <div class="container trust-rank-showcase">
-        <article class="card landing-bottom-card prestige-panel">
-          <div>
-            <span class="badge">TRUST RANKS V1</span>
-            <h2 class="trust-gradient-text" style="font-size:clamp(32px,4vw,52px);margin:16px 0 10px;letter-spacing:-.06em">Climb for status, not only numbers.</h2>
-            <p class="muted landing-lead">Rating stays precise under the hood, while players see divisions, RP progress, season peak and prestige rank badges.</p>
-          </div>
-          <div class="prestige-kpi">
-            <div class="stat"><span>VISIBLE LADDER</span><strong>26 tiers</strong></div>
-            <div class="stat"><span>PROGRESS</span><strong>0–100 RP</strong></div>
-            <div class="stat"><span>TOP END</span><strong>Trust Elite</strong></div>
-          </div>
-        </article>
-        <article class="card landing-bottom-card">
-          <div class="section-title"><h3>Rank ladder preview</h3><span class="pill live">Season 01</span></div>
-          <div class="rank-ladder-grid">
-            <div class="rank-show-card"><div><strong>Recruit</strong><div class="muted">Entry tier</div></div><span class="rank-pill recruit">Recruit III</span></div>
-            <div class="rank-show-card"><div><strong>Vanguard</strong><div class="muted">Stable fighter</div></div><span class="rank-pill vanguard">Vanguard II</span></div>
-            <div class="rank-show-card"><div><strong>Phantom</strong><div class="muted">High-threat player</div></div><span class="rank-pill phantom">Phantom I</span></div>
-            <div class="rank-show-card"><div><strong>Ascendant</strong><div class="muted">Serious contender</div></div><span class="rank-pill ascendant">Ascendant I</span></div>
-            <div class="rank-show-card"><div><strong>Sovereign</strong><div class="muted">Elite field</div></div><span class="rank-pill sovereign">Sovereign</span></div>
-            <div class="rank-show-card"><div><strong>Trust Elite</strong><div class="muted">Leaderboard prestige</div></div><span class="rank-pill trust-elite">Trust Elite</span></div>
-          </div>
-        </article>
-      </div>
-    </section>
+let landingRefreshInFlight = false;
+async function safeLandingRefresh() {
+  if (landingRefreshInFlight) return;
+  landingRefreshInFlight = true;
+  try {
+    await Promise.all([refreshAuth(), refreshHealth(), refreshConfig()]);
+  } finally {
+    landingRefreshInFlight = false;
+  }
+}
 
-    <section id="status" class="section landing-section reveal reveal-3">
-      <div class="container grid-3">
-        <div class="card status-card">
-          <div class="section-title"><h3 data-i18n="backend_title">Backend</h3><span id="backendBadge" class="pill idle">Checking...</span></div>
-          <div class="muted" id="backendText" data-i18n="backend_text_loading">Checking TRUST backend availability.</div>
-        </div>
-        <div class="card status-card">
-          <div class="section-title"><h3 data-i18n="config_title">Config</h3><span id="configBadge" class="pill idle">Waiting</span></div>
-          <div class="muted" id="configText" data-i18n="config_text_loading">Loading matchmaking config.</div>
-          <div class="muted" style="margin-top:10px">В поиске: <strong data-live-searching-count>0</strong> • LIVE матчей: <strong data-live-active-matches>0</strong></div>
-        </div>
-        <div class="card status-card">
-          <div class="section-title"><h3 data-i18n="principle_title">Principle</h3><span class="pill live">Steam-only</span></div>
-          <div class="muted" data-i18n="principle_text">Nick and account come from Steam, the mode is only 2v2, and once all players accept the match the platform moves into map selection and server connect.</div>
-        </div>
-      </div>
-    </section>
+window.addEventListener('pageshow', () => {
+  void safeLandingRefresh();
+});
 
-    <section class="section landing-section reveal reveal-4">
-      <div class="container landing-bottom-grid">
-        <div class="card landing-bottom-card">
-          <div class="section-title"><h3 data-i18n="how_title">How it works</h3></div>
-          <div class="landing-steps">
-            <div class="landing-step"><span>01</span><p data-i18n="how_step_1">Sign in with Steam and open your profile.</p></div>
-            <div class="landing-step"><span>02</span><p data-i18n="how_step_2">Start search, get matched and move through the match flow.</p></div>
-            <div class="landing-step"><span>03</span><p data-i18n="how_step_3">Accept the match, vote the map and join the server.</p></div>
-          </div>
-        </div>
-        <div class="card landing-bottom-card landing-bottom-cta">
-          <span class="badge" data-i18n="cta_badge">TRUST 2v2</span>
-          <h3 data-i18n="cta_title">Ready to play the final version of the platform, not a test page.</h3>
-          <p class="muted" data-i18n="cta_text">The landing is now focused on status, identity and direct access into the real app flow.</p>
-          <div class="hero-cta">
-            <button class="btn primary" id="bottomLoginBtn" data-i18n="hero_cta_login">Sign in with Steam</button>
-            <a class="btn ghost" href="./app.html" data-i18n="hero_cta_open">Open app</a>
-          </div>
-        </div>
-      </div>
-    </section>
+window.addEventListener('focus', () => {
+  void safeLandingRefresh();
+});
 
-    <div class="footer-space"></div>
-  </main>
-  <script src="./frontend-config.js"></script>
-  <script src="./landing.js" defer></script>
-  <script src="./live-session.js" defer></script>
-</body>
-</html>
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) void safeLandingRefresh();
+});

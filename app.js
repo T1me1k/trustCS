@@ -1,548 +1,1642 @@
-:root{
-  --bg:#07080d;
-  --bg2:#0b0d14;
-  --panel:#11131c;
-  --panel-2:#151826;
-  --panel-soft:rgba(255,255,255,.03);
-  --text:#f4f6ff;
-  --muted:#98a1be;
-  --line:rgba(167,139,250,.14);
-  --line-strong:rgba(167,139,250,.28);
-  --primary:#8b5cf6;
-  --primary-2:#6d28d9;
-  --primary-soft:rgba(139,92,246,.12);
-  --success:#22c55e;
-  --warn:#f59e0b;
-  --danger:#ef4444;
-  --radius-xl:24px;
-  --radius-lg:18px;
-  --radius-md:14px;
-  --shadow:0 24px 60px rgba(0,0,0,.34);
-}
-*{box-sizing:border-box}
-html,body{margin:0;padding:0}
-body{
-  font-family:Inter,system-ui,sans-serif;
-  color:var(--text);
-  background:
-    radial-gradient(circle at top left, rgba(139,92,246,.12), transparent 26%),
-    radial-gradient(circle at top right, rgba(109,40,217,.10), transparent 24%),
-    linear-gradient(180deg,var(--bg),var(--bg2));
-  min-height:100vh;
-}
-a{color:inherit;text-decoration:none}
-button,input{font:inherit}
-.hidden{display:none!important}
-.muted{color:var(--muted)}
-.container{width:min(1180px,calc(100% - 32px));margin:0 auto}
-.topbar{position:sticky;top:0;z-index:20;backdrop-filter:blur(14px);background:rgba(7,8,13,.72);border-bottom:1px solid var(--line)}
-.topbar-inner{height:80px;display:flex;align-items:center;justify-content:space-between;gap:20px}
-.brand{display:flex;align-items:center;gap:14px}
-.brand-mark{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,var(--primary),var(--primary-2));font-weight:800;box-shadow:0 12px 28px rgba(109,40,217,.34)}
-.brand-name{font-size:26px;font-weight:800;letter-spacing:-.04em}
-.brand-sub{font-size:12px;color:var(--muted)}
-.nav{display:flex;gap:20px;color:var(--muted)}
-.nav a:hover,.nav a.active{color:var(--text)}
-.actions{display:flex;align-items:center;gap:10px}
-.btn{border:none;cursor:pointer;border-radius:14px;padding:12px 16px;font-weight:700;transition:transform .15s ease,opacity .15s ease,background .15s ease,border-color .15s ease}
-.btn:hover{transform:translateY(-1px)}
-.btn.primary{color:#fff;background:linear-gradient(135deg,var(--primary),var(--primary-2));box-shadow:0 14px 30px rgba(109,40,217,.30)}
-.btn.secondary{color:#efe8ff;background:var(--primary-soft);border:1px solid rgba(139,92,246,.24)}
-.btn.ghost{color:var(--text);background:transparent;border:1px solid var(--line)}
-.btn.block{width:100%}
-.hero{padding:54px 0 18px}
-.hero-grid{display:grid;grid-template-columns:1.35fr .9fr;gap:18px}
-.card{background:rgba(17,19,28,.92);border:1px solid var(--line);border-radius:var(--radius-xl);box-shadow:var(--shadow);padding:24px}
-.badge,.pill{display:inline-flex;align-items:center;min-height:32px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:800;letter-spacing:.04em}
-.badge{color:#efe8ff;background:var(--primary-soft);border:1px solid rgba(139,92,246,.24)}
-.pill.idle{color:var(--muted);background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
-.pill.ok{color:#9ee7b0;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.24)}
-.pill.live{color:#ddd6fe;background:rgba(139,92,246,.14);border:1px solid rgba(139,92,246,.28)}
-.pill.warn{color:#fcd18b;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.24)}
-.hero h1{margin:16px 0 12px;font-size:clamp(38px,6vw,66px);line-height:1.02;letter-spacing:-.065em}
-.hero p{max-width:720px;line-height:1.7}
-.hero-cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
-.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:28px}
-.metric,.stat{background:var(--panel-soft);border:1px solid var(--line);border-radius:18px;padding:16px}
-.metric span,.stat span,.label{display:block;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
-.metric strong,.stat strong{font-size:22px}
-.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-.section{padding:18px 0}
-.section-title{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px}
-.section-title h2,.section-title h3{margin:0}
-.profile-box{display:flex;align-items:center;gap:14px}
-.avatar{width:64px;height:64px;border-radius:50%;object-fit:cover;background:#1a1d2b;border:1px solid var(--line-strong)}
-.avatar.sm{width:36px;height:36px}
-.empty{border:1px dashed var(--line-strong);border-radius:18px;padding:18px;color:var(--muted);background:rgba(255,255,255,.02)}
-.app-shell{padding:22px 0 32px}
-.app-grid{display:grid;grid-template-columns:320px 1fr;gap:18px}
-.sidebar{display:flex;flex-direction:column;gap:18px}
-.sidebar .card,.main .card{padding:20px}
-.main{display:flex;flex-direction:column;gap:18px}
-.search-card{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;align-items:stretch}
-.cta-panel{display:flex;flex-direction:column;justify-content:center;min-height:220px}
-.cta-panel h2{font-size:34px;letter-spacing:-.04em;margin:0 0 10px}
-.cta-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
-.queue-box{border-radius:20px;border:1px solid rgba(139,92,246,.24);background:rgba(139,92,246,.08);padding:18px;display:flex;flex-direction:column;justify-content:space-between}
-.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-.list{display:flex;flex-direction:column;gap:10px}
-.history-item,.invite-item,.search-item,.member-item,.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px;border-radius:16px;background:var(--panel-soft);border:1px solid var(--line)}
-.member-main,.search-main,.table-player{display:flex;align-items:center;gap:12px}
-.input{width:100%;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--text);padding:12px 14px;outline:none}
-.input:focus{border-color:rgba(139,92,246,.46);box-shadow:0 0 0 3px rgba(139,92,246,.12)}
-.inline{display:flex;gap:10px}
-.inline>*{flex:1}
-.alert{padding:14px 16px;border-radius:16px;background:rgba(139,92,246,.10);border:1px solid rgba(139,92,246,.24);margin-bottom:18px}
-.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.team{border-radius:18px;padding:16px;border:1px solid var(--line);background:var(--panel-soft)}
-.table-head,.table-row{display:grid;grid-template-columns:80px 1fr 160px 120px;gap:12px;align-items:center}
-.table-head{padding:0 14px 10px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
-.table-row{padding:14px;border-radius:16px;background:var(--panel-soft);border:1px solid var(--line)}
-.footer-space{height:24px}
-@media (max-width:980px){.hero-grid,.app-grid,.search-card,.grid-3,.match-grid{grid-template-columns:1fr}.nav{display:none}.metrics{grid-template-columns:1fr}}
-
-
-.invite-toast-layer{
-  position:fixed;
-  top:96px;
-  right:24px;
-  z-index:60;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  pointer-events:none;
-}
-.invite-toast{
-  width:min(360px,calc(100vw - 32px));
-  position:relative;
-  overflow:hidden;
-  border-radius:20px;
-  border:1px solid rgba(139,92,246,.24);
-  background:linear-gradient(180deg,rgba(19,21,34,.98),rgba(13,15,24,.98));
-  box-shadow:0 20px 48px rgba(0,0,0,.38);
-  padding:18px 18px 16px;
-  pointer-events:auto;
-  opacity:0;
-  transform:translateY(-8px) scale(.98);
-  transition:opacity .18s ease,transform .18s ease;
-}
-.invite-toast.shown{opacity:1;transform:translateY(0) scale(1)}
-.invite-toast.hiding{opacity:0;transform:translateY(-6px) scale(.98)}
-.invite-toast-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  margin-bottom:14px;
-}
-.invite-toast-title{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#ddd6fe}
-.invite-toast-body{display:flex;align-items:center;gap:12px}
-.invite-toast-avatar{
-  width:44px;height:44px;border-radius:14px;display:grid;place-items:center;
-  background:rgba(139,92,246,.16);border:1px solid rgba(139,92,246,.26);font-weight:800;color:#f5f3ff;flex:0 0 auto;
-}
-.invite-toast-name{font-weight:700}
-.invite-toast-sub{font-size:13px;color:var(--muted);margin-top:2px}
-.invite-toast-actions{display:flex;gap:10px;margin-top:16px}
-.invite-toast-actions .btn{flex:1}
-.invite-toast-close{
-  position:absolute;top:10px;right:10px;width:28px;height:28px;border:none;border-radius:999px;
-  background:rgba(255,255,255,.05);color:var(--muted);cursor:pointer;font-size:18px;line-height:1;
-}
-.invite-toast-close:hover{background:rgba(255,255,255,.09);color:var(--text)}
-.invite-toast-progress{
-  position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(255,255,255,.05);
-}
-.invite-toast-progress-bar{
-  width:100%;height:100%;background:linear-gradient(90deg,var(--primary),#a78bfa);
-  transition:width linear;
-}
-.invite-item{display:flex;flex-direction:column;gap:12px;width:100%;box-sizing:border-box}
-.invite-item>div:first-child{min-width:0}
-.invite-actions,.invite-actions-inline{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:none}
-.invite-actions .btn,.invite-actions-inline .btn{width:100%;min-width:0}
-@media (max-width:980px){
-  .invite-toast-layer{top:88px;right:16px;left:16px}
-  .invite-toast{width:100%}
+const APP_I18N = {
+  ru: { login: 'Войти через Steam', logout: 'Выйти', navPlay: 'Играть', navLeaderboard: 'Лидерборд', navHome: 'Главная', brandSub: 'matchmaking app', queueBadgeIdle: 'Не в очереди', queueTitle: 'Найти матч', playCtaGuest: 'Сначала войди через Steam. Потом можно искать матч в 2x2 соло или вдвоём.', playCtaAuthed: 'Режим только 2x2: можно искать матч соло или вдвоём. Готовая пати из двух не разделяется, соло-игроку подбирается тиммейт.', joinQueue: 'НАЙТИ МАТЧ', cancel: 'ОТМЕНИТЬ', statusTitle: 'Статус', statusIdle: 'Ожидание', queueTimer: 'В поиске:', mode: 'Режим', party: 'Party', partyMembers: 'Состав party', partyInvites: 'Входящие инвайты', findPlayer: 'Найти игрока', history: 'История матчей', authConnected: 'Steam connected', guest: 'Гость', inviteToParty: 'Пригласить в party', invite: 'Пригласить' },
+  en: { login: 'Sign in with Steam', logout: 'Sign out', navPlay: 'Play', navLeaderboard: 'Leaderboard', navHome: 'Home', brandSub: 'matchmaking app', queueBadgeIdle: 'Not in queue', queueTitle: 'Find match', playCtaGuest: 'Sign in with Steam first. Then you can queue 2v2 solo or with a friend.', playCtaAuthed: '2v2 only: queue solo or as a duo. A ready two-player party stays together, and solo players get a teammate.', joinQueue: 'FIND MATCH', cancel: 'CANCEL', statusTitle: 'Status', statusIdle: 'Idle', queueTimer: 'Searching:', mode: 'Mode', party: 'Party', partyMembers: 'Party roster', partyInvites: 'Incoming invites', findPlayer: 'Find player', history: 'Match history', authConnected: 'Steam connected', guest: 'Guest', inviteToParty: 'Invite to party', invite: 'Invite' }
+};
+const APP_LANG_KEY = 'trust_lang';
+let appLang = localStorage.getItem(APP_LANG_KEY) === 'en' ? 'en' : 'ru';
+function t(key) { return (APP_I18N[appLang] && APP_I18N[appLang][key]) || APP_I18N.ru[key] || key; }
+function applyAppLang() {
+  document.documentElement.lang = appLang;
+  const map = { appLoginBtn:'login', appLogoutBtn:'logout', appNavPlay:'navPlay', appNavLeaderboard:'navLeaderboard', appNavHome:'navHome', appMobileNavPlay:'navPlay', appMobileNavLeaderboard:'navLeaderboard', appMobileNavHome:'navHome', appBrandSub:'brandSub', queueBadge:'queueBadgeIdle', appQueueTitle:'queueTitle', joinQueueBtn:'joinQueue', cancelQueueBtn:'cancel', queueStatusTitle:'statusTitle', matchmakingState:'statusIdle', queueTimerLabel:'queueTimer', queueModeLabel:'mode', queuePartyLabel:'party', partyTitle:'party', partyMembersLabel:'partyMembers', partyInvitesLabel:'partyInvites', partySearchLabel:'findPlayer', historyTitle:'history' };
+  Object.entries(map).forEach(([id, key]) => { const el = document.getElementById(id); if (el) el.textContent = t(key); });
+  document.getElementById('appLangRu')?.classList.toggle('active', appLang === 'ru');
+  document.getElementById('appLangEn')?.classList.toggle('active', appLang === 'en');
 }
 
-.profile-sidebar-stats{grid-template-columns:repeat(2,1fr)}
+const BACKEND_BASE_URL = (() => {
+  const fromWindow = window.TRUST_BACKEND_BASE_URL;
+  const fromMeta = document.querySelector('meta[name="trust-backend-url"]')?.content;
+  const fromStorage = window.localStorage.getItem('trust_backend_base_url');
+  return (fromWindow || fromMeta || fromStorage || 'https://YOUR-BACKEND.up.railway.app').replace(/\/+$/, '');
+})();
 
-.profile-rank-line{margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.rank-pill{display:inline-flex;align-items:center;justify-content:center;min-height:30px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:800;letter-spacing:.05em;border:1px solid transparent}
-.rank-pill.iron{color:#d1d5db;background:rgba(148,163,184,.14);border-color:rgba(148,163,184,.25)}
-.rank-pill.bronze{color:#f0b48a;background:rgba(180,83,9,.16);border-color:rgba(180,83,9,.28)}
-.rank-pill.silver{color:#e5e7eb;background:rgba(156,163,175,.16);border-color:rgba(156,163,175,.28)}
-.rank-pill.gold{color:#fcd34d;background:rgba(234,179,8,.16);border-color:rgba(234,179,8,.28)}
-.rank-pill.guardian{color:#93c5fd;background:rgba(59,130,246,.16);border-color:rgba(59,130,246,.28)}
-.rank-pill.distinguished{color:#c4b5fd;background:rgba(124,58,237,.18);border-color:rgba(124,58,237,.28)}
-.rank-pill.eagle{color:#fca5a5;background:rgba(239,68,68,.14);border-color:rgba(239,68,68,.26)}
-.rank-pill.supreme{color:#f9a8d4;background:rgba(236,72,153,.16);border-color:rgba(236,72,153,.28)}
-.rank-pill.global{color:#86efac;background:rgba(34,197,94,.16);border-color:rgba(34,197,94,.28)}
-.rank-progress-card{margin-top:2px;padding:14px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid var(--line)}
-.rank-progress-head,.rank-progress-foot{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.rank-progress-bar{height:10px;border-radius:999px;background:rgba(255,255,255,.05);overflow:hidden;margin:12px 0}
-.rank-progress-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,var(--primary),#a78bfa);transition:width .25s ease}
-.rank-inline{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
-.rank-inline .muted{white-space:nowrap}
-.profile-side-meta{display:flex;flex-direction:column;gap:10px;margin-top:16px}
-.meta-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-radius:14px;background:var(--panel-soft);border:1px solid var(--line)}
-.recent-form{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-.form-chip,.empty-chip{min-width:34px;height:34px;border-radius:12px;display:grid;place-items:center;font-weight:800;font-size:13px;border:1px solid var(--line)}
-.form-chip.win{background:rgba(34,197,94,.12);color:#9ee7b0;border-color:rgba(34,197,94,.24)}
-.form-chip.loss{background:rgba(245,158,11,.12);color:#fcd18b;border-color:rgba(245,158,11,.24)}
-.empty-chip{padding:0 10px;min-width:auto;color:var(--muted);background:rgba(255,255,255,.03)}
-.profile-overview-grid{display:grid;grid-template-columns:1fr 1.25fr;gap:18px}
-.profile-highlight{border-radius:20px;border:1px solid rgba(139,92,246,.24);background:rgba(139,92,246,.08);padding:18px;display:flex;flex-direction:column;justify-content:space-between;gap:16px}
-.profile-highlight-row{display:flex;align-items:center;gap:14px}
-.profile-hero-avatar{width:76px;height:76px}
-.profile-hero-name{font-size:26px;font-weight:800;letter-spacing:-.04em}
-.profile-hero-elo{font-size:18px;font-weight:700}
-.profile-summary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-.history-cards{gap:14px}
-.history-card{padding:16px;border-radius:18px;background:var(--panel-soft);border:1px solid var(--line);display:flex;flex-direction:column;gap:14px}
-.history-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-.history-card-id{font-size:18px;font-weight:800}
-.history-card-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.history-card-stat{padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid var(--line)}
-.history-card-stat span{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
-.history-card-stat strong{font-size:16px}
-.history-card-foot{font-size:14px}
-.history-card-actions{display:flex;justify-content:flex-end}
-.modal{position:fixed;inset:0;z-index:80}
-.modal-backdrop{position:absolute;inset:0;background:rgba(2,4,10,.72);backdrop-filter:blur(8px)}
-.modal-dialog{position:relative;width:min(980px,calc(100% - 32px));max-height:calc(100vh - 48px);margin:24px auto;overflow:auto;z-index:1}
-.modal-head{position:sticky;top:0;background:rgba(17,19,28,.96);backdrop-filter:blur(8px);padding-bottom:12px;margin-bottom:14px}
-.details-summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.details-timeline{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:16px}
-.timeline-row{padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
-.member-item.compact{padding:12px}
-.avatar-fallback{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:#1a1d2b;border:1px solid var(--line-strong);color:#fff;font-weight:800;flex:0 0 auto}
-.avatar-fallback.sm{width:36px;height:36px;border-radius:50%;font-size:14px}
-.real-avatar{object-fit:cover}
-.invite-toast-avatar.real-avatar{display:block;background:none;border:none;object-fit:cover}
-@media (max-width:980px){
-  .profile-overview-grid,.details-summary-grid,.details-timeline,.history-card-grid{grid-template-columns:1fr 1fr}
+const AUTH_RETURN_STORAGE_KEY = 'trust_post_auth_return';
+function getSteamAuthUrl() {
+  const returnTo = encodeURIComponent(window.location.href);
+  return `${BACKEND_BASE_URL}/auth/steam?returnTo=${returnTo}`;
 }
-@media (max-width:720px){
-  .profile-summary-grid,.details-summary-grid,.details-timeline,.history-card-grid{grid-template-columns:1fr}
-  .modal-dialog{width:min(100% - 20px,980px);margin:10px auto}
+function rememberAuthReturn() {
+  try {
+    sessionStorage.setItem(AUTH_RETURN_STORAGE_KEY, window.location.href);
+  } catch (_) {}
 }
 
 
-.status-subline {
-  margin-top: 8px;
-  color: #aeb4e6;
-  font-size: 13px;
-  font-weight: 700;
+
+const RANK_TABLE = [
+  {
+    "key": "recruit_iii",
+    "name": "Recruit III",
+    "tierName": "Recruit",
+    "division": "III",
+    "minElo": 0,
+    "color": "recruit"
+  },
+  {
+    "key": "recruit_ii",
+    "name": "Recruit II",
+    "tierName": "Recruit",
+    "division": "II",
+    "minElo": 100,
+    "color": "recruit"
+  },
+  {
+    "key": "recruit_i",
+    "name": "Recruit I",
+    "tierName": "Recruit",
+    "division": "I",
+    "minElo": 200,
+    "color": "recruit"
+  },
+  {
+    "key": "operative_iii",
+    "name": "Operative III",
+    "tierName": "Operative",
+    "division": "III",
+    "minElo": 300,
+    "color": "operative"
+  },
+  {
+    "key": "operative_ii",
+    "name": "Operative II",
+    "tierName": "Operative",
+    "division": "II",
+    "minElo": 400,
+    "color": "operative"
+  },
+  {
+    "key": "operative_i",
+    "name": "Operative I",
+    "tierName": "Operative",
+    "division": "I",
+    "minElo": 500,
+    "color": "operative"
+  },
+  {
+    "key": "vanguard_iii",
+    "name": "Vanguard III",
+    "tierName": "Vanguard",
+    "division": "III",
+    "minElo": 600,
+    "color": "vanguard"
+  },
+  {
+    "key": "vanguard_ii",
+    "name": "Vanguard II",
+    "tierName": "Vanguard",
+    "division": "II",
+    "minElo": 700,
+    "color": "vanguard"
+  },
+  {
+    "key": "vanguard_i",
+    "name": "Vanguard I",
+    "tierName": "Vanguard",
+    "division": "I",
+    "minElo": 800,
+    "color": "vanguard"
+  },
+  {
+    "key": "sentinel_iii",
+    "name": "Sentinel III",
+    "tierName": "Sentinel",
+    "division": "III",
+    "minElo": 900,
+    "color": "sentinel"
+  },
+  {
+    "key": "sentinel_ii",
+    "name": "Sentinel II",
+    "tierName": "Sentinel",
+    "division": "II",
+    "minElo": 1000,
+    "color": "sentinel"
+  },
+  {
+    "key": "sentinel_i",
+    "name": "Sentinel I",
+    "tierName": "Sentinel",
+    "division": "I",
+    "minElo": 1100,
+    "color": "sentinel"
+  },
+  {
+    "key": "phantom_iii",
+    "name": "Phantom III",
+    "tierName": "Phantom",
+    "division": "III",
+    "minElo": 1200,
+    "color": "phantom"
+  },
+  {
+    "key": "phantom_ii",
+    "name": "Phantom II",
+    "tierName": "Phantom",
+    "division": "II",
+    "minElo": 1300,
+    "color": "phantom"
+  },
+  {
+    "key": "phantom_i",
+    "name": "Phantom I",
+    "tierName": "Phantom",
+    "division": "I",
+    "minElo": 1400,
+    "color": "phantom"
+  },
+  {
+    "key": "ascendant_iii",
+    "name": "Ascendant III",
+    "tierName": "Ascendant",
+    "division": "III",
+    "minElo": 1500,
+    "color": "ascendant"
+  },
+  {
+    "key": "ascendant_ii",
+    "name": "Ascendant II",
+    "tierName": "Ascendant",
+    "division": "II",
+    "minElo": 1600,
+    "color": "ascendant"
+  },
+  {
+    "key": "ascendant_i",
+    "name": "Ascendant I",
+    "tierName": "Ascendant",
+    "division": "I",
+    "minElo": 1700,
+    "color": "ascendant"
+  },
+  {
+    "key": "dominion_iii",
+    "name": "Dominion III",
+    "tierName": "Dominion",
+    "division": "III",
+    "minElo": 1800,
+    "color": "dominion"
+  },
+  {
+    "key": "dominion_ii",
+    "name": "Dominion II",
+    "tierName": "Dominion",
+    "division": "II",
+    "minElo": 1900,
+    "color": "dominion"
+  },
+  {
+    "key": "dominion_i",
+    "name": "Dominion I",
+    "tierName": "Dominion",
+    "division": "I",
+    "minElo": 2000,
+    "color": "dominion"
+  },
+  {
+    "key": "sovereign_iii",
+    "name": "Sovereign III",
+    "tierName": "Sovereign",
+    "division": "III",
+    "minElo": 2100,
+    "color": "sovereign"
+  },
+  {
+    "key": "sovereign_ii",
+    "name": "Sovereign II",
+    "tierName": "Sovereign",
+    "division": "II",
+    "minElo": 2200,
+    "color": "sovereign"
+  },
+  {
+    "key": "sovereign_i",
+    "name": "Sovereign I",
+    "tierName": "Sovereign",
+    "division": "I",
+    "minElo": 2300,
+    "color": "sovereign"
+  },
+  {
+    "key": "apex",
+    "name": "Apex",
+    "tierName": "Apex",
+    "division": null,
+    "minElo": 2400,
+    "color": "apex"
+  },
+  {
+    "key": "trust_elite",
+    "name": "Trust Elite",
+    "tierName": "Trust Elite",
+    "division": null,
+    "minElo": 2600,
+    "color": "trust-elite"
+  }
+];
+
+function renderRankTooltip(activeRankKey) {
+  const root = $('rankTooltipList');
+  if (!root) return;
+  root.innerHTML = RANK_TABLE.map((rank) => `
+    <div class="rank-tooltip-row ${rank.key === activeRankKey ? 'active' : ''}">
+      <div class="rank-tooltip-rank">
+        <div>
+          <div class="rank-tooltip-name">${esc(rank.name)}</div>
+          <div class="muted">${esc(rank.minElo)}+ Rating</div>
+        </div>
+      </div>
+      <span class="rank-pill ${esc(rank.color)}">${esc(rank.minElo)}+</span>
+    </div>
+  `).join('');
 }
 
 
-.post-match-backdrop{background:rgba(3,6,14,.82);backdrop-filter:blur(12px)}
-.post-match-dialog{position:relative;z-index:1;width:min(760px,calc(100% - 28px));margin:40px auto}
-.post-match-card{padding:26px;border:1px solid rgba(139,92,246,.24);background:linear-gradient(180deg,rgba(17,19,28,.98),rgba(10,12,22,.98));box-shadow:0 26px 70px rgba(0,0,0,.45)}
-.post-match-card.win{border-color:rgba(34,197,94,.24)}
-.post-match-card.loss{border-color:rgba(245,158,11,.24)}
-.post-match-header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
-.post-match-result-pill{min-width:108px;height:42px;border-radius:999px;display:grid;place-items:center;font-weight:800;letter-spacing:.08em}
-.post-match-result-pill.win{background:rgba(34,197,94,.14);border:1px solid rgba(34,197,94,.26);color:#9ee7b0}
-.post-match-result-pill.loss{background:rgba(245,158,11,.14);border:1px solid rgba(245,158,11,.26);color:#fcd18b}
-.post-match-body{display:flex;flex-direction:column;gap:18px}
-.post-match-result-label{font-size:56px;line-height:.95;font-weight:900;letter-spacing:-.06em}
-.post-match-card.win .post-match-result-label{color:#d7ffe2}
-.post-match-card.loss .post-match-result-label{color:#ffe3b5}
-.post-match-subtitle{margin-top:8px;color:var(--muted);font-size:16px}
-.post-match-scoreline{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.post-match-score-box,.post-match-stat{padding:16px 18px;border-radius:18px;background:rgba(255,255,255,.035);border:1px solid var(--line)}
-.post-match-score-box span,.post-match-stat span{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
-.post-match-score-box strong{font-size:28px}
-.post-match-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.post-match-stat strong{font-size:26px;line-height:1}
-.post-match-stat small{display:block;margin-top:10px;color:var(--muted);font-size:13px}
-.post-match-meta{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.post-match-meta-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid var(--line)}
-.post-match-meta-row span{color:var(--muted)}
-.post-match-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:4px}
-@media (max-width:720px){
-  .post-match-dialog{width:min(calc(100% - 18px),760px);margin:14px auto}
-  .post-match-card{padding:18px}
-  .post-match-header,.post-match-actions{flex-direction:column;align-items:stretch}
-  .post-match-result-label{font-size:42px}
-  .post-match-scoreline,.post-match-stats-grid,.post-match-meta{grid-template-columns:1fr}
+function setupRankTooltipInteractions() {
+  const card = document.querySelector('.rank-hover-card');
+  const trigger = $('profileRankTrigger');
+  const tooltip = $('rankTooltip');
+  if (!card || !trigger || !tooltip || card.dataset.bound === '1') return;
+  card.dataset.bound = '1';
+
+  let closeTimer = null;
+  const open = () => {
+    if (closeTimer) {
+      clearTimeout(closeTimer);
+      closeTimer = null;
+    }
+    card.classList.add('is-open');
+    card.setAttribute('data-open', 'true');
+    trigger.setAttribute('aria-expanded', 'true');
+  };
+  const close = () => {
+    if (closeTimer) clearTimeout(closeTimer);
+    closeTimer = window.setTimeout(() => {
+      card.classList.remove('is-open');
+      card.setAttribute('data-open', 'false');
+      trigger.setAttribute('aria-expanded', 'false');
+    }, 40);
+  };
+  const toggle = () => {
+    if (card.classList.contains('is-open')) close(); else open();
+  };
+
+  ['mouseenter', 'pointerenter'].forEach((eventName) => {
+    card.addEventListener(eventName, open);
+    tooltip.addEventListener(eventName, open);
+  });
+  ['mouseleave', 'pointerleave'].forEach((eventName) => {
+    card.addEventListener(eventName, close);
+    tooltip.addEventListener(eventName, close);
+  });
+  trigger.addEventListener('focus', open);
+  trigger.addEventListener('blur', () => {
+    if (!card.matches(':hover')) close();
+  });
+  trigger.addEventListener('click', (event) => {
+    event.preventDefault();
+    toggle();
+  });
+  document.addEventListener('click', (event) => {
+    if (!card.contains(event.target)) {
+      card.classList.remove('is-open');
+      card.setAttribute('data-open', 'false');
+      trigger.setAttribute('aria-expanded', 'false');
+    }
+  });
+}
+
+const state = {
+  user: null,
+  party: null,
+  queue: null,
+  match: null,
+  profile: null,
+  profileHistory: [],
+  matchDetails: null,
+  mapPool: ['shortdust', 'lake', 'overpass', 'vertigo', 'nuke'],
+  inviteToastSeen: new Set(),
+  inviteToastDismissed: new Set(),
+  inviteToastTimers: new Map(),
+  postMatchSummary: null,
+  queueStats: null
+};
+
+let queueTimerInterval = null;
+
+function $(id) { return document.getElementById(id); }
+function hide(id, on) {
+  const el = $(id);
+  if (!el) return;
+  el.classList.toggle('hidden', on);
+  el.style.display = on ? 'none' : '';
+}
+function text(id, value) { const el = $(id); if (el) el.textContent = value; }
+function esc(v) { return String(v ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
+function formatPercent(value) { return `${Number(value || 0)}%`; }
+function formatDate(value) {
+  if (!value) return '—';
+  const dt = new Date(value);
+  if (Number.isNaN(dt.getTime())) return '—';
+  return dt.toLocaleString('ru-RU', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+}
+
+function formatQueueElapsed(totalSeconds) {
+  const sec = Math.max(0, Math.floor(Number(totalSeconds) || 0));
+  const hours = Math.floor(sec / 3600);
+  const minutes = Math.floor((sec % 3600) / 60);
+  const seconds = sec % 60;
+  const mm = String(minutes).padStart(2, '0');
+  const ss = String(seconds).padStart(2, '0');
+  return hours > 0 ? `${String(hours).padStart(2, '0')}:${mm}:${ss}` : `${mm}:${ss}`;
+}
+
+function formatDuration(totalSec) {
+  if (totalSec == null || Number.isNaN(Number(totalSec))) return '—';
+  const sec = Number(totalSec);
+  const minutes = Math.floor(sec / 60);
+  const seconds = sec % 60;
+  return `${minutes}м ${String(seconds).padStart(2, '0')}с`;
+}
+
+function getPostMatchStorageKey(matchId) {
+  return `trust_post_match_seen_${matchId}`;
+}
+function markPostMatchSeen(matchId) {
+  if (!matchId) return;
+  try { localStorage.setItem(getPostMatchStorageKey(matchId), '1'); } catch (_) {}
+}
+function hasSeenPostMatch(matchId) {
+  if (!matchId) return true;
+  try { return localStorage.getItem(getPostMatchStorageKey(matchId)) === '1'; } catch (_) { return false; }
+}
+function formatStreakValue(value) {
+  const n = Number(value) || 0;
+  return `${n}W`;
+}
+function buildPostMatchSummary(item, profile) {
+  if (!item || !item.publicMatchId || !item.result) return null;
+  const result = item.result === 'win' ? 'win' : 'loss';
+  const eloDelta = Number(item.eloDelta || 0);
+  const eloAfter = Number(profile?.elo2v2 || 100);
+  const eloBefore = eloAfter - eloDelta;
+  const currentStreak = Number(profile?.currentWinStreak || 0);
+  const streakAfter = result === 'win' ? currentStreak : 0;
+  const streakBefore = result === 'win' ? Math.max(0, streakAfter - 1) : Math.max(0, currentStreak);
+  const streakDeltaLabel = result === 'win' ? '+1 win streak' : 'Streak reset';
+  return {
+    publicMatchId: item.publicMatchId,
+    result,
+    mapName: item.mapName || '—',
+    scoreLabel: `${item.teamAScore ?? 0} : ${item.teamBScore ?? 0}`,
+    eloDelta,
+    eloAfter,
+    eloBefore,
+    streakBefore,
+    streakAfter,
+    streakDeltaLabel,
+    finishedAt: item.finishedAt || null
+  };
+}
+function formatStanding(standing) {
+  if (standing === 'hot') return 'HOT';
+  if (standing === 'good') return 'GOOD';
+  return 'BUILDING';
+}
+function standingPillClass(standing) {
+  if (standing === 'hot') return 'ok';
+  if (standing === 'good') return 'live';
+  return 'idle';
+}
+function resultPillClass(result) {
+  if (result === 'win') return 'ok';
+  if (result === 'loss') return 'warn';
+  return 'idle';
+}
+
+function getRankByElo(rawElo) {
+  const elo = Math.max(0, Number(rawElo) || 0);
+  const ranks = RANK_TABLE;
+  let currentIndex = 0;
+  for (let i = 0; i < ranks.length; i += 1) {
+    if (elo >= ranks[i].minElo) currentIndex = i;
+    else break;
+  }
+  const current = ranks[currentIndex];
+  const next = ranks[currentIndex + 1] || null;
+  const progressPercent = next
+    ? Math.max(0, Math.min(100, Math.round(((elo - current.minElo) / Math.max(1, next.minElo - current.minElo)) * 100)))
+    : 100;
+  return {
+    key: current.key,
+    name: current.name,
+    color: current.color,
+    currentElo: elo,
+    nextRankName: next?.name || null,
+    nextRankElo: next?.minElo || null,
+    pointsToNext: next ? Math.max(0, next.minElo - elo) : 0,
+    progressPercent,
+    isMaxRank: !next
+  };
+}
+function normalizeRank(rank, elo) {
+  return rank && rank.name ? rank : getRankByElo(elo);
+}
+function getRankPillMarkup(rank, elo) {
+  const info = normalizeRank(rank, elo);
+  return `<span class="rank-pill ${esc(info.color || 'recruit')}" data-rank-key="${esc(info.key || '')}">${esc(info.name)}</span>`;
+}
+
+function getAvatarMarkup(avatarUrl, fallback, className = 'avatar sm') {
+  if (avatarUrl) return `<img class="${className}" src="${esc(avatarUrl)}" alt="avatar">`;
+  return `<div class="avatar-fallback ${className.includes('sm') ? 'sm' : ''}">${esc((fallback || '?').slice(0, 1).toUpperCase())}</div>`;
+}
+
+async function api(path, options = {}) {
+  const response = await fetch(`${BACKEND_BASE_URL}${path}`, {
+    credentials: 'include',
+    cache: 'no-store',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(options.headers || {})
+    },
+    ...options
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || data.ok === false) throw new Error(data.error || `request_failed_${response.status}`);
+  return data;
+}
+
+function showAlert(message, kind = 'info') {
+  const el = $('globalAlert');
+  if (!el) return;
+  el.textContent = message;
+  el.className = 'alert';
+  if (kind === 'error') {
+    el.style.borderColor = 'rgba(239,68,68,.35)';
+    el.style.background = 'rgba(239,68,68,.12)';
+  } else {
+    el.style.borderColor = 'rgba(139,92,246,.24)';
+    el.style.background = 'rgba(139,92,246,.10)';
+  }
+  el.classList.remove('hidden');
+  clearTimeout(showAlert._t);
+  showAlert._t = setTimeout(() => el.classList.add('hidden'), 3600);
+}
+
+function setBusy(buttonId, busy, labelWhenBusy = '...') {
+  const el = $(buttonId);
+  if (!el) return;
+  if (busy) {
+    el.dataset.originalText = el.textContent;
+    el.textContent = labelWhenBusy;
+    el.disabled = true;
+  } else {
+    el.textContent = el.dataset.originalText || el.textContent;
+    el.disabled = false;
+  }
+}
+
+function renderRecentForm(rootId, values) {
+  const root = $(rootId);
+  if (!root) return;
+  const items = Array.isArray(values) ? values : [];
+  if (!items.length) {
+    root.innerHTML = '<div class="empty-chip">Пока пусто</div>';
+    return;
+  }
+  root.innerHTML = items.map((item) => {
+    const normalized = String(item).toUpperCase() === 'W' ? 'W' : 'L';
+    return `<span class="form-chip ${normalized === 'W' ? 'win' : 'loss'}">${normalized}</span>`;
+  }).join('');
+}
+
+function renderAuth() {
+  const authed = !!state.user;
+  hide('appLoginBtn', authed);
+  hide('appLogoutBtn', !authed);
+  hide('profileGuest', authed);
+  hide('profileCard', !authed);
+  $('authBadge').textContent = authed ? t('authConnected') : t('guest');
+  $('authBadge').className = `pill ${authed ? 'ok' : 'idle'}`;
+
+  if (!authed) {
+    text('playCtaText', t('playCtaGuest'));
+    return;
+  }
+
+  const profile = state.profile || state.user;
+  $('profileAvatar').src = profile.avatarUrl || '';
+  text('profileNickname', profile.nickname || 'Unknown');
+  text('profileSteamId', profile.steamId || profile.steamId64 || '');
+  text('profileElo', profile.elo2v2 ?? 100);
+  const rank = normalizeRank(profile.rank, profile.elo2v2 ?? 100);
+  const rankPill = $('profileRankPill');
+  if (rankPill) { rankPill.textContent = rank.name; rankPill.className = `rank-pill ${rank.color || 'iron'}`; }
+  renderRankTooltip(rank.key);
+  text('profileRankName', rank.name);
+  text('profileRankProgressText', rank.isMaxRank ? 'Максимальное звание достигнуто' : `До следующего звания: ${rank.pointsToNext}`);
+  text('profileRankNext', rank.isMaxRank ? 'MAX' : `${rank.nextRankName} • ${rank.nextRankElo}`);
+  const rankFill = $('profileRankProgressFill');
+  if (rankFill) rankFill.style.width = `${rank.progressPercent || 0}%`;
+  text('profileWinRate', formatPercent(profile.winRate2v2 || 0));
+  text('profileMatches', profile.matchesPlayed2v2 ?? 0);
+  text('profileRecord', `${profile.wins2v2 ?? 0} / ${profile.losses2v2 ?? 0}`);
+  text('profileCurrentStreak', `${profile.currentWinStreak ?? 0}W`);
+  text('profileBestStreak', `${profile.bestWinStreak ?? 0}W`);
+  text('profileFavoriteMap', profile.favoriteMap || '—');
+  renderRecentForm('profileRecentForm', profile.recentForm || []);
+  text('playCtaText', t('playCtaAuthed'));
+}
+
+function renderProfileOverview() {
+  return;
+}
+
+function renderParty() {
+  const party = state.party;
+  const membersEl = $('partyMembers');
+  const invitesEl = $('partyInvites');
+  membersEl.innerHTML = '';
+  invitesEl.innerHTML = '';
+
+  const hasParty = !!party?.id;
+  const count = party?.members?.length || 0;
+  const invites = party?.pendingInvites || [];
+
+  $('partyBadge').textContent = hasParty ? `${count}/2` : 'Нет party';
+  $('partyBadge').className = `pill ${hasParty ? 'ok' : 'idle'}`;
+  text('queuePartyStat', hasParty ? `${count}/2` : '1/2');
+  hide('createPartyBtn', hasParty);
+  hide('leavePartyBtn', !hasParty);
+
+  if (!hasParty) {
+    membersEl.innerHTML = '<div class="empty">Party пока нет. Она создастся автоматически при поиске или по кнопке.</div>';
+  } else {
+    membersEl.innerHTML = (party.members || []).map((m) => `
+      <div class="member-item">
+        <div class="member-main">
+          ${getAvatarMarkup(m.avatarUrl, m.nickname, 'avatar sm')}
+          <div>
+            <div>${esc(m.nickname || 'Unknown')}</div>
+            <div class="muted rank-inline">${esc(m.role || 'member')} • ${getRankPillMarkup(m.rank, m.elo2v2 ?? 100)} <span class="muted">Elo ${esc(m.elo2v2 ?? 100)}</span></div>
+          </div>
+        </div>
+        <span class="pill ${m.role === 'leader' ? 'live' : 'idle'}">${m.role === 'leader' ? 'Leader' : 'Member'}</span>
+      </div>
+    `).join('');
+  }
+
+  invitesEl.innerHTML = invites.length
+    ? invites.map((inv) => `
+      <div class="invite-item invite-inline-card" data-invite-card="${esc(inv.id)}">
+        <div>
+          <div style="font-weight:700">${esc(inv.fromNickname || 'Игрок')}</div>
+          <div class="muted">Приглашает в party</div>
+        </div>
+        <div class="invite-actions invite-actions-inline">
+          <button class="btn secondary" data-accept-invite="${esc(inv.id)}">Принять</button>
+          <button class="btn ghost" data-decline-invite="${esc(inv.id)}">Отклонить</button>
+        </div>
+      </div>
+    `).join('')
+    : '<div class="empty">Входящих инвайтов нет.</div>';
+
+  syncInviteToasts(invites);
+}
+
+function syncInviteToasts(invites) {
+  const layer = $('inviteToastLayer');
+  if (!layer) return;
+  const currentIds = new Set((invites || []).map((inv) => String(inv.id)));
+
+  [...state.inviteToastSeen].forEach((id) => {
+    if (!currentIds.has(id)) state.inviteToastSeen.delete(id);
+  });
+  [...state.inviteToastDismissed].forEach((id) => {
+    if (!currentIds.has(id)) state.inviteToastDismissed.delete(id);
+  });
+
+  layer.querySelectorAll('.invite-toast').forEach((node) => {
+    if (!currentIds.has(node.dataset.inviteId)) removeInviteToast(node.dataset.inviteId);
+  });
+
+  (invites || []).forEach((inv) => {
+    const inviteId = String(inv.id);
+    if (state.inviteToastDismissed.has(inviteId) || state.inviteToastSeen.has(inviteId)) return;
+    state.inviteToastSeen.add(inviteId);
+    createInviteToast(inv);
+  });
+}
+
+function createInviteToast(invite) {
+  const layer = $('inviteToastLayer');
+  if (!layer) return;
+  const inviteId = String(invite.id);
+  if (layer.querySelector(`[data-invite-id="${CSS.escape(inviteId)}"]`)) return;
+
+  const avatarMarkup = invite.fromAvatarUrl
+    ? `<img class="invite-toast-avatar real-avatar" src="${esc(invite.fromAvatarUrl)}" alt="avatar">`
+    : `<div class="invite-toast-avatar">${esc((invite.fromNickname || 'Игрок').slice(0, 1).toUpperCase())}</div>`;
+
+  const toast = document.createElement('div');
+  toast.className = 'invite-toast';
+  toast.dataset.inviteId = inviteId;
+  toast.innerHTML = `
+    <button class="invite-toast-close" type="button" aria-label="Скрыть" data-dismiss-invite-toast="${esc(inviteId)}">×</button>
+    <div class="invite-toast-head">
+      <div class="invite-toast-title">Приглашение в party</div>
+    </div>
+    <div class="invite-toast-body">
+      ${avatarMarkup}
+      <div>
+        <div class="invite-toast-name">${esc(invite.fromNickname || 'Игрок')}</div>
+        <div class="invite-toast-sub">приглашает тебя в duo party</div>
+      </div>
+    </div>
+    <div class="invite-toast-actions">
+      <button class="btn secondary" data-accept-invite="${esc(inviteId)}">Принять</button>
+      <button class="btn ghost" data-decline-invite="${esc(inviteId)}">Отклонить</button>
+    </div>
+    <div class="invite-toast-progress"><div class="invite-toast-progress-bar"></div></div>
+  `;
+
+  layer.prepend(toast);
+  requestAnimationFrame(() => toast.classList.add('shown'));
+
+  const progress = toast.querySelector('.invite-toast-progress-bar');
+  if (progress) {
+    const createdAt = invite.createdAt ? new Date(invite.createdAt).getTime() : Date.now();
+    const expiresAt = invite.expiresAt ? new Date(invite.expiresAt).getTime() : (createdAt + 10000);
+    const totalMs = Math.max(1, expiresAt - createdAt);
+    const remainingMs = Math.max(0, expiresAt - Date.now());
+    const remainingPercent = Math.max(0, Math.min(100, (remainingMs / totalMs) * 100));
+    progress.style.transitionDuration = `${remainingMs}ms`;
+    progress.style.width = `${remainingPercent}%`;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        progress.style.width = '0%';
+      });
+    });
+  }
+
+  const expiresAtMs = invite.expiresAt ? new Date(invite.expiresAt).getTime() : Date.now() + 10000;
+  const timeoutMs = Math.max(0, expiresAtMs - Date.now());
+  const timer = window.setTimeout(() => dismissInviteToast(inviteId), timeoutMs || 10);
+  state.inviteToastTimers.set(inviteId, timer);
+}
+
+function clearInviteToastTimer(inviteId) {
+  const timer = state.inviteToastTimers.get(inviteId);
+  if (timer) {
+    clearTimeout(timer);
+    state.inviteToastTimers.delete(inviteId);
+  }
+}
+
+function removeInviteToast(inviteId) {
+  clearInviteToastTimer(inviteId);
+  const layer = $('inviteToastLayer');
+  const node = layer?.querySelector(`[data-invite-id="${CSS.escape(String(inviteId))}"]`);
+  if (!node) return;
+  node.classList.remove('shown');
+  node.classList.add('hiding');
+  window.setTimeout(() => node.remove(), 180);
+}
+
+function dismissInviteToast(inviteId) {
+  state.inviteToastDismissed.add(String(inviteId));
+  removeInviteToast(inviteId);
 }
 
 
-.restriction-card{border-color:rgba(245,158,11,.24);background:linear-gradient(180deg,rgba(30,20,8,.42),rgba(17,19,28,.96))}
-.restriction-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;align-items:start}
-.restriction-title{font-size:22px;font-weight:800;letter-spacing:-.04em;margin-bottom:8px}
-.restriction-meta{display:flex;flex-direction:column;gap:10px}
-.restriction-meta-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid var(--line)}
-.current-match-room-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
-.current-match-room-stat{padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid var(--line)}
-.current-match-room-stat span{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
-.current-match-room-stat strong{font-size:16px}
-.current-match-timeline{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:12px}
-.current-match-step{padding:12px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid var(--line);font-size:13px}
-.current-match-step.done{border-color:rgba(34,197,94,.24);background:rgba(34,197,94,.08)}
-.current-match-step.current{border-color:rgba(139,92,246,.28);background:rgba(139,92,246,.10)}
-.current-match-step-title{font-weight:800;margin-bottom:6px}
-@media (max-width:980px){.restriction-grid,.current-match-room-grid,.current-match-timeline{grid-template-columns:1fr 1fr}}
-@media (max-width:720px){.restriction-grid,.current-match-room-grid,.current-match-timeline{grid-template-columns:1fr}}
-
-
-.app-grid-updated{grid-template-columns:320px minmax(0,1fr);align-items:start}
-.sidebar-profile-only{position:sticky;top:98px}
-.main-updated{display:flex;flex-direction:column;gap:18px}
-.profile-name{font-weight:800;font-size:22px;letter-spacing:-.04em}
-.profile-head-copy{min-width:0}
-.profile-box-updated{align-items:flex-start}
-.profile-stats-compact{margin-top:18px}
-.rank-trigger{display:inline-flex;align-items:center;gap:10px;padding:0;border:none;background:transparent;color:inherit;cursor:pointer;appearance:none;-webkit-appearance:none;box-shadow:none;outline:none}
-.rank-hover-card{position:relative;display:inline-flex}
-.rank-trigger:focus,.rank-trigger:focus-visible{outline:none;box-shadow:none}
-.profile-rank-line{position:relative;z-index:6}
-.rank-hover-card{position:relative;display:inline-flex;z-index:8}
-.party-main-grid .label{display:block;margin-bottom:10px}
-#userSearchResults{margin-top:10px;min-height:58px}
-#partyMembers,#partyInvites{margin-top:10px}
-
-.rank-tooltip{position:absolute;left:0;top:calc(100% + 10px);width:min(360px,calc(100vw - 28px));padding:12px;border-radius:18px;border:1px solid rgba(167,139,250,.18);background:linear-gradient(180deg,#11131c,#0a0c16);box-shadow:0 24px 60px rgba(0,0,0,.42);opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity .18s ease,transform .18s ease;z-index:30}
-.rank-hover-card:hover .rank-tooltip,.rank-hover-card:focus-within .rank-tooltip{opacity:1;transform:translateY(0);pointer-events:auto}
-.rank-tooltip-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
-.rank-tooltip-list{display:flex;flex-direction:column;gap:6px}
-.rank-tooltip-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:14px;background:rgba(255,255,255,.025);border:1px solid rgba(167,139,250,.08)}
-.rank-tooltip-row.active{background:rgba(139,92,246,.10);border-color:rgba(139,92,246,.22)}
-.rank-tooltip-rank{display:flex;align-items:center;gap:10px;min-width:0}
-.rank-tooltip-name{font-weight:700;font-size:14px}
-.rank-progress-card-updated{padding:16px}
-.play-stage-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;align-items:stretch}
-.cta-panel-updated{min-height:0;padding-right:12px}
-.queue-box-updated{height:100%;display:flex;flex-direction:column;justify-content:center}
-.queue-stage-stats{grid-template-columns:repeat(2,1fr)}
-.party-main-grid{display:grid;grid-template-columns:.95fr 1.05fr;gap:18px;align-items:stretch}
-.party-main-actions{display:flex;flex-direction:column;gap:10px}
-.current-match-hero{border-color:rgba(139,92,246,.24);background:linear-gradient(180deg,rgba(17,19,28,.96),rgba(10,12,22,.98))}
-.section-title-match{margin-bottom:18px}
-.current-match-hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}
-.current-match-id{font-weight:800;font-size:28px;letter-spacing:-.05em}
-.current-match-hero-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
-.server-connect-box{margin-top:14px;padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid var(--line)}
-.server-connect-line{font-weight:700;word-break:break-word;overflow-wrap:anywhere}
-.match-grid-compact{grid-template-columns:1fr 1fr}
-#matchActions{margin-top:16px}
-@media (max-width: 1180px){.play-stage-grid,.party-main-grid{grid-template-columns:1fr}}
-@media (max-width: 980px){.app-grid-updated{grid-template-columns:1fr}.sidebar-profile-only{position:static}.current-match-hero-top{flex-direction:column}.current-match-hero-actions{justify-content:flex-start}}
-@media (max-width: 720px){.party-main-actions{grid-template-columns:1fr}.rank-tooltip{left:-12px;right:auto;width:min(360px,calc(100vw - 24px))}}
-
-
-.party-column{min-width:0}
-.party-subsection{margin-top:18px}
-.party-column-left .list,.party-column-right .list{min-width:0}
-.party-search-inline{align-items:stretch}
-.party-search-inline .input{min-width:0;flex:1 1 auto}
-.party-search-inline .btn{flex:0 0 auto}
-.rank-hover-card{position:relative;display:inline-flex;align-items:center}
-.rank-trigger{position:relative;z-index:2}
-.rank-hover-card.is-open .rank-tooltip,
-.rank-hover-card[data-open="true"] .rank-tooltip,
-.rank-hover-card:hover .rank-tooltip,
-.rank-hover-card:focus-within .rank-tooltip{opacity:1;transform:translateY(0);pointer-events:auto}
-.rank-tooltip{visibility:hidden}
-.rank-hover-card.is-open .rank-tooltip,
-.rank-hover-card[data-open="true"] .rank-tooltip,
-.rank-hover-card:hover .rank-tooltip,
-.rank-hover-card:focus-within .rank-tooltip{visibility:visible}
-@media (max-width: 1180px){
-  .party-main-grid{grid-template-columns:1fr}
+function stopQueueTimer() {
+  if (queueTimerInterval) {
+    clearInterval(queueTimerInterval);
+    queueTimerInterval = null;
+  }
+  hide('queueTimerRow', true);
+  text('queueTimerValue', '00:00');
 }
 
-.party-column-right{display:flex;flex-direction:column;min-width:0;gap:18px;}
-.party-search-wrap{margin-top:0;}
-.party-main-actions-corner{margin-top:auto;align-items:flex-end;justify-content:flex-end;}
-.party-main-actions-corner .btn{width:min(240px,100%);}
-.party-search-inline{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:stretch;}
-.party-search-inline .btn{order:0;min-width:112px;}
-.party-search-inline .input{order:1;min-width:0;}
-#userSearchResults .member-item{align-items:flex-start;}
-.search-user-meta{margin-top:4px;font-size:12px;}
-@media (max-width: 1180px){.party-column-right{gap:14px}.party-main-actions-corner{align-items:stretch}.party-main-actions-corner .btn{width:100%;}}
-@media (max-width: 720px){.party-search-inline{grid-template-columns:1fr}.party-search-inline .btn,.party-search-inline .input{width:100%}.party-main-actions-corner{margin-top:0;align-items:stretch}}
-
-
-.match-room-shell{border-color:rgba(139,92,246,.24);background:linear-gradient(180deg,rgba(12,14,24,.98),rgba(8,10,18,.98))}
-.match-room-root{display:flex;flex-direction:column;gap:16px}.match-room-topbar{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
-.match-room-summary-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}.match-room-summary-card{padding:14px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.03)}
-.match-room-summary-card span{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}.match-room-summary-card strong{font-size:16px}
-.match-room-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}.match-room-maincol{display:flex;flex-direction:column;gap:16px}
-.match-room-panel{padding:16px;border-radius:18px;border:1px solid var(--line);background:rgba(255,255,255,.025)}.match-room-panel.compact{padding:14px}
-.match-room-panel-head{display:flex;justify-content:flex-start;gap:10px;align-items:center;margin-bottom:12px}.match-room-team-title{font-weight:800;margin-bottom:10px}
-.match-room-stage-timeline{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}.match-room-stage-step{padding:14px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.03);min-height:130px}
-.match-room-stage-step.done{border-color:rgba(34,197,94,.26);background:rgba(34,197,94,.08)}.match-room-stage-step.current{border-color:rgba(139,92,246,.28);background:rgba(139,92,246,.12)}
-.match-room-battle-grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(220px,260px) minmax(0,1.45fr);gap:16px;align-items:start}.match-player-card{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.02);overflow:hidden}.match-room-team .list{display:flex;flex-direction:column;gap:12px}
-.match-player-main{display:flex;align-items:center;gap:12px;min-width:0;width:100%}.match-player-info{min-width:0;flex:1 1 auto}.match-player-topline{display:flex;align-items:center;gap:10px;min-width:0}.match-player-name{font-weight:800;min-width:0;flex:1 1 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.match-player-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.match-player-main>div{min-width:0}.match-player-main .muted{font-size:13px}.rank-inline{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.match-player-info .rank-pill{flex:0 0 auto;max-width:100%}
-.match-room-center-col{display:flex;flex-direction:column;gap:12px;min-width:0;max-width:260px;justify-self:center;width:100%}.match-room-center-card{padding:14px 14px 16px;border-radius:20px;border:1px solid rgba(139,92,246,.22);background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));display:flex;flex-direction:column;gap:12px}.match-room-center-timer-wrap{text-align:center}.match-room-center-timer{font-size:32px;line-height:1.05;font-weight:900;letter-spacing:-.05em;color:#f5f3ff;margin-top:4px}.match-room-center-meta{display:grid;grid-template-columns:1fr;gap:8px}.match-room-center-meta-card{padding:10px 12px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.03)}.match-room-center-meta-card span{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}.match-room-center-meta-card strong{display:block;font-size:18px;overflow-wrap:anywhere;word-break:break-word}.match-room-connect-box{margin-top:0}
-.match-room-actions{display:flex;flex-direction:column;gap:10px}.match-room-actions .btn{width:100%}.match-room-actions-center .btn{min-height:50px;font-size:15px}.match-room-cancelled .match-room-center-meta,.match-room-cancelled .match-room-connect-box{display:none}.match-room-cancelled .match-room-center-card{justify-content:center;min-height:220px}.match-room-cancelled .match-room-center-timer{font-size:24px;letter-spacing:.02em}
-.match-room-layout,.match-room-maincol,.match-room-panel,.match-room-team,.match-player-card,.match-player-main,.match-player-info,.match-room-summary-card,.match-room-center-card{min-width:0}
-.match-room-stage-step,.match-room-summary-card strong,.current-match-id{overflow-wrap:anywhere;word-break:break-word}
-.match-event-item{display:grid;grid-template-columns:110px minmax(0,1fr);gap:12px;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.02)}.match-event-time{font-size:12px;color:var(--muted)}.match-event-title{font-weight:800;margin-bottom:4px}
-@media (max-width:1180px){.match-room-summary-grid{grid-template-columns:repeat(3,1fr)}.match-room-battle-grid{grid-template-columns:1fr}.match-room-center-col{order:-1}}
-@media (max-width:720px){.match-room-topbar,.match-room-panel-head{flex-direction:column;align-items:flex-start}.match-room-summary-grid,.match-room-stage-timeline,.match-room-battle-grid{grid-template-columns:1fr}.match-room-center-timer{font-size:34px}.match-event-item{grid-template-columns:1fr}}
-.issue-form-grid{display:grid;grid-template-columns:1fr;gap:16px}.issue-select{width:100%}.issue-textarea{min-height:140px;resize:vertical}
-@media (max-width:1180px){.match-room-layout{grid-template-columns:1fr}.match-room-summary-grid{grid-template-columns:repeat(3,1fr)}}
-@media (max-width:720px){.match-room-topbar,.match-room-panel-head{flex-direction:column;align-items:flex-start}.match-room-summary-grid,.match-room-stage-timeline,.match-room-teams-grid{grid-template-columns:1fr}.match-event-item{grid-template-columns:1fr}}
-
-
-.app-header-actions { display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:flex-end; }
-.lang-switch { display:inline-flex; align-items:center; gap:4px; padding:4px; border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.04); border-radius:999px; }
-.lang-btn { border:0; background:transparent; color:rgba(255,255,255,.7); padding:8px 10px; border-radius:999px; font:inherit; font-size:12px; letter-spacing:.08em; font-weight:700; cursor:pointer; transition:background .2s ease,color .2s ease,transform .2s ease; }
-.lang-btn:hover { color:#fff; }
-.lang-btn.active { background:rgba(139,92,246,.22); color:#fff; }
-@media (max-width: 900px) { .app-header-actions { width:100%; justify-content:flex-start; } }
-
-
-.mobile-nav{display:none}
-.mobile-nav-link{display:inline-flex;align-items:center;justify-content:center;padding:11px 14px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--muted);font-weight:700;white-space:nowrap;min-width:0}
-.mobile-nav-link.active{color:var(--text);background:rgba(139,92,246,.12);border-color:rgba(139,92,246,.28)}
-@media (max-width:980px){
-  .topbar-inner{height:auto;min-height:80px;padding:14px 0;align-items:flex-start;flex-wrap:wrap}
-  .brand{min-width:0;flex:1 1 auto}
-  .actions,.landing-actions,.app-header-actions{width:100%;justify-content:flex-start}
-  .mobile-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px auto 0}
-}
-@media (max-width:720px){
-  .container{width:min(1180px,calc(100% - 24px))}
-  .card{padding:18px}
-  .brand-name{font-size:22px}
-  .topbar-inner{padding:12px 0}
-  .actions,.landing-actions,.app-header-actions{gap:8px}
-  .actions .btn,.landing-actions .btn,.app-header-actions .btn{width:100%}
-  .hero{padding:30px 0 14px}
-  .hero h1{font-size:clamp(30px,10vw,42px)}
-  .section-title{flex-direction:column;align-items:flex-start}
+function startQueueTimer(startAt) {
+  stopQueueTimer();
+  if (!startAt) return;
+  const startedMs = new Date(startAt).getTime();
+  if (Number.isNaN(startedMs)) return;
+  hide('queueTimerRow', false);
+  const tick = () => {
+    const elapsedSeconds = Math.floor((Date.now() - startedMs) / 1000);
+    text('queueTimerValue', formatQueueElapsed(elapsedSeconds));
+  };
+  tick();
+  queueTimerInterval = setInterval(tick, 1000);
 }
 
-@media (max-width:980px){
-  .app-header-actions .btn{flex:1 1 180px}
-  .profile-box-updated,.history-item,.search-item,.member-item,.row{min-width:0}
+function renderRestrictionCard() {
+  const restrictions = state.restrictions || null;
+  const block = restrictions?.restriction || null;
+  const isQueuePresenceOnly = block?.reasonKey === 'already_in_queue';
+  const blockedByCurrentMatch = !!state.match && ['already_in_match_flow', 'already_in_live_match'].includes(block?.reasonKey);
+  const visible = !!block?.isActive && !isQueuePresenceOnly && !blockedByCurrentMatch;
+  hide('restrictionCard', !visible);
+  if (!visible) return;
+  text('restrictionTitle', block.title || 'Поиск временно недоступен');
+  text('restrictionMessage', block.message || 'У игрока есть активное ограничение.');
+  text('restrictionReason', block.reasonKey || block.type || 'queue_lock');
+  text('restrictionRemaining', block.remainingText || 'до разблокировки');
+  text('restrictionBadge', block.category === 'queue_lock' ? 'Locked' : 'Cooldown');
+  $('restrictionBadge').className = `pill ${block.category === 'queue_lock' ? 'warn' : 'live'}`;
 }
-@media (max-width:720px){
-  .app-header-actions .lang-switch{width:100%;justify-content:center}
-  .profile-box-updated,.history-item,.search-item,.member-item,.row{flex-direction:column;align-items:flex-start}
-  .stats-grid,.queue-stage-stats,.profile-sidebar-stats,.match-grid-compact{grid-template-columns:1fr}
-  .rank-progress-head,.rank-progress-foot,.meta-row,.history-card-top,.history-card-actions{flex-direction:column;align-items:flex-start}
-  .cta-actions .btn,.party-main-actions .btn,.current-match-hero-actions .btn,.match-room-actions .btn{width:100%}
-  .search-item>div:last-child,.member-item>div:last-child,.row>div:last-child,.history-item>div:last-child{width:100%}
-  .search-item .btn,.member-item .btn,.row .btn,.history-item .btn{width:100%}
+
+function renderQueue() {
+  const queue = state.queue;
+  const inQueue = !!queue;
+  const restrictions = state.restrictions || null;
+  const canQueue = restrictions?.canQueue !== false;
+  const stats = state.queueStats || {};
+  const searchingPlayers = Number(stats.searchingPlayers || 0);
+  const activeMatches = Number(stats.activeMatches || 0);
+  $('queueBadge').textContent = inQueue ? 'В очереди' : 'Не в очереди';
+  $('queueBadge').className = `pill ${inQueue ? 'ok' : 'idle'}`;
+  $('matchmakingState').textContent = inQueue ? 'Поиск...' : (canQueue ? 'Ожидание' : 'Blocked');
+  $('matchmakingState').className = `pill ${inQueue ? 'live' : canQueue ? 'idle' : 'warn'}`;
+  text('searchStateText', inQueue
+    ? `Матчмейкер подбирает 2x2 игру. Сейчас ищут ${searchingPlayers} игроков, LIVE матчей ${activeMatches}.`
+    : canQueue
+      ? 'Нажми «Найти матч». Если party нет, она создастся автоматически.'
+      : (restrictions?.restriction?.message || 'Поиск временно недоступен.'));
+  hide('joinQueueBtn', inQueue);
+  hide('cancelQueueBtn', !inQueue);
+  if ($('joinQueueBtn')) $('joinQueueBtn').disabled = !inQueue && !canQueue;
+  text('queuePartyLabel', 'В поиске / LIVE');
+  if ($('queuePartyStat')) $('queuePartyStat').innerHTML = `<span data-live-searching-count>${searchingPlayers}</span> / <span data-live-active-matches>${activeMatches}</span>`;
+
+  const queueStartedAt = queue?.queuedAt || queue?.joinedAt || queue?.createdAt || queue?.startedAt || queue?.searchStartedAt || null;
+  if (inQueue && queueStartedAt) {
+    startQueueTimer(queueStartedAt);
+  } else {
+    stopQueueTimer();
+  }
+}
+
+function renderHistory() {
+  const root = $('historyList');
+  const items = state.profileHistory || [];
+  text('historyCountBadge', items.length);
+  if (!items.length) {
+    root.innerHTML = '<div class="empty">История матчей пока пуста.</div>';
+    return;
+  }
+  root.innerHTML = items.map((item) => {
+    const resultLabel = item.result === 'win' ? 'WIN' : item.result === 'loss' ? 'LOSS' : '—';
+    const scoreLabel = `${item.teamAScore ?? 0} : ${item.teamBScore ?? 0}`;
+    const teammate = item.teammate?.nickname ? esc(item.teammate.nickname) : '—';
+    const opponents = (item.opponents || []).map((p) => esc(p.nickname)).join(', ') || '—';
+    const eloDelta = item.eloDelta == null ? '—' : `${item.eloDelta > 0 ? '+' : ''}${item.eloDelta}`;
+    return `
+      <article class="history-card">
+        <div class="history-card-top">
+          <div>
+            <div class="history-card-id">${esc(item.publicMatchId || 'match')}</div>
+            <div class="muted">${formatDate(item.finishedAt)} • ${esc(item.mapName || '—')}</div>
+          </div>
+          <span class="pill ${resultPillClass(item.result)}">${resultLabel}</span>
+        </div>
+        <div class="history-card-grid">
+          <div class="history-card-stat"><span>Счёт</span><strong>${esc(scoreLabel)}</strong></div>
+          <div class="history-card-stat"><span>Elo</span><strong>${esc(eloDelta)}</strong></div>
+          <div class="history-card-stat"><span>Длительность</span><strong>${esc(formatDuration(item.durationSec))}</strong></div>
+          <div class="history-card-stat"><span>Тиммейт</span><strong>${teammate}</strong></div>
+        </div>
+        <div class="history-card-foot muted">Против: ${opponents}</div>
+        <div class="history-card-actions">
+          <button class="btn secondary" data-open-match-details="${esc(item.publicMatchId)}">Подробнее</button>
+        </div>
+      </article>
+    `;
+  }).join('');
+}
+
+function connectString(match) {
+  if (!match?.serverIp || !match?.serverPort) return 'Сервер ещё назначается';
+  return `connect ${match.serverIp}:${match.serverPort}; password ${match.serverPassword || ''}`.trim();
+}
+
+function shouldDisplayMatchRoom(match) {
+  if (!match) return false;
+  const phase = String(match?.room?.phase || match?.phase || match?.status || '').trim().toLowerCase();
+  return !['finished'].includes(phase);
+}
+
+function isMatchRoomTimedOut(match) {
+  if (!match) return false;
+  const room = match.room || {};
+  const phase = String(room.phase || match.phase || match.status || '').trim().toLowerCase();
+  const currentDeadlineSec = Number(room.currentDeadlineSec);
+  const connectRemainingSec = Number(match.connectRemainingSec ?? room?.deadlines?.connectRemainingSec);
+  const acceptRemainingSec = Number(match.acceptRemainingSec ?? room?.deadlines?.acceptRemainingSec);
+  if (phase === 'connect' && Number.isFinite(currentDeadlineSec) && currentDeadlineSec <= 0) return true;
+  if (phase === 'connect' && Number.isFinite(connectRemainingSec) && connectRemainingSec <= 0) return true;
+  if (phase === 'accept' && Number.isFinite(currentDeadlineSec) && currentDeadlineSec <= 0) return true;
+  if (phase === 'accept' && Number.isFinite(acceptRemainingSec) && acceptRemainingSec <= 0) return true;
+  return false;
+}
+
+function renderCurrentMatch() {
+  const match = state.match;
+  const hasMatch = !!match;
+  hide('queueStageCard', hasMatch);
+  hide('matchStageCard', !hasMatch);
+  $('currentMatchBadge').textContent = hasMatch ? (match.status || 'Матч') : 'Нет матча';
+  $('currentMatchBadge').className = `pill ${hasMatch ? 'live' : 'idle'}`;
+  if (!hasMatch) return;
+
+  text('currentMatchId', match.publicMatchId || match.matchId || '—');
+  text('currentMatchMeta', `${match.mode || '2x2'} • карта: ${match.mapName || 'не выбрана'}`);
+  text('currentMatchStatus', match.status || '—');
+  $('currentMatchStatus').className = `pill ${match.status === 'live' ? 'live' : match.status === 'server_assigned' ? 'ok' : match.status === 'finished' ? 'ok' : 'warn'}`;
+  text('serverConnectLine', connectString(match));
+
+  const roomGrid = $('currentMatchRoomGrid');
+  const timeline = $('currentMatchTimeline');
+  const room = match.room || {};
+  const deadlines = room.deadlines || {};
+  roomGrid.innerHTML = `
+    <div class="current-match-room-stat"><span>Phase</span><strong>${esc(room.phase || match.phase || 'waiting')}</strong></div>
+    <div class="current-match-room-stat"><span>Accepted</span><strong>${esc(`${match.acceptedCount || 0}/${match.totalPlayers || 4}`)}</strong></div>
+    <div class="current-match-room-stat"><span>Connected</span><strong>${esc(`${match.connectedCount || 0}/${match.totalPlayers || 4}`)}</strong></div>
+    <div class="current-match-room-stat"><span>Deadline</span><strong>${esc(room.phase === 'accept' ? formatDuration(deadlines.acceptRemainingSec) : room.phase === 'connect' ? formatDuration(deadlines.connectRemainingSec) : '—')}</strong></div>
+  `;
+  timeline.innerHTML = (match.timeline || []).map((step) => `
+    <div class="current-match-step ${esc(step.state || 'upcoming')}">
+      <div class="current-match-step-title">${esc(step.title || step.key || 'Step')}</div>
+      <div class="muted">${esc(step.description || '')}</div>
+    </div>
+  `).join('');
+
+  const teamA = (match.players || []).filter((p) => p.team === 'A');
+  const teamB = (match.players || []).filter((p) => p.team === 'B');
+  $('teamAPlayers').innerHTML = teamA.map(playerHtml).join('');
+  $('teamBPlayers').innerHTML = teamB.map(playerHtml).join('');
+
+  renderAcceptAndMapVoting(match);
+}
+
+function playerHtml(p) {
+  return `
+    <div class="member-item">
+      <div class="member-main">
+        ${getAvatarMarkup(p.avatarUrl, p.nickname, 'avatar sm')}
+        <div>
+          <div>${esc(p.nickname || 'Unknown')}</div>
+          <div class="muted rank-inline">${getRankPillMarkup(p.rank, p.elo || p.elo2v2 || 100)} <span class="muted">Elo ${esc(p.elo || p.elo2v2 || 100)}</span>${p.mapVote ? ` <span class="muted">• vote: ${esc(p.mapVote)}</span>` : ''}</div>
+        </div>
+      </div>
+      <span class="pill ${p.accepted ? 'ok' : 'idle'}">${p.accepted ? 'Accepted' : 'Waiting'}</span>
+    </div>
+  `;
+}
+
+function renderAcceptAndMapVoting(match) {
+  let box = $('matchActions');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'matchActions';
+    box.style.marginTop = '14px';
+    $('currentMatchCard').appendChild(box);
+  }
+
+  const canAccept = match.status === 'pending_acceptance' && !match.accepted;
+  const canVoteMap = match.acceptedCount === match.totalPlayers && ['map_voting', 'server_assigned'].includes(match.status) && !match.mapName;
+  const acceptedText = `${match.acceptedCount || 0}/${match.totalPlayers || 4} приняли матч`;
+
+  let html = `<div class="muted" style="margin-bottom:10px">${esc(acceptedText)}</div>`;
+  if (canAccept) {
+    html += '<button class="btn primary" id="acceptMatchBtn">ПРИНЯТЬ МАТЧ</button>';
+  } else if (match.status === 'pending_acceptance') {
+    html += '<div class="empty">Ждём, пока все игроки примут матч.</div>';
+  }
+
+  if (canVoteMap) {
+    html += '<div style="margin-top:14px"><div class="label">Выбор карты</div><div class="list">';
+    html += state.mapPool.map((map) => `<button class="btn secondary block" data-map-vote="${esc(map)}">${esc(map)}</button>`).join('');
+    html += '</div></div>';
+  } else if (match.status === 'map_voting' && !match.mapName) {
+    html += `<div class="empty" style="margin-top:12px">После принятия всеми игроками выбирается карта из пула: ${state.mapPool.join(', ')}.</div>`;
+  } else if (match.mapName) {
+    html += `<div class="empty" style="margin-top:12px">Выбрана карта: ${esc(match.mapName)}.</div>`;
+  }
+
+  box.innerHTML = html;
+
+  $('acceptMatchBtn')?.addEventListener('click', async () => {
+    try {
+      setBusy('acceptMatchBtn', true, 'ПРИНИМАЕМ...');
+      await api(`/api/matches/${encodeURIComponent(match.publicMatchId)}/accept`, { method: 'POST' });
+      await refreshAll();
+    } catch (err) {
+      showAlert(`Не удалось принять матч: ${err.message}`, 'error');
+    } finally {
+      setBusy('acceptMatchBtn', false);
+    }
+  });
+
+  box.querySelectorAll('[data-map-vote]').forEach((btn) => btn.addEventListener('click', async () => {
+    try {
+      btn.disabled = true;
+      await api(`/api/matches/${encodeURIComponent(match.publicMatchId)}/map-vote`, {
+        method: 'POST',
+        body: JSON.stringify({ mapName: btn.dataset.mapVote })
+      });
+      await refreshAll();
+    } catch (err) {
+      showAlert(`Не удалось выбрать карту: ${err.message}`, 'error');
+      btn.disabled = false;
+    }
+  }));
+}
+
+function renderMatchDetailsModal() {
+  const modal = $('matchDetailsModal');
+  const details = state.matchDetails;
+  hide('matchDetailsModal', !details);
+  if (!details) return;
+
+  text('matchDetailsTitle', details.publicMatchId || 'Детали матча');
+  text('matchDetailsMeta', `${details.mode || '2x2'} • ${details.mapName || 'карта не выбрана'} • ${details.status || '—'}`);
+
+  const teamHtml = (title, players) => `
+    <div class="team">
+      <div style="font-weight:700;margin-bottom:12px">${title}</div>
+      <div class="list">
+        ${(players || []).map((player) => `
+          <div class="member-item compact">
+            <div class="member-main">
+              ${getAvatarMarkup(player.avatarUrl, player.nickname, 'avatar sm')}
+              <div>
+                <div>${esc(player.nickname || 'Unknown')}</div>
+                <div class="muted rank-inline">${getRankPillMarkup(player.rank, player.elo2v2 ?? 100)} <span class="muted">Elo ${esc(player.elo2v2 ?? 100)}</span>${player.result ? ` <span class="muted">• ${esc(player.result)}</span>` : ''}</div>
+              </div>
+            </div>
+            <span class="pill ${player.result === 'win' ? 'ok' : player.result === 'loss' ? 'warn' : player.accepted ? 'live' : 'idle'}">${player.result ? esc(player.result) : player.accepted ? 'Accepted' : '—'}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  $('matchDetailsBody').innerHTML = `
+    <div class="details-summary-grid">
+      <div class="stat"><span>Счёт</span><strong>${esc(`${details.score?.teamA ?? 0} : ${details.score?.teamB ?? 0}`)}</strong></div>
+      <div class="stat"><span>Победитель</span><strong>${esc(details.score?.winnerTeam || '—')}</strong></div>
+      <div class="stat"><span>Сервер</span><strong>${esc(details.server?.name || details.server?.region || '—')}</strong></div>
+      <div class="stat"><span>Финиш</span><strong>${esc(formatDate(details.timeline?.finishedAt))}</strong></div>
+    </div>
+    <div class="details-timeline">
+      <div class="timeline-row"><span class="muted">Accept</span><strong>${esc(formatDate(details.timeline?.acceptedAt))}</strong></div>
+      <div class="timeline-row"><span class="muted">Map voting start</span><strong>${esc(formatDate(details.timeline?.mapVotingStartedAt))}</strong></div>
+      <div class="timeline-row"><span class="muted">Map voting end</span><strong>${esc(formatDate(details.timeline?.mapVotingFinishedAt))}</strong></div>
+      <div class="timeline-row"><span class="muted">Live start</span><strong>${esc(formatDate(details.timeline?.startedAt))}</strong></div>
+      <div class="timeline-row"><span class="muted">Result</span><strong>${esc(formatDate(details.timeline?.finishedAt))}</strong></div>
+    </div>
+    <div class="match-grid" style="margin-top:16px">
+      ${teamHtml('Team A', details.teams?.A || [])}
+      ${teamHtml('Team B', details.teams?.B || [])}
+    </div>
+  `;
+}
+
+function renderPostMatchModal() {
+  const modal = $('postMatchModal');
+  const summary = state.postMatchSummary;
+  hide('postMatchModal', !summary);
+  if (!summary) return;
+
+  const isWin = summary.result === 'win';
+  text('postMatchResultLabel', isWin ? 'WIN' : 'LOSS');
+  text('postMatchSubtitle', isWin ? 'You won your latest 2x2 match.' : 'Your latest 2x2 match ended in a loss.');
+  text('postMatchScore', summary.scoreLabel || '—');
+  text('postMatchMap', summary.mapName || '—');
+  text('postMatchEloDelta', `${summary.eloDelta > 0 ? '+' : ''}${summary.eloDelta}`);
+  text('postMatchEloAfter', `Now ${summary.eloAfter}`);
+  text('postMatchStreakDelta', summary.streakDeltaLabel || '—');
+  text('postMatchStreakAfter', `Current ${formatStreakValue(summary.streakAfter)}`);
+  text('postMatchMatchId', summary.publicMatchId || '—');
+  text('postMatchFinishedAt', formatDate(summary.finishedAt));
+  text('postMatchResultPill', isWin ? 'WIN' : 'LOSS');
+
+  const pill = $('postMatchResultPill');
+  const card = $('postMatchCard');
+  pill.className = `post-match-result-pill ${isWin ? 'win' : 'loss'}`;
+  if (card) card.className = `card post-match-card ${isWin ? 'win' : 'loss'}`;
+}
+
+function evaluatePostMatchSummary() {
+  if (state.postMatchSummary) return;
+  const latest = (state.profileHistory || [])[0] || null;
+  const summary = buildPostMatchSummary(latest, state.profile);
+  if (!summary || hasSeenPostMatch(summary.publicMatchId)) {
+    state.postMatchSummary = null;
+    return;
+  }
+  state.postMatchSummary = summary;
+}
+
+async function closePostMatchModal() {
+  const matchId = state.postMatchSummary?.publicMatchId || null;
+  if (matchId) {
+    markPostMatchSeen(matchId);
+    try {
+      await api(`/api/matches/${encodeURIComponent(matchId)}/post-match/ack`, { method: 'POST' });
+    } catch (_) {}
+  }
+  state.postMatchSummary = null;
+  renderPostMatchModal();
+}
+
+async function openProfileFromPostMatch() {
+  const profileSection = document.querySelector('.sidebar .card');
+  if (profileSection) profileSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  await closePostMatchModal();
+}
+
+async function refreshAccount() {
+  const data = await api('/auth/me');
+  state.user = data.user || null;
+}
+async function refreshParty() {
+  const data = await api('/api/party/me');
+  state.party = data.party || null;
+}
+async function refreshQueue() {
+  const data = await api('/api/queue/me');
+  state.queue = data.queue || null;
+  state.restrictions = data.restrictions || null;
+  if (!state.queue) stopQueueTimer();
+}
+async function refreshMatch() {
+  const data = await api('/api/matches/me/current');
+  state.match = data.match || null;
+  if (state.match) stopQueueTimer();
+  if (Array.isArray(data.mapPool)) state.mapPool = data.mapPool;
+}
+async function refreshProfile() {
+  const data = await api('/api/profile/me');
+  state.profile = data.profile || null;
+}
+async function refreshQueueStats() {
+  const data = await api('/api/queue/stats');
+  state.queueStats = data.stats || null;
+}
+async function refreshProfileHistory() {
+  const data = await api('/api/profile/me/history?limit=12');
+  state.profileHistory = data.items || [];
+}
+async function refreshPostMatchSummary() {
+  const data = await api('/api/matches/me/post-match');
+  const summary = data.summary || null;
+  if (!summary) {
+    state.postMatchSummary = null;
+    return;
+  }
+  const profile = state.profile || null;
+  state.postMatchSummary = {
+    ...summary,
+    scoreLabel: `${summary.teamAScore ?? 0} : ${summary.teamBScore ?? 0}`,
+    eloAfter: summary.eloAfter ?? profile?.elo2v2 ?? 100,
+    streakAfter: profile?.currentWinStreak ?? 0,
+    streakDeltaLabel: summary.result === 'win' ? '+1 win streak' : 'Streak reset'
+  };
+}
+
+async function refreshAll() {
+  await Promise.allSettled([
+    refreshAccount(),
+    refreshParty(),
+    refreshQueue(),
+    refreshMatch(),
+    refreshQueueStats(),
+    refreshProfile(),
+    refreshProfileHistory(),
+    refreshPostMatchSummary()
+  ]);
+  renderAuth();
+  renderProfileOverview();
+  renderParty();
+  renderRestrictionCard();
+  renderQueue();
+  renderCurrentMatch();
+  renderHistory();
+  evaluatePostMatchSummary();
+  renderMatchDetailsModal();
+  renderPostMatchModal();
+}
+
+function login() { rememberAuthReturn(); window.location.assign(getSteamAuthUrl()); }
+async function logout() { try { await api('/auth/logout', { method: 'POST' }); } catch (_) {} window.location.reload(); }
+
+async function createParty() {
+  try {
+    await api('/api/party/create', { method: 'POST' });
+    await refreshAll();
+    showAlert('Party создана.');
+  } catch (err) {
+    showAlert(`Не удалось создать party: ${err.message}`, 'error');
+  }
+}
+
+async function leaveParty() {
+  try {
+    await api('/api/party/leave', { method: 'POST' });
+    await refreshAll();
+    showAlert('Ты покинул party.');
+  } catch (err) {
+    showAlert(`Не удалось выйти из party: ${err.message}`, 'error');
+  }
+}
+
+async function searchUsers() {
+  const q = $('userSearchInput')?.value?.trim();
+  const root = $('userSearchResults');
+  if (!q) {
+    root.innerHTML = '<div class="empty">Введи ник игрока.</div>';
+    return;
+  }
+  try {
+    const data = await api(`/api/account/users/search?q=${encodeURIComponent(q)}`);
+    const items = data.items || [];
+    if (!items.length) {
+      root.innerHTML = '<div class="empty">Игроки не найдены.</div>';
+      return;
+    }
+    root.innerHTML = items.map((item) => {
+      const canPullFromParty = item.partyStatus && item.partyStatus !== 'closed';
+      const presenceLabel = item.presenceLabel || 'Онлайн';
+      const inviteLabel = canPullFromParty ? t('inviteToParty') : t('invite');
+      return `
+      <div class="member-item">
+        <div class="member-main">
+          ${getAvatarMarkup(item.avatarUrl, item.nickname, 'avatar sm')}
+          <div>
+            <div>${esc(item.nickname || 'Unknown')}</div>
+            <div class="muted rank-inline">${getRankPillMarkup(item.rank, item.elo2v2 ?? 100)} <span class="muted">Elo ${esc(item.elo2v2 ?? 100)}</span></div>
+            <div class="muted search-user-meta">${esc(presenceLabel)}${canPullFromParty ? ' • его текущее lobby закроется после принятия' : ''}</div>
+          </div>
+        </div>
+        <button class="btn secondary" data-invite-user="${esc(item.id)}">${inviteLabel}</button>
+      </div>
+    `;
+    }).join('');
+  } catch (err) {
+    root.innerHTML = `<div class="empty">Ошибка поиска: ${esc(err.message)}</div>`;
+  }
+}
+
+async function inviteUser(userId) {
+  try {
+    if (!state.party?.id) {
+      await api('/api/party/create', { method: 'POST' });
+      await refreshParty();
+    }
+    await api('/api/party/invite', {
+      method: 'POST',
+      body: JSON.stringify({ targetUserId: userId })
+    });
+    await refreshAll();
+    showAlert('Инвайт отправлен.');
+  } catch (err) {
+    showAlert(`Не удалось отправить инвайт: ${err.message}`, 'error');
+  }
+}
+
+async function acceptInvite(id) {
+  try {
+    await api(`/api/party/invite/${encodeURIComponent(id)}/accept`, { method: 'POST' });
+    removeInviteToast(id);
+    await refreshAll();
+    showAlert('Инвайт принят.');
+  } catch (err) {
+    showAlert(`Не удалось принять инвайт: ${err.message}`, 'error');
+  }
+}
+
+async function declineInvite(id) {
+  try {
+    await api(`/api/party/invite/${encodeURIComponent(id)}/decline`, { method: 'POST' });
+    dismissInviteToast(id);
+    await refreshAll();
+    showAlert('Инвайт отклонён.');
+  } catch (err) {
+    showAlert(`Не удалось отклонить инвайт: ${err.message}`, 'error');
+  }
+}
+
+async function joinQueue() {
+  try {
+    if (!state.user) {
+      showAlert('Сначала войди через Steam.', 'error');
+      return;
+    }
+    if (!state.party?.id) {
+      await api('/api/party/create', { method: 'POST' });
+      await refreshParty();
+      renderParty();
+      renderRestrictionCard();
+      renderQueue();
+    }
+    await api('/api/queue/join', { method: 'POST', body: JSON.stringify({ mode: '2x2' }) });
+    await refreshAll();
+    showAlert('Поиск матча запущен.');
+  } catch (err) {
+    showAlert(`Не удалось запустить поиск: ${err.message}`, 'error');
+  }
+}
+
+async function cancelQueue() {
+  try {
+    await api('/api/queue/cancel', { method: 'POST' });
+    await refreshAll();
+    showAlert('Поиск матча отменён.');
+  } catch (err) {
+    showAlert(`Не удалось отменить поиск: ${err.message}`, 'error');
+  }
+}
+
+async function copyConnect() {
+  if (!state.match) return;
+  await navigator.clipboard.writeText(connectString(state.match));
+  showAlert('Команда connect скопирована.');
+}
+
+async function openMatchDetails(publicMatchId) {
+  try {
+    const data = await api(`/api/matches/${encodeURIComponent(publicMatchId)}/details`);
+    state.matchDetails = data.match || null;
+    renderMatchDetailsModal();
+  } catch (err) {
+    showAlert(`Не удалось загрузить детали матча: ${err.message}`, 'error');
+  }
+}
+function closeMatchDetails() {
+  state.matchDetails = null;
+  renderMatchDetailsModal();
+}
+
+async function handleDelegatedClick(event) {
+  const acceptBtn = event.target.closest('[data-accept-invite]');
+  if (acceptBtn) {
+    acceptBtn.disabled = true;
+    await acceptInvite(acceptBtn.dataset.acceptInvite);
+    return;
+  }
+  const declineBtn = event.target.closest('[data-decline-invite]');
+  if (declineBtn) {
+    declineBtn.disabled = true;
+    await declineInvite(declineBtn.dataset.declineInvite);
+    return;
+  }
+  const dismissBtn = event.target.closest('[data-dismiss-invite-toast]');
+  if (dismissBtn) {
+    dismissInviteToast(dismissBtn.dataset.dismissInviteToast);
+    return;
+  }
+  const inviteBtn = event.target.closest('[data-invite-user]');
+  if (inviteBtn) {
+    inviteBtn.disabled = true;
+    try { await inviteUser(inviteBtn.dataset.inviteUser); } finally { inviteBtn.disabled = false; }
+    return;
+  }
+  const detailsBtn = event.target.closest('[data-open-match-details]');
+  if (detailsBtn) {
+    await openMatchDetails(detailsBtn.dataset.openMatchDetails);
+    return;
+  }
+  const closeModalBtn = event.target.closest('[data-close-modal="match-details"]');
+  if (closeModalBtn) {
+    closeMatchDetails();
+  }
 }
 
 
-.queue-stage-stats .stat strong#queuePartyStat {
-  font-size: clamp(2rem, 3.5vw, 2.8rem);
-  line-height: 1;
-  letter-spacing: -0.03em;
+
+function matchPhaseBadgeClass(phase) {
+  if (phase === 'live' || phase === 'finished') return 'ok';
+  if (phase === 'cancelled') return 'warn';
+  return 'live';
 }
 
-.queue-stage-stats .stat strong#queuePartyStat span {
-  display: inline-block;
-  min-width: 1ch;
+function getPlayerDelayReason(player) {
+  if (!player) return '';
+  if (!player.accepted) return `${player.nickname || 'Игрок'} ещё не принял матч`;
+  if (['waiting_connect', 'pending_connect'].includes(player.connectionState)) return `${player.nickname || 'Игрок'} ещё не подключился`;
+  if (player.connectionState === 'disconnected') return `${player.nickname || 'Игрок'} вылетел и ждёт reconnect`;
+  if (player.connectionState === 'abandoned') return `${player.nickname || 'Игрок'} получил abandon`;
+  return '';
+}
+
+function renderMatchPlayerCard(p) {
+  const tags = [];
+  if (p.mapVote) tags.push(`<span class="tag">vote: ${esc(p.mapVote)}</span>`);
+  if (p.isReconnecting) tags.push(`<span class="tag warn">reconnect ${esc(formatDuration(p.reconnectRemainingSec))}</span>`);
+  if (p.isAbandoned) tags.push('<span class="tag danger">abandon</span>');
+  return `
+    <div class="match-player-card">
+      <div class="match-player-main">
+        ${getAvatarMarkup(p.avatarUrl, p.nickname, 'avatar sm')}
+        <div class="match-player-info">
+          <div class="match-player-topline">
+            <div class="match-player-name" title="${esc(p.nickname || 'Unknown')}">${esc(p.nickname || 'Unknown')}</div>
+            ${getRankPillMarkup(p.rank, p.elo || p.elo2v2 || 100)}
+          </div>
+          <div class="muted rank-inline"><span class="muted">Elo ${esc(p.elo || p.elo2v2 || 100)}</span></div>
+          ${tags.length ? `<div class="match-player-meta">${tags.join('')}</div>` : ''}
+        </div>
+      </div>
+    </div>`;
 }
 
 
-.vote-btn{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.vote-count-badge{display:inline-flex;align-items:center;justify-content:center;min-width:58px;padding:6px 10px;border-radius:999px;border:1px solid rgba(139,92,246,.35);background:rgba(139,92,246,.14);font-size:13px;font-weight:800;color:#f5f3ff}
-#queuePartyStat{font-size:38px;line-height:1;font-weight:900;letter-spacing:-.04em}
-#queuePartyStat [data-live-searching-count],#queuePartyStat [data-live-active-matches]{font-size:44px}
-#queuePartyStat br{display:none}
-.match-room-actions .vote-btn{width:100%}
+function getMapVoteCounts(match) {
+  const totalPlayers = Number(match?.totalPlayers || match?.room?.counts?.totalPlayers || (match?.players || []).length || 4);
+  const counts = Object.create(null);
+  (match?.players || []).forEach((player) => {
+    if (player?.mapVote) counts[player.mapVote] = (counts[player.mapVote] || 0) + 1;
+  });
+  return { counts, totalPlayers };
+}
+
+function renderMatchRoomActions(match) {
+  const room = match?.room || {};
+  const actions = [];
+  const roomTimedOut = isMatchRoomTimedOut(match);
+  if (room.actions?.canAccept) actions.push('<button class="btn primary" data-room-action="accept">ПРИНЯТЬ МАТЧ</button>');
+  if (room.actions?.canVoteMap) {
+    const { counts, totalPlayers } = getMapVoteCounts(match);
+    actions.push(state.mapPool.map((map) => `
+      <button class="btn secondary vote-btn" data-room-action="vote" data-map-name="${esc(map)}">
+        <span>Карта: ${esc(map)}</span>
+        <span class="vote-count-badge">${esc(`${counts[map] || 0}/${totalPlayers}`)}</span>
+      </button>`).join(''));
+  }
+  if (!roomTimedOut && (room.phase === 'connect' || room.phase === 'live')) {
+    if (room.actions?.canConnect) actions.push('<button class="btn primary" data-room-action="connect">CONNECT TO SERVER</button>');
+    if (room.actions?.canCopyCommand) actions.push('<button class="btn secondary" data-room-action="copy-command">Скопировать connect</button>');
+  }
+  if (roomTimedOut || room.phase === 'cancelled' || room.phase === 'canceled') {
+    actions.push('<button class="btn primary" data-room-action="return">ВЕРНУТЬСЯ</button>');
+  }
+  if (room.phase === 'live' && !actions.length) {
+    actions.push('<div class="empty">Матч уже идёт.</div>');
+  }
+  if (room.phase === 'finished' || room.phase === 'cancelled') {
+    actions.push('<button class="btn secondary" data-room-action="result">Открыть результат</button>');
+    actions.push('<button class="btn ghost" data-room-action="profile">Открыть профиль</button>');
+    actions.push('<button class="btn primary" data-room-action="play-again">Играть ещё</button>');
+  }
+  $('matchRoomActions').innerHTML = actions.join('') || '<div class="empty">Ожидание следующего шага матча.</div>';
+}
+
+function renderCurrentMatch() {
+  const match = state.match;
+  const hasMatch = shouldDisplayMatchRoom(match);
+  hide('queueStageCard', hasMatch);
+  hide('matchStageCard', !hasMatch);
+  $('currentMatchBadge').textContent = hasMatch ? ((match.room?.phaseLabel) || match.status || 'Матч') : 'Нет матча';
+  $('currentMatchBadge').className = `pill ${hasMatch ? matchPhaseBadgeClass(match.room?.phase) : 'idle'}`;
+  if (!hasMatch) {
+    $('currentMatchSummaryGrid').innerHTML = '';
+    $('currentMatchStageTimeline').innerHTML = '';
+    $('teamAPlayers').innerHTML = '';
+    $('teamBPlayers').innerHTML = '';
+    $('matchRoomActions').innerHTML = '';
+    text('serverConnectLine', '—');
+    text('matchRoomWhyBlocked', '');
+    text('matchRoomCenterTimer', '—');
+    text('matchRoomCenterServer', '—');
+    text('matchRoomCenterMap', '—');
+    $('matchStageCard')?.classList.remove('match-room-cancelled');
+    return;
+  }
+
+  const room = match.room || {};
+  const roomTimedOut = isMatchRoomTimedOut(match);
+  const phaseTimer = formatDuration(room.currentDeadlineSec);
+  text('currentMatchId', room.publicMatchId || match.publicMatchId || '—');
+  text('currentMatchMeta', `${match.mode || '2x2'} • карта: ${room.mapName || 'не выбрана'} • сервер: ${room.server?.name || 'EU-1'}`);
+  text('currentMatchStatus', room.statusText || match.status || '—');
+  $('currentMatchStatus').className = `pill ${matchPhaseBadgeClass(room.phase)}`;
+  text('serverConnectLine', room.server?.connectCommand || connectString(match));
+  const isCancelledRoom = roomTimedOut || ['cancelled', 'canceled'].includes(String(room.phase || '').toLowerCase());
+  const cancellationLabel = room.finishReasonLabel || room.statusText || 'МАТЧ ОТМЕНЁН';
+  text('matchRoomCenterTimer', isCancelledRoom ? cancellationLabel : phaseTimer);
+  text('matchRoomCenterServer', room.server?.name || 'EU-1');
+  text('matchRoomCenterMap', room.mapName || (isCancelledRoom ? 'cancelled' : 'TBD'));
+  $('matchStageCard')?.classList.toggle('match-room-cancelled', isCancelledRoom);
+
+  $('currentMatchSummaryGrid').innerHTML = `
+    <div class="match-room-summary-card"><span>Фаза</span><strong>${esc(room.phaseLabel || room.phase || '—')}</strong></div>
+    <div class="match-room-summary-card"><span>Match ID</span><strong>${esc(room.publicMatchId || '—')}</strong></div>
+    <div class="match-room-summary-card"><span>Карта</span><strong>${esc(room.mapName || 'pending')}</strong></div>
+    <div class="match-room-summary-card"><span>Сервер</span><strong>${esc(room.server?.name || 'EU-1')}</strong></div>
+    <div class="match-room-summary-card"><span>Подключились</span><strong>${esc(`${match.connectedCount || 0}/${match.totalPlayers || 4}`)}</strong></div>
+    <div class="match-room-summary-card"><span>Таймер</span><strong>${esc(phaseTimer)}</strong></div>`;
+
+  $('currentMatchStageTimeline').innerHTML = (room.progressTimeline || []).map((step) => `
+    <div class="match-room-stage-step ${esc(step.state || 'upcoming')}">
+      <div class="current-match-step-title">${esc(step.title || step.key)}</div>
+      <div class="muted">${esc(step.description || '')}</div>
+    </div>`).join('');
+
+  $('teamAPlayers').innerHTML = ((room.teams?.teamA) || []).map(renderMatchPlayerCard).join('') || '<div class="empty">Нет игроков</div>';
+  $('teamBPlayers').innerHTML = ((room.teams?.teamB) || []).map(renderMatchPlayerCard).join('') || '<div class="empty">Нет игроков</div>';
+
+  text('matchRoomWhyBlocked', '');
+
+  renderMatchRoomActions(match);
+}
+
+async function submitMatchIssue() {
+  const match = state.match;
+  if (!match?.publicMatchId) return;
+  try {
+    setBusy('submitMatchIssueBtn', true, 'ОТПРАВКА...');
+    await api(`/api/matches/${encodeURIComponent(match.publicMatchId)}/issues`, {
+      method: 'POST',
+      body: JSON.stringify({
+        phase: match.room?.phase || match.phase || 'live',
+        reason: $('matchIssueReason')?.value || 'other',
+        comment: $('matchIssueComment')?.value || ''
+      })
+    });
+    $('matchIssueComment').value = '';
+    hide('matchIssueModal', true);
+    showAlert('Проблема по матчу отправлена в backend.');
+    await refreshMatch();
+    renderCurrentMatch();
+  } catch (err) {
+    showAlert(`Не удалось отправить репорт: ${err.message}`, 'error');
+  } finally {
+    setBusy('submitMatchIssueBtn', false);
+  }
+}
+
+function openMatchIssueModal() { hide('matchIssueModal', false); }
+function closeMatchIssueModal() { hide('matchIssueModal', true); }
+
+async function refreshMatch() {
+  const data = await api('/api/matches/me/current');
+  state.match = data.match || null;
+  state.issueReasons = data.issueReasons || [];
+  if (state.match) stopQueueTimer();
+  if (Array.isArray(data.mapPool)) state.mapPool = data.mapPool;
+}
+
+async function executeRoomAction(action, mapName) {
+  const match = state.match;
+  if (!match?.publicMatchId) return;
+  if (action === 'accept') {
+    await api(`/api/matches/${encodeURIComponent(match.publicMatchId)}/accept`, { method: 'POST' });
+    await refreshAll();
+    return;
+  }
+  if (action === 'vote') {
+    await api(`/api/matches/${encodeURIComponent(match.publicMatchId)}/map-vote`, { method: 'POST', body: JSON.stringify({ mapName }) });
+    await refreshAll();
+    return;
+  }
+  if (action === 'connect') {
+    window.open(`steam://connect/${match.serverIp}:${match.serverPort}`, '_self');
+    return;
+  }
+  if (action === 'copy-ip') {
+    await navigator.clipboard.writeText(`${match.serverIp}:${match.serverPort}`);
+    showAlert('IP сервера скопирован.');
+    return;
+  }
+  if (action === 'copy-command') {
+    await copyConnect();
+    return;
+  }
+  if (action === 'issue') { openMatchIssueModal(); return; }
+  if (action === 'result') { await openMatchDetails(match.publicMatchId); return; }
+  if (action === 'profile') { document.querySelector('.sidebar .card')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+  if (action === 'play-again') { if (state.queue) await cancelQueue(); await joinQueue(); return; }
+  if (action === 'return') {
+    state.match = null;
+    renderCurrentMatch();
+    document.getElementById('queueStageCard')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setTimeout(() => { void refreshAll(); }, 150);
+    return;
+  }
+  if (action === 'room') { showAlert('Ты уже в комнате матча.'); }
+}
+
+document.addEventListener('click', (event) => {
+  const actionBtn = event.target.closest('[data-room-action]');
+  if (actionBtn) {
+    event.preventDefault();
+    void executeRoomAction(actionBtn.dataset.roomAction, actionBtn.dataset.mapName || null);
+    return;
+  }
+  const issueClose = event.target.closest('[data-close-modal="match-issue"]');
+  if (issueClose) {
+    event.preventDefault();
+    closeMatchIssueModal();
+  }
+});
 
 
-/* TRUST Premium Competitive Visual System v1 */
-:root{
-  --bg:#07080d;
-  --bg2:#0A0B10;
-  --panel:#11131A;
-  --panel-2:#171A23;
-  --panel-3:#1D2130;
-  --text:#F4F7FF;
-  --muted:#9AA4B2;
-  --line:rgba(220,227,238,.08);
-  --line-strong:rgba(169,157,255,.28);
-  --primary:#6F5BFF;
-  --primary-2:#8B7CFF;
-  --primary-soft:rgba(111,91,255,.14);
-  --cyan:#46C9FF;
-  --gold:#F3C969;
-  --success:#21C97A;
-  --danger:#FF5C73;
-  --shadow:0 26px 90px rgba(0,0,0,.48);
-}
-body{
-  background:
-    radial-gradient(900px 450px at 14% -8%, rgba(111,91,255,.18), transparent 58%),
-    radial-gradient(800px 420px at 86% 0%, rgba(70,201,255,.08), transparent 56%),
-    linear-gradient(180deg,#07080D 0%,#0A0B10 50%,#090A10 100%);
-}
-body::after{
-  content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;opacity:.36;
-  background-image:linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
-  background-size:64px 64px;
-  mask-image:radial-gradient(circle at 50% 20%, #000 0%, transparent 72%);
-}
-.card,.landing-hero-card,.landing-account-card,.landing-feature-card,.status-card,.landing-bottom-card{
-  background:linear-gradient(180deg, rgba(23,26,35,.94), rgba(12,14,22,.94));
-  border:1px solid rgba(220,227,238,.08);
-  box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,.035);
-}
-.card:hover,.landing-feature-card:hover,.status-card:hover{
-  border-color:rgba(169,157,255,.22);
-  box-shadow:0 30px 95px rgba(0,0,0,.52),0 0 0 1px rgba(111,91,255,.06) inset;
-}
-.brand-mark{
-  background:linear-gradient(135deg,#6F5BFF,#46C9FF 130%);
-  box-shadow:0 12px 32px rgba(111,91,255,.35),0 0 28px rgba(70,201,255,.12);
-}
-.btn.primary{
-  background:linear-gradient(135deg,#6F5BFF,#8B7CFF 55%,#46C9FF 150%);
-  box-shadow:0 14px 34px rgba(111,91,255,.32), inset 0 1px 0 rgba(255,255,255,.22);
-}
-.btn.primary:hover{filter:brightness(1.08);transform:translateY(-2px)}
-.btn.ghost,.btn.secondary,.input{border-color:rgba(220,227,238,.10)}
-.badge{background:rgba(111,91,255,.13);border-color:rgba(169,157,255,.25);color:#E9E4FF}
-.pill.live{color:#DCD7FF;background:rgba(111,91,255,.16);border-color:rgba(169,157,255,.32)}
-.pill.ok{color:#9AF2C3;background:rgba(33,201,122,.12);border-color:rgba(33,201,122,.28)}
-.pill.warn{color:#FFE0A3;background:rgba(243,201,105,.12);border-color:rgba(243,201,105,.30)}
-.hero h1,.cta-panel h2{letter-spacing:-.075em;text-wrap:balance}
-.hero h1 strong,.trust-gradient-text{background:linear-gradient(90deg,#fff,#A99DFF 52%,#46C9FF);-webkit-background-clip:text;background-clip:text;color:transparent}
-.metric,.stat,.history-item,.invite-item,.search-item,.member-item,.row,.table-row,.team{
-  background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.018));
-  border-color:rgba(220,227,238,.075);
-}
-.table-row:hover,.history-item:hover,.member-item:hover{border-color:rgba(169,157,255,.24);transform:translateY(-1px)}
-.table-row,.history-item,.member-item{transition:transform .18s ease,border-color .18s ease,background .18s ease}
-.rank-pill{position:relative;overflow:hidden;text-transform:uppercase;box-shadow:inset 0 1px 0 rgba(255,255,255,.10)}
-.rank-pill::before{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent,rgba(255,255,255,.16),transparent);transform:translateX(-120%);transition:transform .7s ease}
-.rank-pill:hover::before{transform:translateX(120%)}
-.rank-pill.recruit{color:#D4DAE8;background:rgba(154,164,178,.13);border-color:rgba(154,164,178,.28)}
-.rank-pill.operative{color:#AFC7EA;background:rgba(82,123,190,.14);border-color:rgba(82,123,190,.32)}
-.rank-pill.vanguard{color:#7DD3FC;background:rgba(14,165,233,.14);border-color:rgba(14,165,233,.32)}
-.rank-pill.sentinel{color:#A5B4FC;background:rgba(99,102,241,.16);border-color:rgba(129,140,248,.34)}
-.rank-pill.phantom{color:#C4B5FD;background:rgba(124,58,237,.18);border-color:rgba(167,139,250,.38)}
-.rank-pill.ascendant{color:#DDD6FE;background:linear-gradient(135deg,rgba(111,91,255,.24),rgba(243,201,105,.10));border-color:rgba(169,157,255,.48)}
-.rank-pill.dominion{color:#FDE68A;background:linear-gradient(135deg,rgba(243,201,105,.18),rgba(111,91,255,.18));border-color:rgba(243,201,105,.42)}
-.rank-pill.sovereign{color:#FFF5C2;background:linear-gradient(135deg,rgba(243,201,105,.24),rgba(255,255,255,.06));border-color:rgba(243,201,105,.55)}
-.rank-pill.apex{color:#E0F7FF;background:linear-gradient(135deg,rgba(255,255,255,.12),rgba(70,201,255,.18),rgba(111,91,255,.15));border-color:rgba(70,201,255,.50)}
-.rank-pill.trust-elite{color:#FFF7D6;background:linear-gradient(135deg,rgba(243,201,105,.28),rgba(255,255,255,.14),rgba(111,91,255,.20));border-color:rgba(243,201,105,.72);box-shadow:0 0 30px rgba(243,201,105,.18),inset 0 1px 0 rgba(255,255,255,.22)}
-.rank-progress-fill{background:linear-gradient(90deg,#6F5BFF,#8B7CFF,#46C9FF)!important;box-shadow:0 0 20px rgba(111,91,255,.35)}
-.trust-rank-showcase{display:grid;grid-template-columns:1.05fr .95fr;gap:18px;align-items:stretch}
-.rank-ladder-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.rank-show-card{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px;border-radius:18px;border:1px solid rgba(220,227,238,.08);background:rgba(255,255,255,.035)}
-.rank-orb{width:42px;height:42px;border-radius:15px;background:linear-gradient(135deg,rgba(111,91,255,.85),rgba(70,201,255,.45));box-shadow:0 0 28px rgba(111,91,255,.22);display:grid;place-items:center;font-weight:900}
-.prestige-panel{position:relative;min-height:100%;display:flex;flex-direction:column;justify-content:space-between;gap:18px;overflow:hidden}
-.prestige-panel::before{content:"";position:absolute;right:-90px;top:-80px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(243,201,105,.22),transparent 66%)}
-.prestige-kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.prestige-kpi .stat strong{font-size:20px}
-@media (max-width:980px){.trust-rank-showcase,.rank-ladder-grid{grid-template-columns:1fr}.prestige-kpi{grid-template-columns:1fr}}
+let appBootstrapped = false;
+let appRefreshInFlight = false;
+let appRefreshTimer = null;
 
-/* Leaderboard premium 4-column table fix */
-.table-head,.table-row{grid-template-columns:80px minmax(0,1fr) 180px 100px}
-@media (max-width:720px){.table-head,.table-row{grid-template-columns:52px minmax(0,1fr);}.table-head div:nth-child(3),.table-head div:nth-child(4),.table-row div:nth-child(3),.table-row div:nth-child(4){display:none}}
+async function safeRefreshAll() {
+  if (appRefreshInFlight) return;
+  appRefreshInFlight = true;
+  try {
+    await refreshAll();
+  } finally {
+    appRefreshInFlight = false;
+  }
+}
+
+async function bootstrapApp() {
+  if (appBootstrapped) return;
+  appBootstrapped = true;
+
+  setupRankTooltipInteractions();
+  $('appLangRu')?.addEventListener('click', () => {
+    appLang = 'ru';
+    localStorage.setItem(APP_LANG_KEY, appLang);
+    applyAppLang();
+    renderAuth();
+    renderProfileOverview();
+    renderParty();
+    renderRestrictionCard();
+    renderQueue();
+    renderCurrentMatch();
+    renderHistory();
+    renderMatchDetailsModal();
+    renderPostMatchModal();
+  });
+  $('appLangEn')?.addEventListener('click', () => {
+    appLang = 'en';
+    localStorage.setItem(APP_LANG_KEY, appLang);
+    applyAppLang();
+    renderAuth();
+    renderProfileOverview();
+    renderParty();
+    renderRestrictionCard();
+    renderQueue();
+    renderCurrentMatch();
+    renderHistory();
+    renderMatchDetailsModal();
+    renderPostMatchModal();
+  });
+  applyAppLang();
+  $('appLoginBtn')?.addEventListener('click', login);
+  $('appLogoutBtn')?.addEventListener('click', logout);
+  $('createPartyBtn')?.addEventListener('click', (event) => { event.preventDefault(); void createParty(); });
+  $('leavePartyBtn')?.addEventListener('click', (event) => { event.preventDefault(); void leaveParty(); });
+  $('userSearchBtn')?.addEventListener('click', (event) => { event.preventDefault(); void searchUsers(); });
+  $('joinQueueBtn')?.addEventListener('click', (event) => { event.preventDefault(); void joinQueue(); });
+  $('cancelQueueBtn')?.addEventListener('click', (event) => { event.preventDefault(); void cancelQueue(); });
+  $('copyConnectBtn')?.addEventListener('click', (event) => { event.preventDefault(); void copyConnect(); });
+  $('postMatchContinueBtn')?.addEventListener('click', (event) => { event.preventDefault(); void closePostMatchModal(); });
+  $('postMatchProfileBtn')?.addEventListener('click', (event) => { event.preventDefault(); void openProfileFromPostMatch(); });
+  $('submitMatchIssueBtn')?.addEventListener('click', (event) => { event.preventDefault(); void submitMatchIssue(); });
+  document.addEventListener('click', (event) => {
+    void handleDelegatedClick(event);
+  });
+
+  await safeRefreshAll();
+  if (!appRefreshTimer) {
+    appRefreshTimer = setInterval(() => { void safeRefreshAll(); }, 2000);
+  }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  void bootstrapApp();
+});
+
+window.addEventListener('pageshow', () => {
+  void safeRefreshAll();
+});
+
+window.addEventListener('focus', () => {
+  void safeRefreshAll();
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) void safeRefreshAll();
+});
