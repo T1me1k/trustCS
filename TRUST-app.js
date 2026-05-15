@@ -19,15 +19,214 @@ function rememberAuthReturn() {
 
 
 const RANK_TABLE = [
-  { key: 'iron', name: 'Iron', minElo: 0, color: 'iron' },
-  { key: 'bronze', name: 'Bronze', minElo: 300, color: 'bronze' },
-  { key: 'silver', name: 'Silver', minElo: 500, color: 'silver' },
-  { key: 'gold_nova', name: 'Gold Nova', minElo: 700, color: 'gold' },
-  { key: 'master_guardian', name: 'Master Guardian', minElo: 900, color: 'guardian' },
-  { key: 'distinguished', name: 'Distinguished', minElo: 1100, color: 'distinguished' },
-  { key: 'legendary_eagle', name: 'Legendary Eagle', minElo: 1300, color: 'eagle' },
-  { key: 'supreme', name: 'Supreme', minElo: 1500, color: 'supreme' },
-  { key: 'global_elite', name: 'Global Elite', minElo: 1700, color: 'global' }
+  {
+    "key": "recruit_iii",
+    "name": "Recruit III",
+    "tierName": "Recruit",
+    "division": "III",
+    "minElo": 0,
+    "color": "recruit"
+  },
+  {
+    "key": "recruit_ii",
+    "name": "Recruit II",
+    "tierName": "Recruit",
+    "division": "II",
+    "minElo": 100,
+    "color": "recruit"
+  },
+  {
+    "key": "recruit_i",
+    "name": "Recruit I",
+    "tierName": "Recruit",
+    "division": "I",
+    "minElo": 200,
+    "color": "recruit"
+  },
+  {
+    "key": "operative_iii",
+    "name": "Operative III",
+    "tierName": "Operative",
+    "division": "III",
+    "minElo": 300,
+    "color": "operative"
+  },
+  {
+    "key": "operative_ii",
+    "name": "Operative II",
+    "tierName": "Operative",
+    "division": "II",
+    "minElo": 400,
+    "color": "operative"
+  },
+  {
+    "key": "operative_i",
+    "name": "Operative I",
+    "tierName": "Operative",
+    "division": "I",
+    "minElo": 500,
+    "color": "operative"
+  },
+  {
+    "key": "vanguard_iii",
+    "name": "Vanguard III",
+    "tierName": "Vanguard",
+    "division": "III",
+    "minElo": 600,
+    "color": "vanguard"
+  },
+  {
+    "key": "vanguard_ii",
+    "name": "Vanguard II",
+    "tierName": "Vanguard",
+    "division": "II",
+    "minElo": 700,
+    "color": "vanguard"
+  },
+  {
+    "key": "vanguard_i",
+    "name": "Vanguard I",
+    "tierName": "Vanguard",
+    "division": "I",
+    "minElo": 800,
+    "color": "vanguard"
+  },
+  {
+    "key": "sentinel_iii",
+    "name": "Sentinel III",
+    "tierName": "Sentinel",
+    "division": "III",
+    "minElo": 900,
+    "color": "sentinel"
+  },
+  {
+    "key": "sentinel_ii",
+    "name": "Sentinel II",
+    "tierName": "Sentinel",
+    "division": "II",
+    "minElo": 1000,
+    "color": "sentinel"
+  },
+  {
+    "key": "sentinel_i",
+    "name": "Sentinel I",
+    "tierName": "Sentinel",
+    "division": "I",
+    "minElo": 1100,
+    "color": "sentinel"
+  },
+  {
+    "key": "phantom_iii",
+    "name": "Phantom III",
+    "tierName": "Phantom",
+    "division": "III",
+    "minElo": 1200,
+    "color": "phantom"
+  },
+  {
+    "key": "phantom_ii",
+    "name": "Phantom II",
+    "tierName": "Phantom",
+    "division": "II",
+    "minElo": 1300,
+    "color": "phantom"
+  },
+  {
+    "key": "phantom_i",
+    "name": "Phantom I",
+    "tierName": "Phantom",
+    "division": "I",
+    "minElo": 1400,
+    "color": "phantom"
+  },
+  {
+    "key": "ascendant_iii",
+    "name": "Ascendant III",
+    "tierName": "Ascendant",
+    "division": "III",
+    "minElo": 1500,
+    "color": "ascendant"
+  },
+  {
+    "key": "ascendant_ii",
+    "name": "Ascendant II",
+    "tierName": "Ascendant",
+    "division": "II",
+    "minElo": 1600,
+    "color": "ascendant"
+  },
+  {
+    "key": "ascendant_i",
+    "name": "Ascendant I",
+    "tierName": "Ascendant",
+    "division": "I",
+    "minElo": 1700,
+    "color": "ascendant"
+  },
+  {
+    "key": "dominion_iii",
+    "name": "Dominion III",
+    "tierName": "Dominion",
+    "division": "III",
+    "minElo": 1800,
+    "color": "dominion"
+  },
+  {
+    "key": "dominion_ii",
+    "name": "Dominion II",
+    "tierName": "Dominion",
+    "division": "II",
+    "minElo": 1900,
+    "color": "dominion"
+  },
+  {
+    "key": "dominion_i",
+    "name": "Dominion I",
+    "tierName": "Dominion",
+    "division": "I",
+    "minElo": 2000,
+    "color": "dominion"
+  },
+  {
+    "key": "sovereign_iii",
+    "name": "Sovereign III",
+    "tierName": "Sovereign",
+    "division": "III",
+    "minElo": 2100,
+    "color": "sovereign"
+  },
+  {
+    "key": "sovereign_ii",
+    "name": "Sovereign II",
+    "tierName": "Sovereign",
+    "division": "II",
+    "minElo": 2200,
+    "color": "sovereign"
+  },
+  {
+    "key": "sovereign_i",
+    "name": "Sovereign I",
+    "tierName": "Sovereign",
+    "division": "I",
+    "minElo": 2300,
+    "color": "sovereign"
+  },
+  {
+    "key": "apex",
+    "name": "Apex",
+    "tierName": "Apex",
+    "division": null,
+    "minElo": 2400,
+    "color": "apex"
+  },
+  {
+    "key": "trust_elite",
+    "name": "Trust Elite",
+    "tierName": "Trust Elite",
+    "division": null,
+    "minElo": 2600,
+    "color": "trust-elite"
+  }
 ];
 
 function renderRankTooltip(activeRankKey) {
@@ -38,7 +237,7 @@ function renderRankTooltip(activeRankKey) {
       <div class="rank-tooltip-rank">
         <div>
           <div class="rank-tooltip-name">${esc(rank.name)}</div>
-          <div class="muted">${esc(rank.minElo)}+ Elo</div>
+          <div class="muted">${esc(rank.minElo)}+ Rating</div>
         </div>
       </div>
       <span class="rank-pill ${esc(rank.color)}">${esc(rank.minElo)}+</span>
@@ -238,7 +437,7 @@ function normalizeRank(rank, elo) {
 }
 function getRankPillMarkup(rank, elo) {
   const info = normalizeRank(rank, elo);
-  return `<span class="rank-pill ${esc(info.color || 'iron')}">${esc(info.name)}</span>`;
+  return `<span class="rank-pill ${esc(info.color || 'recruit')}" data-rank-key="${esc(info.key || '')}">${esc(info.name)}</span>`;
 }
 
 function getAvatarMarkup(avatarUrl, fallback, className = 'avatar sm') {

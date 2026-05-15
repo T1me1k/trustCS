@@ -16,21 +16,151 @@ function rememberAuthReturn() {
   } catch (_) {}
 }
 
-const LB_I18N = {
-  ru: {
-    login: 'Войти через Steam', brandSub: '2x2 leaderboard', navHome: 'Главная', navPlay: 'Играть', navLeaderboard: 'Лидерборд',
-    title: 'Лидерборд TRUST 2x2', subtitle: 'Топ игроков по Elo. Рейтинг считается на backend и одинаков для сайта и launcher.',
-    headPlayer: 'Игрок', headRank: 'Звание', loading: 'Загрузка...', empty: 'Лидерборд пока пустой.', loadError: 'Не удалось загрузить лидерборд.'
-  },
+const LANDING_I18N = {
   en: {
-    login: 'Sign in with Steam', brandSub: '2x2 leaderboard', navHome: 'Home', navPlay: 'Play', navLeaderboard: 'Leaderboard',
-    title: 'TRUST 2v2 Leaderboard', subtitle: 'Top players by Elo. Rating is calculated on the backend and shared between the site and launcher.',
-    headPlayer: 'Player', headRank: 'Rank', loading: 'Loading...', empty: 'The leaderboard is empty for now.', loadError: 'Failed to load leaderboard.'
+    brand_sub: 'Competitive 2v2 platform',
+    nav_platform: 'Platform',
+    nav_status: 'Status',
+    nav_leaderboard: 'Leaderboard',
+    cabinet: 'Cabinet',
+    login: 'Sign in with Steam',
+    logout: 'Log out',
+    release_badge: 'TRUST RELEASE',
+    hero_title: 'Queue. Compete.<br>Climb.',
+    hero_text: 'Premium ranked arena for CS:GO: 2v2 queue, seasonal TRUST ranks, clean match flow and profile status players want to flex.',
+    hero_cta_login: 'Sign in with Steam',
+    hero_cta_open: 'Open app',
+    hero_cta_leaderboard: 'Leaderboard',
+    metric_format: 'Format',
+    metric_platforms: 'Platforms',
+    metric_platforms_value: 'Web + Launcher',
+    account_title: 'Account',
+    account_guest: 'Sign in with Steam to unlock party, queue and profile.',
+    account_matches: 'Matches',
+    account_wins: 'Wins',
+    account_mode: 'Mode',
+    account_open: 'Open player cabinet',
+    feature_ready_title: 'Built around the real match flow',
+    feature_ready_text: 'Party, ready-check, map choice, connect, live state and result all live in one backend-driven flow instead of separate scripts.',
+    feature_server_title: 'Server-authoritative logic',
+    feature_server_text: 'The match server controls connection state, reconnect windows and whitelist access so the platform stays consistent during real games.',
+    feature_simple_title: 'Minimal surface, serious core',
+    feature_simple_text: 'No overloaded hubs. Just profile, party, queue, current match, history and a clean route back into the next game.',
+    backend_title: 'Backend',
+    backend_text_loading: 'Checking TRUST backend availability.',
+    config_title: 'Config',
+    config_text_loading: 'Loading matchmaking config.',
+    principle_title: 'Principle',
+    principle_text: 'Nick and account come from Steam, the mode is only 2v2, and once all players accept the match the platform moves into map selection and server connect.',
+    how_title: 'How it works',
+    how_step_1: 'Sign in with Steam and open your profile.',
+    how_step_2: 'Queue solo or invite one teammate into a duo.',
+    how_step_3: 'Accept the match, vote the map and join the server.',
+    cta_badge: 'TRUST 2v2',
+    cta_title: 'Ready to play the final version of the platform, not a test page.',
+    cta_text: 'The landing is now focused on status, identity and direct access into the real app flow.',
+    auth_guest: 'Guest',
+    auth_connected: 'Steam connected',
+    backend_online: 'ONLINE',
+    backend_offline: 'OFFLINE',
+    backend_online_text: 'Backend is reachable and responding.',
+    backend_offline_text: 'Backend did not respond. Check Railway deploy, URL and CORS.',
+    config_waiting: 'Waiting',
+    config_on: 'MATCHMAKING ON',
+    config_off: 'OFF',
+    config_error: 'Error',
+    config_error_text: 'Failed to load config.',
+    config_format: '{app} • latest {version} • mode {mode}'
+  },
+  ru: {
+    brand_sub: 'Соревновательная 2x2 платформа',
+    nav_platform: 'Платформа',
+    nav_status: 'Статус',
+    nav_leaderboard: 'Лидерборд',
+    cabinet: 'Кабинет',
+    login: 'Войти через Steam',
+    logout: 'Выйти',
+    release_badge: 'TRUST RELEASE',
+    hero_title: 'Играй. Побеждай.<br>Поднимайся.',
+    hero_text: 'Премиальная ranked-арена для CS:GO: очередь 2x2, сезонные TRUST-звания, чистый match flow и профиль, который хочется показать.',
+    hero_cta_login: 'Войти через Steam',
+    hero_cta_open: 'Открыть app',
+    hero_cta_leaderboard: 'Лидерборд',
+    metric_format: 'Формат',
+    metric_platforms: 'Платформы',
+    metric_platforms_value: 'Web + Launcher',
+    account_title: 'Аккаунт',
+    account_guest: 'Войди через Steam, чтобы открыть party, очередь и профиль.',
+    account_matches: 'Матчи',
+    account_wins: 'Победы',
+    account_mode: 'Режим',
+    account_open: 'Открыть кабинет игрока',
+    feature_ready_title: 'Построено вокруг реального матча',
+    feature_ready_text: 'Party, ready-check, выбор карты, connect, live-state и результат живут в одном backend-driven flow, а не в разрозненных скриптах.',
+    feature_server_title: 'Сервер — источник истины',
+    feature_server_text: 'Матч-сервер контролирует состояние подключений, окна переподключения и whitelist, чтобы платформа оставалась консистентной в живых играх.',
+    feature_simple_title: 'Минимальная оболочка, серьёзное ядро',
+    feature_simple_text: 'Без перегруженных хабов. Только профиль, party, очередь, текущий матч, история и быстрый возврат в следующую игру.',
+    backend_title: 'Backend',
+    backend_text_loading: 'Проверяем доступность TRUST backend.',
+    config_title: 'Конфиг',
+    config_text_loading: 'Загружаем конфиг матчмейкинга.',
+    principle_title: 'Принцип',
+    principle_text: 'Ник и аккаунт берутся из Steam, режим только 2x2, а после принятия матча всеми игроками платформа переходит к выбору карты и подключению к серверу.',
+    how_title: 'Как это работает',
+    how_step_1: 'Войди через Steam и открой свой профиль.',
+    how_step_2: 'Ищи матч соло или пригласи одного тиммейта в duo.',
+    how_step_3: 'Прими матч, выбери карту и подключись к серверу.',
+    cta_badge: 'TRUST 2x2',
+    cta_title: 'Пора играть уже в финальную версию платформы, а не в тестовую страницу.',
+    cta_text: 'Теперь landing сфокусирован на статусе, айдентике и прямом входе в реальный app flow.',
+    auth_guest: 'Гость',
+    auth_connected: 'Steam connected',
+    backend_online: 'ONLINE',
+    backend_offline: 'OFFLINE',
+    backend_online_text: 'Backend доступен и отвечает.',
+    backend_offline_text: 'Backend не ответил. Проверь Railway deploy, URL и CORS.',
+    config_waiting: 'Ожидание',
+    config_on: 'MATCHMAKING ON',
+    config_off: 'OFF',
+    config_error: 'Ошибка',
+    config_error_text: 'Не удалось загрузить config.',
+    config_format: '{app} • latest {version} • режим {mode}'
   }
 };
-const LB_LANG_KEY = 'trust_lang';
-let lbLang = localStorage.getItem(LB_LANG_KEY) === 'en' ? 'en' : 'ru';
-const lbT = (k) => (LB_I18N[lbLang] && LB_I18N[lbLang][k]) || LB_I18N.ru[k] || k;
+
+const landingState = {
+  user: null,
+  config: null,
+  backendOnline: null,
+  lang: localStorage.getItem('trust_landing_lang') || 'en'
+};
+
+function $(id) { return document.getElementById(id); }
+function hide(id, on) { $(id)?.classList.toggle('hidden', on); }
+function t(key) {
+  const dict = LANDING_I18N[landingState.lang] || LANDING_I18N.en;
+  return dict[key] ?? LANDING_I18N.en[key] ?? key;
+}
+
+function formatString(template, params) {
+  return String(template).replace(/\{(\w+)\}/g, (_, key) => String(params?.[key] ?? '—'));
+}
+
+function applyTranslations() {
+  document.documentElement.lang = landingState.lang;
+  document.querySelectorAll('[data-i18n]').forEach((el) => {
+    const key = el.dataset.i18n;
+    if (!key) return;
+    el.innerHTML = t(key);
+  });
+  document.querySelectorAll('.lang-btn').forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.lang === landingState.lang);
+  });
+  applyUser(landingState.user);
+  renderBackendStatus();
+  renderConfigStatus();
+}
 
 async function api(path, options = {}) {
   const response = await fetch(`${BACKEND_BASE_URL}${path}`, {
@@ -44,128 +174,172 @@ async function api(path, options = {}) {
   return data;
 }
 
-function applyLbLang() {
-  document.documentElement.lang = lbLang;
-  const map = {
-    lbLoginBtn: 'login', lbBrandSub: 'brandSub', lbNavHome: 'navHome', lbNavPlay: 'navPlay', lbNavLeaderboard: 'navLeaderboard', lbMobileNavHome: 'navHome', lbMobileNavPlay: 'navPlay', lbMobileNavLeaderboard: 'navLeaderboard',
-    lbTitle: 'title', lbSubtitle: 'subtitle', lbHeadPlayer: 'headPlayer', lbHeadRank: 'headRank'
-  };
-  Object.entries(map).forEach(([id, key]) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = lbT(key);
-  });
-  document.getElementById('lbLangRu')?.classList.toggle('active', lbLang === 'ru');
-  document.getElementById('lbLangEn')?.classList.toggle('active', lbLang === 'en');
+function applyUser(user) {
+  landingState.user = user || null;
+  const authed = !!landingState.user;
+  hide('landingAppBtn', !authed);
+  hide('landingLogoutBtn', !authed);
+  hide('landingLoginBtn', authed);
+  hide('heroLoginBtn', authed);
+  hide('bottomLoginBtn', authed);
+  hide('landingGuestCard', authed);
+  hide('landingUserCard', !authed);
+
+  $('landingAuthBadge').textContent = authed ? t('auth_connected') : t('auth_guest');
+  $('landingAuthBadge').className = `pill ${authed ? 'ok' : 'idle'}`;
+
+  if (!authed) return;
+  $('landingAvatar').src = landingState.user.avatarUrl || '';
+  $('landingNickname').textContent = landingState.user.nickname || 'Unknown';
+  $('landingSteamId').textContent = landingState.user.steamId || landingState.user.steamId64 || '';
+  $('landingElo').textContent = landingState.user.elo2v2 ?? 100;
+  $('landingMatches').textContent = landingState.user.matchesPlayed2v2 ?? 0;
+  $('landingWins').textContent = landingState.user.wins2v2 ?? 0;
 }
 
-function getRankByElo(rawElo) {
-  const elo = Math.max(0, Number(rawElo) || 0);
-  const ranks = [
-    { key: 'iron', name: 'Iron', minElo: 0, color: 'iron' },
-    { key: 'bronze', name: 'Bronze', minElo: 300, color: 'bronze' },
-    { key: 'silver', name: 'Silver', minElo: 500, color: 'silver' },
-    { key: 'gold_nova', name: 'Gold Nova', minElo: 700, color: 'gold' },
-    { key: 'master_guardian', name: 'Master Guardian', minElo: 900, color: 'guardian' },
-    { key: 'distinguished', name: 'Distinguished', minElo: 1100, color: 'distinguished' },
-    { key: 'legendary_eagle', name: 'Legendary Eagle', minElo: 1300, color: 'eagle' },
-    { key: 'supreme', name: 'Supreme', minElo: 1500, color: 'supreme' },
-    { key: 'global_elite', name: 'Global Elite', minElo: 1700, color: 'global' }
-  ];
-  let currentIndex = 0;
-  for (let i = 0; i < ranks.length; i += 1) {
-    if (elo >= ranks[i].minElo) currentIndex = i;
-    else break;
-  }
-  return { ...ranks[currentIndex] };
-}
-function normalizeRank(rank, elo) { return rank && rank.name ? rank : getRankByElo(elo); }
-function esc(v) { return String(v ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
-
-async function loadLeaderboard() {
-  const root = document.getElementById('leaderboardRows');
-  root.innerHTML = `<div class="empty">${lbT('loading')}</div>`;
-  try {
-    const data = await api('/api/leaderboard');
-    const items = data.items || [];
-    if (!items.length) {
-      root.innerHTML = `<div class="empty">${lbT('empty')}</div>`;
-      return;
-    }
-    root.innerHTML = items.map((item, idx) => {
-      const rankInfo = normalizeRank(item.rank, item.elo2v2 ?? 100);
-      return `
-      <div class="table-row">
-        <div><strong>#${esc(item.rankPosition ?? item.rank ?? (idx + 1))}</strong></div>
-        <div class="table-player"><img class="avatar sm" src="${esc(item.avatarUrl || '')}" alt="avatar"><span>${esc(item.nickname || 'Unknown')}</span></div>
-        <div><span class="rank-pill ${esc(rankInfo.color || 'iron')}">${esc(rankInfo.name || 'Iron')}</span></div>
-        <div><strong>${esc(item.elo2v2 ?? 100)}</strong></div>
-      </div>
-    `}).join('');
-  } catch (_) {
-    root.innerHTML = `<div class="empty">${lbT('loadError')}</div>`;
-  }
-}
-
-async function refreshLeaderboardAuth() {
+async function refreshAuth() {
   try {
     const data = await api('/auth/me');
-    const authed = !!data.user;
-    const btn = document.getElementById('lbLoginBtn');
-    if (btn) btn.classList.toggle('hidden', authed);
-  } catch (_) {}
-}
-
-
-let leaderboardBootstrapped = false;
-let leaderboardRefreshInFlight = false;
-
-async function safeLeaderboardRefresh() {
-  if (leaderboardRefreshInFlight) return;
-  leaderboardRefreshInFlight = true;
-  try {
-    await refreshLeaderboardAuth();
-    await loadLeaderboard();
-  } finally {
-    leaderboardRefreshInFlight = false;
+    applyUser(data.user || null);
+  } catch (_) {
+    applyUser(null);
   }
 }
 
-async function bootstrapLeaderboard() {
-  if (leaderboardBootstrapped) return;
-  leaderboardBootstrapped = true;
-
-  document.getElementById('lbLoginBtn')?.addEventListener('click', () => {
-    rememberAuthReturn();
-    window.location.assign(getSteamAuthUrl());
-  });
-  document.getElementById('lbLangRu')?.addEventListener('click', () => {
-    lbLang = 'ru';
-    localStorage.setItem(LB_LANG_KEY, lbLang);
-    applyLbLang();
-    void loadLeaderboard();
-  });
-  document.getElementById('lbLangEn')?.addEventListener('click', () => {
-    lbLang = 'en';
-    localStorage.setItem(LB_LANG_KEY, lbLang);
-    applyLbLang();
-    void loadLeaderboard();
-  });
-  applyLbLang();
-  await safeLeaderboardRefresh();
+function renderBackendStatus() {
+  if (landingState.backendOnline === true) {
+    $('backendBadge').textContent = t('backend_online');
+    $('backendBadge').className = 'pill ok';
+    $('backendText').textContent = t('backend_online_text');
+    return;
+  }
+  if (landingState.backendOnline === false) {
+    $('backendBadge').textContent = t('backend_offline');
+    $('backendBadge').className = 'pill warn';
+    $('backendText').textContent = t('backend_offline_text');
+    return;
+  }
+  $('backendBadge').textContent = '...';
+  $('backendBadge').className = 'pill idle';
+  $('backendText').textContent = t('backend_text_loading');
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-  void bootstrapLeaderboard();
-});
+async function refreshHealth() {
+  try {
+    await api('/health');
+    landingState.backendOnline = true;
+  } catch (_) {
+    landingState.backendOnline = false;
+  }
+  renderBackendStatus();
+}
+
+function renderConfigStatus() {
+  const cfg = landingState.config;
+  if (!cfg) {
+    $('configBadge').textContent = t('config_waiting');
+    $('configBadge').className = 'pill idle';
+    $('configText').textContent = t('config_text_loading');
+    return;
+  }
+
+  $('configBadge').textContent = cfg.matchmakingEnabled ? t('config_on') : t('config_off');
+  $('configBadge').className = `pill ${cfg.matchmakingEnabled ? 'ok' : 'warn'}`;
+  $('configText').textContent = formatString(t('config_format'), {
+    app: cfg.appName || 'TRUST',
+    version: cfg.latestVersion || '—',
+    mode: cfg.mode || 'auto'
+  });
+}
+
+async function refreshConfig() {
+  try {
+    const data = await api('/config');
+    landingState.config = data.config || {};
+  } catch (_) {
+    landingState.config = null;
+    $('configBadge').textContent = t('config_error');
+    $('configBadge').className = 'pill warn';
+    $('configText').textContent = t('config_error_text');
+    return;
+  }
+  renderConfigStatus();
+}
+
+function login() {
+  rememberAuthReturn();
+  window.location.assign(getSteamAuthUrl());
+}
+
+async function logout() {
+  try {
+    await api('/auth/logout', { method: 'POST' });
+  } catch (_) {}
+  window.location.reload();
+}
+
+function setLanguage(lang) {
+  landingState.lang = lang === 'ru' ? 'ru' : 'en';
+  localStorage.setItem('trust_landing_lang', landingState.lang);
+  applyTranslations();
+}
+
+function bindLandingEvents() {
+  document.addEventListener('click', async (e) => {
+    const langBtn = e.target.closest('[data-lang]');
+    if (langBtn) {
+      e.preventDefault();
+      setLanguage(langBtn.dataset.lang);
+      return;
+    }
+
+    const loginBtn = e.target.closest('#landingLoginBtn, #heroLoginBtn, #bottomLoginBtn');
+    if (loginBtn) {
+      e.preventDefault();
+      login();
+      return;
+    }
+
+    const logoutBtn = e.target.closest('#landingLogoutBtn');
+    if (logoutBtn) {
+      e.preventDefault();
+      await logout();
+    }
+  });
+}
+
+async function initLanding() {
+  bindLandingEvents();
+  applyTranslations();
+  await Promise.all([refreshAuth(), refreshHealth(), refreshConfig()]);
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initLanding, { once: true });
+} else {
+  initLanding();
+}
+
+
+let landingRefreshInFlight = false;
+async function safeLandingRefresh() {
+  if (landingRefreshInFlight) return;
+  landingRefreshInFlight = true;
+  try {
+    await Promise.all([refreshAuth(), refreshHealth(), refreshConfig()]);
+  } finally {
+    landingRefreshInFlight = false;
+  }
+}
 
 window.addEventListener('pageshow', () => {
-  void safeLeaderboardRefresh();
+  void safeLandingRefresh();
 });
 
 window.addEventListener('focus', () => {
-  void safeLeaderboardRefresh();
+  void safeLandingRefresh();
 });
 
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden) void safeLeaderboardRefresh();
+  if (!document.hidden) void safeLandingRefresh();
 });
