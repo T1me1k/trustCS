@@ -22,6 +22,7 @@
       </div>
       <nav class="nav reveal reveal-2">
         <a href="#platform" data-i18n="nav_platform">Platform</a>
+        <a href="./app.html" data-i18n="nav_play">Play</a>
         <a href="./leaderboard.html" data-i18n="nav_leaderboard">Leaderboard</a>
       </nav>
       <div class="actions reveal reveal-3 landing-actions">
@@ -38,6 +39,7 @@
 
   <div class="container mobile-nav mobile-nav-landing" aria-label="Mobile navigation">
     <a class="mobile-nav-link" href="#platform" data-i18n="nav_platform">Platform</a>
+    <a class="mobile-nav-link" href="./app.html" data-i18n="nav_play">Play</a>
     <a class="mobile-nav-link" href="./leaderboard.html" data-i18n="nav_leaderboard">Leaderboard</a>
   </div>
 
@@ -112,28 +114,72 @@
 
 
     <section class="section landing-section reveal reveal-3" id="ranks">
-      <div class="container trust-rank-showcase">
+      <div class="container trust-rank-showcase trust-rank-showcase-fixed">
         <article class="card landing-bottom-card prestige-panel">
           <div>
-            <span class="badge">CS:GO MEDALS</span>
-            <h2 class="trust-gradient-text" style="font-size:clamp(32px,4vw,52px);margin:16px 0 10px;letter-spacing:-.06em">Classic medals, cleaner progression.</h2>
-            <p class="muted landing-lead">The old medal vibe is back: players climb through familiar CS:GO-style ranks, while rating and progress stay clear inside TRUST.</p>
+            <span class="badge">TRUST RANKS</span>
+            <h2 class="trust-gradient-text" style="font-size:clamp(32px,4vw,52px);margin:16px 0 10px;letter-spacing:-.06em">Trust medals, cleaner progression.</h2>
+            <p class="muted landing-lead">The TRUST ladder is back: players climb through ten clean medals from Iron to Legend while rating and RP stay readable.</p>
           </div>
           <div class="prestige-kpi">
-            <div class="stat"><span>LADDER</span><strong>18 medals</strong></div>
+            <div class="stat"><span>LADDER</span><strong>10 medals</strong></div>
             <div class="stat"><span>PROGRESS</span><strong>Rating + RP</strong></div>
-            <div class="stat"><span>TOP END</span><strong>Global Elite</strong></div>
+            <div class="stat"><span>TOP END</span><strong>Legend</strong></div>
           </div>
         </article>
-        <article class="card landing-bottom-card">
-          <div class="section-title"><h3>Medal ladder preview</h3><span class="pill live">Season 01</span></div>
-          <div class="rank-ladder-grid medal-ladder-grid">
-            <div class="rank-show-card"><img class="rank-medal-large" src="./assets/ranks/silver.svg" alt=""><div><strong>Silver</strong><div class="muted">Starting medal path</div></div><span class="rank-pill silver"><img class="rank-medal-img" src="./assets/ranks/silver.svg" alt="">Silver I</span></div>
-            <div class="rank-show-card"><img class="rank-medal-large" src="./assets/ranks/gold_nova.svg" alt=""><div><strong>Gold Nova</strong><div class="muted">Reliable ranked player</div></div><span class="rank-pill gold"><img class="rank-medal-img" src="./assets/ranks/gold_nova.svg" alt="">Gold Nova III</span></div>
-            <div class="rank-show-card"><img class="rank-medal-large" src="./assets/ranks/master_guardian.svg" alt=""><div><strong>Master Guardian</strong><div class="muted">Strong duo contender</div></div><span class="rank-pill guardian"><img class="rank-medal-img" src="./assets/ranks/master_guardian.svg" alt="">MG II</span></div>
-            <div class="rank-show-card"><img class="rank-medal-large" src="./assets/ranks/legendary_eagle.svg" alt=""><div><strong>Legendary Eagle</strong><div class="muted">High-level pressure</div></div><span class="rank-pill eagle"><img class="rank-medal-img" src="./assets/ranks/legendary_eagle.svg" alt="">Legendary Eagle</span></div>
-            <div class="rank-show-card"><img class="rank-medal-large" src="./assets/ranks/supreme.svg" alt=""><div><strong>Supreme</strong><div class="muted">Elite bracket</div></div><span class="rank-pill supreme"><img class="rank-medal-img" src="./assets/ranks/supreme.svg" alt="">Supreme</span></div>
-            <div class="rank-show-card"><img class="rank-medal-large" src="./assets/ranks/global_elite.svg" alt=""><div><strong>Global Elite</strong><div class="muted">Top prestige medal</div></div><span class="rank-pill global"><img class="rank-medal-img" src="./assets/ranks/global_elite.svg" alt="">Global Elite</span></div>
+        <article class="card landing-bottom-card rank-preview-card-fixed">
+          <div class="section-title"><h3>Rank ladder preview</h3><span class="pill live">Season 01</span></div>
+          <div class="rank-ladder-grid trust-rank-ladder-grid">
+            <div class="rank-show-card trust-rank-card">
+              <img class="rank-medal-large" src="./assets/ranks/iron.svg" alt="Iron">
+              <div class="rank-show-copy"><strong>Iron</strong><div class="muted">From 0 rating</div></div>
+              <span class="rank-pill iron"><img class="rank-medal-img" src="./assets/ranks/iron.svg" alt="">Iron</span>
+            </div>
+            <div class="rank-show-card trust-rank-card">
+              <img class="rank-medal-large" src="./assets/ranks/bronze.svg" alt="Bronze">
+              <div class="rank-show-copy"><strong>Bronze</strong><div class="muted">From 300 rating</div></div>
+              <span class="rank-pill bronze"><img class="rank-medal-img" src="./assets/ranks/bronze.svg" alt="">Bronze</span>
+            </div>
+            <div class="rank-show-card trust-rank-card">
+              <img class="rank-medal-large" src="./assets/ranks/silver.svg" alt="Silver">
+              <div class="rank-show-copy"><strong>Silver</strong><div class="muted">From 600 rating</div></div>
+              <span class="rank-pill silver"><img class="rank-medal-img" src="./assets/ranks/silver.svg" alt="">Silver</span>
+            </div>
+            <div class="rank-show-card trust-rank-card">
+              <img class="rank-medal-large" src="./assets/ranks/gold.svg" alt="Gold">
+              <div class="rank-show-copy"><strong>Gold</strong><div class="muted">From 900 rating</div></div>
+              <span class="rank-pill gold"><img class="rank-medal-img" src="./assets/ranks/gold.svg" alt="">Gold</span>
+            </div>
+            <div class="rank-show-card trust-rank-card">
+              <img class="rank-medal-large" src="./assets/ranks/platinum.svg" alt="Platinum">
+              <div class="rank-show-copy"><strong>Platinum</strong><div class="muted">From 1200 rating</div></div>
+              <span class="rank-pill platinum"><img class="rank-medal-img" src="./assets/ranks/platinum.svg" alt="">Platinum</span>
+            </div>
+            <div class="rank-show-card trust-rank-card">
+              <img class="rank-medal-large" src="./assets/ranks/diamond.svg" alt="Diamond">
+              <div class="rank-show-copy"><strong>Diamond</strong><div class="muted">From 1500 rating</div></div>
+              <span class="rank-pill diamond"><img class="rank-medal-img" src="./assets/ranks/diamond.svg" alt="">Diamond</span>
+            </div>
+            <div class="rank-show-card trust-rank-card">
+              <img class="rank-medal-large" src="./assets/ranks/master.svg" alt="Master">
+              <div class="rank-show-copy"><strong>Master</strong><div class="muted">From 1800 rating</div></div>
+              <span class="rank-pill master"><img class="rank-medal-img" src="./assets/ranks/master.svg" alt="">Master</span>
+            </div>
+            <div class="rank-show-card trust-rank-card">
+              <img class="rank-medal-large" src="./assets/ranks/grandmaster.svg" alt="Grandmaster">
+              <div class="rank-show-copy"><strong>Grandmaster</strong><div class="muted">From 2100 rating</div></div>
+              <span class="rank-pill grandmaster"><img class="rank-medal-img" src="./assets/ranks/grandmaster.svg" alt="">Grandmaster</span>
+            </div>
+            <div class="rank-show-card trust-rank-card">
+              <img class="rank-medal-large" src="./assets/ranks/elite.svg" alt="Elite">
+              <div class="rank-show-copy"><strong>Elite</strong><div class="muted">From 2400 rating</div></div>
+              <span class="rank-pill elite"><img class="rank-medal-img" src="./assets/ranks/elite.svg" alt="">Elite</span>
+            </div>
+            <div class="rank-show-card trust-rank-card">
+              <img class="rank-medal-large" src="./assets/ranks/legend.svg" alt="Legend">
+              <div class="rank-show-copy"><strong>Legend</strong><div class="muted">From 2700 rating</div></div>
+              <span class="rank-pill legend"><img class="rank-medal-img" src="./assets/ranks/legend.svg" alt="">Legend</span>
+            </div>
           </div>
         </article>
       </div>

@@ -20,166 +20,94 @@ function rememberAuthReturn() {
 
 const RANK_TABLE = [
   {
-    "key": "silver_1",
-    "name": "Silver I",
-    "tierName": "Silver",
-    "division": "I",
+    "key": "iron",
+    "name": "Iron",
+    "tierName": "Iron",
+    "division": null,
     "minElo": 0,
-    "color": "silver",
-    "icon": "silver.svg"
+    "color": "iron",
+    "icon": "./assets/ranks/iron.svg"
   },
   {
-    "key": "silver_2",
-    "name": "Silver II",
-    "tierName": "Silver",
-    "division": "II",
-    "minElo": 150,
-    "color": "silver",
-    "icon": "silver.svg"
-  },
-  {
-    "key": "silver_3",
-    "name": "Silver III",
-    "tierName": "Silver",
-    "division": "III",
+    "key": "bronze",
+    "name": "Bronze",
+    "tierName": "Bronze",
+    "division": null,
     "minElo": 300,
-    "color": "silver",
-    "icon": "silver.svg"
+    "color": "bronze",
+    "icon": "./assets/ranks/bronze.svg"
   },
   {
-    "key": "silver_4",
-    "name": "Silver IV",
+    "key": "silver",
+    "name": "Silver",
     "tierName": "Silver",
-    "division": "IV",
-    "minElo": 450,
-    "color": "silver",
-    "icon": "silver.svg"
-  },
-  {
-    "key": "silver_elite",
-    "name": "Silver Elite",
-    "tierName": "Silver Elite",
     "division": null,
     "minElo": 600,
     "color": "silver",
-    "icon": "silver.svg"
+    "icon": "./assets/ranks/silver.svg"
   },
   {
-    "key": "silver_elite_master",
-    "name": "Silver Elite Master",
-    "tierName": "Silver Elite Master",
+    "key": "gold",
+    "name": "Gold",
+    "tierName": "Gold",
     "division": null,
-    "minElo": 750,
-    "color": "silver",
-    "icon": "silver.svg"
-  },
-  {
-    "key": "gold_nova_1",
-    "name": "Gold Nova I",
-    "tierName": "Gold Nova",
-    "division": "I",
     "minElo": 900,
     "color": "gold",
-    "icon": "gold_nova.svg"
+    "icon": "./assets/ranks/gold.svg"
   },
   {
-    "key": "gold_nova_2",
-    "name": "Gold Nova II",
-    "tierName": "Gold Nova",
-    "division": "II",
-    "minElo": 1050,
-    "color": "gold",
-    "icon": "gold_nova.svg"
-  },
-  {
-    "key": "gold_nova_3",
-    "name": "Gold Nova III",
-    "tierName": "Gold Nova",
-    "division": "III",
-    "minElo": 1200,
-    "color": "gold",
-    "icon": "gold_nova.svg"
-  },
-  {
-    "key": "gold_nova_master",
-    "name": "Gold Nova Master",
-    "tierName": "Gold Nova Master",
+    "key": "platinum",
+    "name": "Platinum",
+    "tierName": "Platinum",
     "division": null,
-    "minElo": 1350,
-    "color": "gold",
-    "icon": "gold_nova.svg"
+    "minElo": 1200,
+    "color": "platinum",
+    "icon": "./assets/ranks/platinum.svg"
   },
   {
-    "key": "master_guardian_1",
-    "name": "Master Guardian I",
-    "tierName": "Master Guardian",
-    "division": "I",
+    "key": "diamond",
+    "name": "Diamond",
+    "tierName": "Diamond",
+    "division": null,
     "minElo": 1500,
-    "color": "guardian",
-    "icon": "master_guardian.svg"
+    "color": "diamond",
+    "icon": "./assets/ranks/diamond.svg"
   },
   {
-    "key": "master_guardian_2",
-    "name": "Master Guardian II",
-    "tierName": "Master Guardian",
-    "division": "II",
-    "minElo": 1650,
-    "color": "guardian",
-    "icon": "master_guardian.svg"
-  },
-  {
-    "key": "master_guardian_elite",
-    "name": "Master Guardian Elite",
-    "tierName": "Master Guardian Elite",
+    "key": "master",
+    "name": "Master",
+    "tierName": "Master",
     "division": null,
     "minElo": 1800,
-    "color": "guardian",
-    "icon": "master_guardian.svg"
+    "color": "master",
+    "icon": "./assets/ranks/master.svg"
   },
   {
-    "key": "distinguished_master_guardian",
-    "name": "Distinguished Master Guardian",
-    "tierName": "Distinguished Master Guardian",
-    "division": null,
-    "minElo": 1950,
-    "color": "distinguished",
-    "icon": "distinguished.svg"
-  },
-  {
-    "key": "legendary_eagle",
-    "name": "Legendary Eagle",
-    "tierName": "Legendary Eagle",
+    "key": "grandmaster",
+    "name": "Grandmaster",
+    "tierName": "Grandmaster",
     "division": null,
     "minElo": 2100,
-    "color": "eagle",
-    "icon": "legendary_eagle.svg"
+    "color": "grandmaster",
+    "icon": "./assets/ranks/grandmaster.svg"
   },
   {
-    "key": "legendary_eagle_master",
-    "name": "Legendary Eagle Master",
-    "tierName": "Legendary Eagle Master",
-    "division": null,
-    "minElo": 2250,
-    "color": "eagle",
-    "icon": "legendary_eagle.svg"
-  },
-  {
-    "key": "supreme_master_first_class",
-    "name": "Supreme Master First Class",
-    "tierName": "Supreme Master First Class",
+    "key": "elite",
+    "name": "Elite",
+    "tierName": "Elite",
     "division": null,
     "minElo": 2400,
-    "color": "supreme",
-    "icon": "supreme.svg"
+    "color": "elite",
+    "icon": "./assets/ranks/elite.svg"
   },
   {
-    "key": "global_elite",
-    "name": "Global Elite",
-    "tierName": "Global Elite",
+    "key": "legend",
+    "name": "Legend",
+    "tierName": "Legend",
     "division": null,
-    "minElo": 2600,
-    "color": "global",
-    "icon": "global_elite.svg"
+    "minElo": 2700,
+    "color": "legend",
+    "icon": "./assets/ranks/legend.svg"
   }
 ];
 
@@ -396,7 +324,13 @@ function normalizeRank(rank, elo) {
 }
 function getRankIconSrc(rank) {
   const info = rank || {};
-  return info.icon ? `./assets/ranks/${String(info.icon).replace(/[^a-z0-9_.-]/gi, '')}` : '';
+  if (info.icon) {
+    const icon = String(info.icon);
+    if (icon.startsWith('./assets/ranks/')) return icon;
+    return `./assets/ranks/${icon.replace(/[^a-z0-9_.-]/gi, '')}`;
+  }
+  if (info.color) return `./assets/ranks/${String(info.color).replace(/[^a-z0-9_.-]/gi, '')}.svg`;
+  return './assets/ranks/iron.svg';
 }
 
 function getRankPillMarkup(rank, elo) {
@@ -779,7 +713,7 @@ function connectString(match) {
 function shouldDisplayMatchRoom(match) {
   if (!match) return false;
   const phase = String(match?.room?.phase || match?.phase || match?.status || '').trim().toLowerCase();
-  return !['finished'].includes(phase);
+  return !['finished', 'complete', 'completed', 'result_submitted', 'closed'].includes(phase);
 }
 
 function renderCurrentMatch() {

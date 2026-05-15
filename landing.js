@@ -20,6 +20,7 @@ const LANDING_I18N = {
   en: {
     brand_sub: 'Competitive 2v2 platform',
     nav_platform: 'Platform',
+    nav_play: 'Play',
     nav_leaderboard: 'Leaderboard',
     cabinet: 'Cabinet',
     login: 'Sign in with Steam',
