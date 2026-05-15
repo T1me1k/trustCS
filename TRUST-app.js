@@ -20,212 +20,166 @@ function rememberAuthReturn() {
 
 const RANK_TABLE = [
   {
-    "key": "recruit_iii",
-    "name": "Recruit III",
-    "tierName": "Recruit",
-    "division": "III",
-    "minElo": 0,
-    "color": "recruit"
-  },
-  {
-    "key": "recruit_ii",
-    "name": "Recruit II",
-    "tierName": "Recruit",
-    "division": "II",
-    "minElo": 100,
-    "color": "recruit"
-  },
-  {
-    "key": "recruit_i",
-    "name": "Recruit I",
-    "tierName": "Recruit",
+    "key": "silver_1",
+    "name": "Silver I",
+    "tierName": "Silver",
     "division": "I",
-    "minElo": 200,
-    "color": "recruit"
+    "minElo": 0,
+    "color": "silver",
+    "icon": "silver.svg"
   },
   {
-    "key": "operative_iii",
-    "name": "Operative III",
-    "tierName": "Operative",
+    "key": "silver_2",
+    "name": "Silver II",
+    "tierName": "Silver",
+    "division": "II",
+    "minElo": 150,
+    "color": "silver",
+    "icon": "silver.svg"
+  },
+  {
+    "key": "silver_3",
+    "name": "Silver III",
+    "tierName": "Silver",
     "division": "III",
     "minElo": 300,
-    "color": "operative"
+    "color": "silver",
+    "icon": "silver.svg"
   },
   {
-    "key": "operative_ii",
-    "name": "Operative II",
-    "tierName": "Operative",
-    "division": "II",
-    "minElo": 400,
-    "color": "operative"
+    "key": "silver_4",
+    "name": "Silver IV",
+    "tierName": "Silver",
+    "division": "IV",
+    "minElo": 450,
+    "color": "silver",
+    "icon": "silver.svg"
   },
   {
-    "key": "operative_i",
-    "name": "Operative I",
-    "tierName": "Operative",
-    "division": "I",
-    "minElo": 500,
-    "color": "operative"
-  },
-  {
-    "key": "vanguard_iii",
-    "name": "Vanguard III",
-    "tierName": "Vanguard",
-    "division": "III",
+    "key": "silver_elite",
+    "name": "Silver Elite",
+    "tierName": "Silver Elite",
+    "division": null,
     "minElo": 600,
-    "color": "vanguard"
+    "color": "silver",
+    "icon": "silver.svg"
   },
   {
-    "key": "vanguard_ii",
-    "name": "Vanguard II",
-    "tierName": "Vanguard",
-    "division": "II",
-    "minElo": 700,
-    "color": "vanguard"
+    "key": "silver_elite_master",
+    "name": "Silver Elite Master",
+    "tierName": "Silver Elite Master",
+    "division": null,
+    "minElo": 750,
+    "color": "silver",
+    "icon": "silver.svg"
   },
   {
-    "key": "vanguard_i",
-    "name": "Vanguard I",
-    "tierName": "Vanguard",
+    "key": "gold_nova_1",
+    "name": "Gold Nova I",
+    "tierName": "Gold Nova",
     "division": "I",
-    "minElo": 800,
-    "color": "vanguard"
-  },
-  {
-    "key": "sentinel_iii",
-    "name": "Sentinel III",
-    "tierName": "Sentinel",
-    "division": "III",
     "minElo": 900,
-    "color": "sentinel"
+    "color": "gold",
+    "icon": "gold_nova.svg"
   },
   {
-    "key": "sentinel_ii",
-    "name": "Sentinel II",
-    "tierName": "Sentinel",
+    "key": "gold_nova_2",
+    "name": "Gold Nova II",
+    "tierName": "Gold Nova",
     "division": "II",
-    "minElo": 1000,
-    "color": "sentinel"
+    "minElo": 1050,
+    "color": "gold",
+    "icon": "gold_nova.svg"
   },
   {
-    "key": "sentinel_i",
-    "name": "Sentinel I",
-    "tierName": "Sentinel",
-    "division": "I",
-    "minElo": 1100,
-    "color": "sentinel"
-  },
-  {
-    "key": "phantom_iii",
-    "name": "Phantom III",
-    "tierName": "Phantom",
+    "key": "gold_nova_3",
+    "name": "Gold Nova III",
+    "tierName": "Gold Nova",
     "division": "III",
     "minElo": 1200,
-    "color": "phantom"
+    "color": "gold",
+    "icon": "gold_nova.svg"
   },
   {
-    "key": "phantom_ii",
-    "name": "Phantom II",
-    "tierName": "Phantom",
-    "division": "II",
-    "minElo": 1300,
-    "color": "phantom"
+    "key": "gold_nova_master",
+    "name": "Gold Nova Master",
+    "tierName": "Gold Nova Master",
+    "division": null,
+    "minElo": 1350,
+    "color": "gold",
+    "icon": "gold_nova.svg"
   },
   {
-    "key": "phantom_i",
-    "name": "Phantom I",
-    "tierName": "Phantom",
+    "key": "master_guardian_1",
+    "name": "Master Guardian I",
+    "tierName": "Master Guardian",
     "division": "I",
-    "minElo": 1400,
-    "color": "phantom"
-  },
-  {
-    "key": "ascendant_iii",
-    "name": "Ascendant III",
-    "tierName": "Ascendant",
-    "division": "III",
     "minElo": 1500,
-    "color": "ascendant"
+    "color": "guardian",
+    "icon": "master_guardian.svg"
   },
   {
-    "key": "ascendant_ii",
-    "name": "Ascendant II",
-    "tierName": "Ascendant",
+    "key": "master_guardian_2",
+    "name": "Master Guardian II",
+    "tierName": "Master Guardian",
     "division": "II",
-    "minElo": 1600,
-    "color": "ascendant"
+    "minElo": 1650,
+    "color": "guardian",
+    "icon": "master_guardian.svg"
   },
   {
-    "key": "ascendant_i",
-    "name": "Ascendant I",
-    "tierName": "Ascendant",
-    "division": "I",
-    "minElo": 1700,
-    "color": "ascendant"
-  },
-  {
-    "key": "dominion_iii",
-    "name": "Dominion III",
-    "tierName": "Dominion",
-    "division": "III",
+    "key": "master_guardian_elite",
+    "name": "Master Guardian Elite",
+    "tierName": "Master Guardian Elite",
+    "division": null,
     "minElo": 1800,
-    "color": "dominion"
+    "color": "guardian",
+    "icon": "master_guardian.svg"
   },
   {
-    "key": "dominion_ii",
-    "name": "Dominion II",
-    "tierName": "Dominion",
-    "division": "II",
-    "minElo": 1900,
-    "color": "dominion"
+    "key": "distinguished_master_guardian",
+    "name": "Distinguished Master Guardian",
+    "tierName": "Distinguished Master Guardian",
+    "division": null,
+    "minElo": 1950,
+    "color": "distinguished",
+    "icon": "distinguished.svg"
   },
   {
-    "key": "dominion_i",
-    "name": "Dominion I",
-    "tierName": "Dominion",
-    "division": "I",
-    "minElo": 2000,
-    "color": "dominion"
-  },
-  {
-    "key": "sovereign_iii",
-    "name": "Sovereign III",
-    "tierName": "Sovereign",
-    "division": "III",
+    "key": "legendary_eagle",
+    "name": "Legendary Eagle",
+    "tierName": "Legendary Eagle",
+    "division": null,
     "minElo": 2100,
-    "color": "sovereign"
+    "color": "eagle",
+    "icon": "legendary_eagle.svg"
   },
   {
-    "key": "sovereign_ii",
-    "name": "Sovereign II",
-    "tierName": "Sovereign",
-    "division": "II",
-    "minElo": 2200,
-    "color": "sovereign"
+    "key": "legendary_eagle_master",
+    "name": "Legendary Eagle Master",
+    "tierName": "Legendary Eagle Master",
+    "division": null,
+    "minElo": 2250,
+    "color": "eagle",
+    "icon": "legendary_eagle.svg"
   },
   {
-    "key": "sovereign_i",
-    "name": "Sovereign I",
-    "tierName": "Sovereign",
-    "division": "I",
-    "minElo": 2300,
-    "color": "sovereign"
-  },
-  {
-    "key": "apex",
-    "name": "Apex",
-    "tierName": "Apex",
+    "key": "supreme_master_first_class",
+    "name": "Supreme Master First Class",
+    "tierName": "Supreme Master First Class",
     "division": null,
     "minElo": 2400,
-    "color": "apex"
+    "color": "supreme",
+    "icon": "supreme.svg"
   },
   {
-    "key": "trust_elite",
-    "name": "Trust Elite",
-    "tierName": "Trust Elite",
+    "key": "global_elite",
+    "name": "Global Elite",
+    "tierName": "Global Elite",
     "division": null,
     "minElo": 2600,
-    "color": "trust-elite"
+    "color": "global",
+    "icon": "global_elite.svg"
   }
 ];
 
@@ -236,7 +190,7 @@ function renderRankTooltip(activeRankKey) {
     <div class="rank-tooltip-row ${rank.key === activeRankKey ? 'active' : ''}">
       <div class="rank-tooltip-rank">
         <div>
-          <div class="rank-tooltip-name">${esc(rank.name)}</div>
+          <div class="rank-tooltip-name">${getRankIconSrc(rank) ? `<img class="rank-medal-img" src="${esc(getRankIconSrc(rank))}" alt="" loading="lazy">` : ''}${esc(rank.name)}</div>
           <div class="muted">${esc(rank.minElo)}+ Rating</div>
         </div>
       </div>
@@ -327,6 +281,11 @@ function hide(id, on) {
 function text(id, value) { const el = $(id); if (el) el.textContent = value; }
 function esc(v) { return String(v ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
 function formatPercent(value) { return `${Number(value || 0)}%`; }
+function formatMapName(map) {
+  const raw = String(map || 'unknown').replace(/^de_/, '');
+  return raw.replace(/[-_]/g, ' ').replace(/\b\w/g, (ch) => ch.toUpperCase());
+}
+
 function formatDate(value) {
   if (!value) return '—';
   const dt = new Date(value);
@@ -435,9 +394,16 @@ function getRankByElo(rawElo) {
 function normalizeRank(rank, elo) {
   return rank && rank.name ? rank : getRankByElo(elo);
 }
+function getRankIconSrc(rank) {
+  const info = rank || {};
+  return info.icon ? `./assets/ranks/${String(info.icon).replace(/[^a-z0-9_.-]/gi, '')}` : '';
+}
+
 function getRankPillMarkup(rank, elo) {
   const info = normalizeRank(rank, elo);
-  return `<span class="rank-pill ${esc(info.color || 'recruit')}" data-rank-key="${esc(info.key || '')}">${esc(info.name)}</span>`;
+  const icon = getRankIconSrc(info);
+  const iconHtml = icon ? `<img class="rank-medal-img" src="${esc(icon)}" alt="" loading="lazy">` : '';
+  return `<span class="rank-pill ${esc(info.color || 'silver')}" data-rank-key="${esc(info.key || '')}">${iconHtml}<span>${esc(info.name)}</span></span>`;
 }
 
 function getAvatarMarkup(avatarUrl, fallback, className = 'avatar sm') {
@@ -525,7 +491,7 @@ function renderAuth() {
   text('profileElo', profile.elo2v2 ?? 100);
   const rank = normalizeRank(profile.rank, profile.elo2v2 ?? 100);
   const rankPill = $('profileRankPill');
-  if (rankPill) { rankPill.textContent = rank.name; rankPill.className = `rank-pill ${rank.color || 'iron'}`; }
+  if (rankPill) { rankPill.innerHTML = `${getRankIconSrc(rank) ? `<img class="rank-medal-img" src="${esc(getRankIconSrc(rank))}" alt="" loading="lazy">` : ''}<span>${esc(rank.name)}</span>`; rankPill.className = `rank-pill ${rank.color || 'silver'}`; }
   renderRankTooltip(rank.key);
   text('profileRankName', rank.name);
   text('profileRankProgressText', rank.isMaxRank ? 'Максимальное звание достигнуто' : `До следующего звания: ${rank.pointsToNext}`);
@@ -893,7 +859,7 @@ function renderAcceptAndMapVoting(match) {
 
   if (canVoteMap) {
     html += '<div style="margin-top:14px"><div class="label">Выбор карты</div><div class="list">';
-    html += state.mapPool.map((map) => `<button class="btn secondary block" data-map-vote="${esc(map)}">${esc(map)}</button>`).join('');
+    html += `<div class="map-vote-grid">${state.mapPool.map((map) => `<button class="map-vote-card" data-map-vote="${esc(map)}"><span class="map-vote-bg"></span><span class="map-vote-title">${esc(formatMapName(map))}</span><span class="map-vote-sub">vote map</span></button>`).join('')}</div>`;
     html += '</div></div>';
   } else if (match.status === 'map_voting' && !match.mapName) {
     html += `<div class="empty" style="margin-top:12px">После принятия всеми игроками выбирается карта из пула: ${state.mapPool.join(', ')}.</div>`;

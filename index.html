@@ -22,8 +22,6 @@
       </div>
       <nav class="nav reveal reveal-2">
         <a href="#platform" data-i18n="nav_platform">Platform</a>
-        <a href="#ranks">Ranks</a>
-        <a href="#status" data-i18n="nav_status">Status</a>
         <a href="./leaderboard.html" data-i18n="nav_leaderboard">Leaderboard</a>
       </nav>
       <div class="actions reveal reveal-3 landing-actions">
@@ -40,8 +38,6 @@
 
   <div class="container mobile-nav mobile-nav-landing" aria-label="Mobile navigation">
     <a class="mobile-nav-link" href="#platform" data-i18n="nav_platform">Platform</a>
-    <a class="mobile-nav-link" href="#ranks">Ranks</a>
-    <a class="mobile-nav-link" href="#status" data-i18n="nav_status">Status</a>
     <a class="mobile-nav-link" href="./leaderboard.html" data-i18n="nav_leaderboard">Leaderboard</a>
   </div>
 
@@ -53,7 +49,7 @@
           <span class="badge" data-i18n="release_badge">TRUST RELEASE</span>
           <h1 data-i18n="hero_title">Queue. Compete. Climb.</h1>
           <p class="muted landing-lead" data-i18n="hero_text">
-            A premium ranked arena for CS:GO: 2v2 queue, clean match flow, seasonal rank progression and profile status that players want to flex.
+            A premium ranked arena for CS:GO: 2v2 queue, clean match flow, classic medal progression and profile status that players want to flex.
           </p>
           <div class="hero-cta">
             <a class="btn primary" href="./app.html" data-i18n="hero_cta_open">Open app</a>
@@ -119,45 +115,55 @@
       <div class="container trust-rank-showcase">
         <article class="card landing-bottom-card prestige-panel">
           <div>
-            <span class="badge">TRUST RANKS V1</span>
-            <h2 class="trust-gradient-text" style="font-size:clamp(32px,4vw,52px);margin:16px 0 10px;letter-spacing:-.06em">Climb for status, not only numbers.</h2>
-            <p class="muted landing-lead">Rating stays precise under the hood, while players see divisions, RP progress, season peak and prestige rank badges.</p>
+            <span class="badge">CS:GO MEDALS</span>
+            <h2 class="trust-gradient-text" style="font-size:clamp(32px,4vw,52px);margin:16px 0 10px;letter-spacing:-.06em">Classic medals, cleaner progression.</h2>
+            <p class="muted landing-lead">The old medal vibe is back: players climb through familiar CS:GO-style ranks, while rating and progress stay clear inside TRUST.</p>
           </div>
           <div class="prestige-kpi">
-            <div class="stat"><span>VISIBLE LADDER</span><strong>26 tiers</strong></div>
-            <div class="stat"><span>PROGRESS</span><strong>0–100 RP</strong></div>
-            <div class="stat"><span>TOP END</span><strong>Trust Elite</strong></div>
+            <div class="stat"><span>LADDER</span><strong>18 medals</strong></div>
+            <div class="stat"><span>PROGRESS</span><strong>Rating + RP</strong></div>
+            <div class="stat"><span>TOP END</span><strong>Global Elite</strong></div>
           </div>
         </article>
         <article class="card landing-bottom-card">
-          <div class="section-title"><h3>Rank ladder preview</h3><span class="pill live">Season 01</span></div>
-          <div class="rank-ladder-grid">
-            <div class="rank-show-card"><div><strong>Recruit</strong><div class="muted">Entry tier</div></div><span class="rank-pill recruit">Recruit III</span></div>
-            <div class="rank-show-card"><div><strong>Vanguard</strong><div class="muted">Stable fighter</div></div><span class="rank-pill vanguard">Vanguard II</span></div>
-            <div class="rank-show-card"><div><strong>Phantom</strong><div class="muted">High-threat player</div></div><span class="rank-pill phantom">Phantom I</span></div>
-            <div class="rank-show-card"><div><strong>Ascendant</strong><div class="muted">Serious contender</div></div><span class="rank-pill ascendant">Ascendant I</span></div>
-            <div class="rank-show-card"><div><strong>Sovereign</strong><div class="muted">Elite field</div></div><span class="rank-pill sovereign">Sovereign</span></div>
-            <div class="rank-show-card"><div><strong>Trust Elite</strong><div class="muted">Leaderboard prestige</div></div><span class="rank-pill trust-elite">Trust Elite</span></div>
+          <div class="section-title"><h3>Medal ladder preview</h3><span class="pill live">Season 01</span></div>
+          <div class="rank-ladder-grid medal-ladder-grid">
+            <div class="rank-show-card"><img class="rank-medal-large" src="./assets/ranks/silver.svg" alt=""><div><strong>Silver</strong><div class="muted">Starting medal path</div></div><span class="rank-pill silver"><img class="rank-medal-img" src="./assets/ranks/silver.svg" alt="">Silver I</span></div>
+            <div class="rank-show-card"><img class="rank-medal-large" src="./assets/ranks/gold_nova.svg" alt=""><div><strong>Gold Nova</strong><div class="muted">Reliable ranked player</div></div><span class="rank-pill gold"><img class="rank-medal-img" src="./assets/ranks/gold_nova.svg" alt="">Gold Nova III</span></div>
+            <div class="rank-show-card"><img class="rank-medal-large" src="./assets/ranks/master_guardian.svg" alt=""><div><strong>Master Guardian</strong><div class="muted">Strong duo contender</div></div><span class="rank-pill guardian"><img class="rank-medal-img" src="./assets/ranks/master_guardian.svg" alt="">MG II</span></div>
+            <div class="rank-show-card"><img class="rank-medal-large" src="./assets/ranks/legendary_eagle.svg" alt=""><div><strong>Legendary Eagle</strong><div class="muted">High-level pressure</div></div><span class="rank-pill eagle"><img class="rank-medal-img" src="./assets/ranks/legendary_eagle.svg" alt="">Legendary Eagle</span></div>
+            <div class="rank-show-card"><img class="rank-medal-large" src="./assets/ranks/supreme.svg" alt=""><div><strong>Supreme</strong><div class="muted">Elite bracket</div></div><span class="rank-pill supreme"><img class="rank-medal-img" src="./assets/ranks/supreme.svg" alt="">Supreme</span></div>
+            <div class="rank-show-card"><img class="rank-medal-large" src="./assets/ranks/global_elite.svg" alt=""><div><strong>Global Elite</strong><div class="muted">Top prestige medal</div></div><span class="rank-pill global"><img class="rank-medal-img" src="./assets/ranks/global_elite.svg" alt="">Global Elite</span></div>
           </div>
         </article>
       </div>
     </section>
 
-    <section id="status" class="section landing-section reveal reveal-3">
-      <div class="container grid-3">
-        <div class="card status-card">
-          <div class="section-title"><h3 data-i18n="backend_title">Backend</h3><span id="backendBadge" class="pill idle">Checking...</span></div>
-          <div class="muted" id="backendText" data-i18n="backend_text_loading">Checking TRUST backend availability.</div>
-        </div>
-        <div class="card status-card">
-          <div class="section-title"><h3 data-i18n="config_title">Config</h3><span id="configBadge" class="pill idle">Waiting</span></div>
-          <div class="muted" id="configText" data-i18n="config_text_loading">Loading matchmaking config.</div>
-          <div class="muted" style="margin-top:10px">В поиске: <strong data-live-searching-count>0</strong> • LIVE матчей: <strong data-live-active-matches>0</strong></div>
-        </div>
-        <div class="card status-card">
-          <div class="section-title"><h3 data-i18n="principle_title">Principle</h3><span class="pill live">Steam-only</span></div>
-          <div class="muted" data-i18n="principle_text">Nick and account come from Steam, the mode is only 2v2, and once all players accept the match the platform moves into map selection and server connect.</div>
-        </div>
+    <section id="maps" class="section landing-section reveal reveal-3">
+      <div class="container landing-map-showcase">
+        <article class="card landing-bottom-card prestige-panel">
+          <div>
+            <span class="badge">MAP POOL</span>
+            <h2 class="trust-gradient-text" style="font-size:clamp(30px,4vw,48px);margin:16px 0 10px;letter-spacing:-.06em">Every match should feel like an arena pick.</h2>
+            <p class="muted landing-lead">Map vote is now presented as a clean visual stage instead of plain buttons. It makes the match flow feel premium before players even connect.</p>
+          </div>
+          <div class="prestige-kpi">
+            <div class="stat"><span>MODE</span><strong>2v2</strong></div>
+            <div class="stat"><span>VOTE</span><strong>Map pool</strong></div>
+            <div class="stat"><span>FLOW</span><strong>Accept → Vote → Connect</strong></div>
+          </div>
+        </article>
+        <article class="card landing-bottom-card">
+          <div class="section-title"><h3>Featured maps</h3><span class="pill live">Vote stage</span></div>
+          <div class="landing-map-grid">
+            <div class="landing-map-card map-mirage"><span>Mirage</span><strong>balanced aim + mid control</strong></div>
+            <div class="landing-map-card map-inferno"><span>Inferno</span><strong>utility pressure</strong></div>
+            <div class="landing-map-card map-dust"><span>Dust II</span><strong>classic duels</strong></div>
+            <div class="landing-map-card map-nuke"><span>Nuke</span><strong>vertical tactics</strong></div>
+            <div class="landing-map-card map-overpass"><span>Overpass</span><strong>space control</strong></div>
+            <div class="landing-map-card map-vertigo"><span>Vertigo</span><strong>fast contact</strong></div>
+          </div>
+        </article>
       </div>
     </section>
 

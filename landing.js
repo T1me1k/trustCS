@@ -20,14 +20,13 @@ const LANDING_I18N = {
   en: {
     brand_sub: 'Competitive 2v2 platform',
     nav_platform: 'Platform',
-    nav_status: 'Status',
     nav_leaderboard: 'Leaderboard',
     cabinet: 'Cabinet',
     login: 'Sign in with Steam',
     logout: 'Log out',
     release_badge: 'TRUST RELEASE',
     hero_title: 'Queue. Compete.<br>Climb.',
-    hero_text: 'Premium ranked arena for CS:GO: 2v2 queue, seasonal TRUST ranks, clean match flow and profile status players want to flex.',
+    hero_text: 'Premium ranked arena for CS:GO: 2v2 queue, classic medal progression, clean match flow and profile status players want to flex.',
     hero_cta_login: 'Sign in with Steam',
     hero_cta_open: 'Open app',
     hero_cta_leaderboard: 'Leaderboard',
@@ -82,7 +81,7 @@ const LANDING_I18N = {
     logout: 'Выйти',
     release_badge: 'TRUST RELEASE',
     hero_title: 'Играй. Побеждай.<br>Поднимайся.',
-    hero_text: 'Премиальная ranked-арена для CS:GO: очередь 2x2, сезонные TRUST-звания, чистый match flow и профиль, который хочется показать.',
+    hero_text: 'Премиальная ranked-арена для CS:GO: очередь 2x2, классические медальки, чистый match flow и профиль, который хочется показать.',
     hero_cta_login: 'Войти через Steam',
     hero_cta_open: 'Открыть app',
     hero_cta_leaderboard: 'Лидерборд',
@@ -158,8 +157,6 @@ function applyTranslations() {
     btn.classList.toggle('active', btn.dataset.lang === landingState.lang);
   });
   applyUser(landingState.user);
-  renderBackendStatus();
-  renderConfigStatus();
 }
 
 async function api(path, options = {}) {
@@ -311,7 +308,7 @@ function bindLandingEvents() {
 async function initLanding() {
   bindLandingEvents();
   applyTranslations();
-  await Promise.all([refreshAuth(), refreshHealth(), refreshConfig()]);
+  await refreshAuth();
 }
 
 if (document.readyState === 'loading') {
@@ -326,7 +323,7 @@ async function safeLandingRefresh() {
   if (landingRefreshInFlight) return;
   landingRefreshInFlight = true;
   try {
-    await Promise.all([refreshAuth(), refreshHealth(), refreshConfig()]);
+    await refreshAuth();
   } finally {
     landingRefreshInFlight = false;
   }

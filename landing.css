@@ -509,3 +509,20 @@ body::after{
 .prestige-kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .prestige-kpi .stat strong{font-size:20px}
 @media (max-width:980px){.trust-rank-showcase,.rank-ladder-grid{grid-template-columns:1fr}.prestige-kpi{grid-template-columns:1fr}}
+
+
+/* TRUST requested polish: classic medals + map voting cards */
+.rank-pill{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.rank-medal-img{width:22px;height:22px;object-fit:contain;flex:0 0 auto;filter:drop-shadow(0 5px 10px rgba(0,0,0,.35))}
+.rank-tooltip-name{display:flex;align-items:center;gap:8px}
+.rank-medal-large{width:44px;height:44px;object-fit:contain;filter:drop-shadow(0 10px 18px rgba(0,0,0,.42));flex:0 0 auto}
+.medal-ladder-grid .rank-show-card{justify-content:flex-start}.medal-ladder-grid .rank-show-card .rank-pill{margin-left:auto}
+.landing-map-showcase{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:stretch}
+.landing-map-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.landing-map-card{position:relative;overflow:hidden;min-height:112px;padding:16px;border-radius:20px;border:1px solid rgba(220,227,238,.08);background:linear-gradient(135deg,rgba(111,91,255,.16),rgba(70,201,255,.08));display:flex;flex-direction:column;justify-content:flex-end;isolation:isolate}
+.landing-map-card::before{content:"";position:absolute;inset:0;z-index:-2;background:radial-gradient(circle at 18% 20%,rgba(255,255,255,.16),transparent 26%),linear-gradient(135deg,rgba(111,91,255,.24),rgba(10,11,16,.72) 58%,rgba(70,201,255,.10));opacity:.95}
+.landing-map-card::after{content:"";position:absolute;inset:auto -30px -55px auto;width:160px;height:160px;border-radius:50%;background:rgba(111,91,255,.18);filter:blur(6px);z-index:-1}
+.landing-map-card span{font-size:20px;font-weight:900;letter-spacing:-.04em}.landing-map-card strong{margin-top:5px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+.map-inferno::before{background:radial-gradient(circle at 20% 22%,rgba(243,201,105,.16),transparent 26%),linear-gradient(135deg,rgba(255,92,115,.18),rgba(10,11,16,.76) 60%,rgba(243,201,105,.10))}.map-dust::before{background:linear-gradient(135deg,rgba(243,201,105,.18),rgba(10,11,16,.76) 56%,rgba(111,91,255,.08))}.map-nuke::before{background:linear-gradient(135deg,rgba(70,201,255,.16),rgba(10,11,16,.76) 60%,rgba(33,201,122,.10))}.map-overpass::before{background:linear-gradient(135deg,rgba(33,201,122,.14),rgba(10,11,16,.76) 60%,rgba(70,201,255,.10))}.map-vertigo::before{background:linear-gradient(135deg,rgba(169,157,255,.20),rgba(10,11,16,.78) 55%,rgba(243,201,105,.10))}
+.map-vote-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}.map-vote-card{position:relative;overflow:hidden;min-height:78px;border-radius:18px;border:1px solid rgba(220,227,238,.10);background:rgba(255,255,255,.035);color:var(--text);padding:14px;text-align:left;cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}.map-vote-card:hover{transform:translateY(-2px);border-color:rgba(169,157,255,.32);box-shadow:0 18px 46px rgba(0,0,0,.28),0 0 28px rgba(111,91,255,.11)}.map-vote-bg{position:absolute;inset:0;background:radial-gradient(circle at 18% 18%,rgba(255,255,255,.10),transparent 25%),linear-gradient(135deg,rgba(111,91,255,.18),rgba(70,201,255,.06));opacity:.7;z-index:0}.map-vote-title,.map-vote-sub,.vote-count-badge{position:relative;z-index:1}.map-vote-title{display:block;font-size:16px;font-weight:900;letter-spacing:-.03em}.map-vote-sub{display:block;margin-top:6px;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.09em}.vote-count-badge{display:inline-flex;margin-top:8px;min-height:24px;padding:4px 8px;border-radius:999px;background:rgba(111,91,255,.16);border:1px solid rgba(169,157,255,.26);font-size:12px;font-weight:800;color:#E9E4FF}
+@media (max-width:980px){.landing-map-showcase,.landing-map-grid,.map-vote-grid{grid-template-columns:1fr}.medal-ladder-grid .rank-show-card{align-items:flex-start}.medal-ladder-grid .rank-show-card .rank-pill{margin-left:0}}
