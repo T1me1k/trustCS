@@ -6,6 +6,7 @@ const BACKEND_BASE_URL = (() => {
 })();
 
 const AUTH_RETURN_STORAGE_KEY = 'trust_post_auth_return';
+const API_TIMEOUT_MS = 15000;
 function getSteamAuthUrl() {
   const returnTo = encodeURIComponent(window.location.href);
   return `${BACKEND_BASE_URL}/auth/steam?returnTo=${returnTo}`;
@@ -33,15 +34,22 @@ let lbLang = localStorage.getItem(LB_LANG_KEY) === 'en' ? 'en' : 'ru';
 const lbT = (k) => (LB_I18N[lbLang] && LB_I18N[lbLang][k]) || LB_I18N.ru[k] || k;
 
 async function api(path, options = {}) {
-  const response = await fetch(`${BACKEND_BASE_URL}${path}`, {
-    credentials: 'include',
-    cache: 'no-store',
-    headers: { ...(options.headers || {}) },
-    ...options
-  });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok || data.ok === false) throw new Error(data.error || `request_failed_${response.status}`);
-  return data;
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), Number(options.timeoutMs || API_TIMEOUT_MS));
+  try {
+    const response = await fetch(`${BACKEND_BASE_URL}${path}`, {
+      credentials: 'include',
+      cache: 'no-store',
+      ...options,
+      headers: { ...(options.headers || {}) },
+      signal: options.signal || controller.signal
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || data.ok === false) throw new Error(data.error || `request_failed_${response.status}`);
+    return data;
+  } finally {
+    window.clearTimeout(timeout);
+  }
 }
 
 function applyLbLang() {
@@ -73,7 +81,7 @@ const RANK_TABLE = [
     "name": "Bronze",
     "tierName": "Bronze",
     "division": null,
-    "minElo": 300,
+    "minElo": 225,
     "color": "bronze",
     "icon": "./assets/ranks/bronze.svg"
   },
@@ -82,7 +90,7 @@ const RANK_TABLE = [
     "name": "Silver",
     "tierName": "Silver",
     "division": null,
-    "minElo": 600,
+    "minElo": 450,
     "color": "silver",
     "icon": "./assets/ranks/silver.svg"
   },
@@ -91,7 +99,7 @@ const RANK_TABLE = [
     "name": "Gold",
     "tierName": "Gold",
     "division": null,
-    "minElo": 900,
+    "minElo": 675,
     "color": "gold",
     "icon": "./assets/ranks/gold.svg"
   },
@@ -100,7 +108,7 @@ const RANK_TABLE = [
     "name": "Platinum",
     "tierName": "Platinum",
     "division": null,
-    "minElo": 1200,
+    "minElo": 900,
     "color": "platinum",
     "icon": "./assets/ranks/platinum.svg"
   },
@@ -109,7 +117,7 @@ const RANK_TABLE = [
     "name": "Diamond",
     "tierName": "Diamond",
     "division": null,
-    "minElo": 1500,
+    "minElo": 1125,
     "color": "diamond",
     "icon": "./assets/ranks/diamond.svg"
   },
@@ -118,7 +126,7 @@ const RANK_TABLE = [
     "name": "Master",
     "tierName": "Master",
     "division": null,
-    "minElo": 1800,
+    "minElo": 1350,
     "color": "master",
     "icon": "./assets/ranks/master.svg"
   },
@@ -127,7 +135,7 @@ const RANK_TABLE = [
     "name": "Grandmaster",
     "tierName": "Grandmaster",
     "division": null,
-    "minElo": 2100,
+    "minElo": 1575,
     "color": "grandmaster",
     "icon": "./assets/ranks/grandmaster.svg"
   },
@@ -136,7 +144,7 @@ const RANK_TABLE = [
     "name": "Elite",
     "tierName": "Elite",
     "division": null,
-    "minElo": 2400,
+    "minElo": 1800,
     "color": "elite",
     "icon": "./assets/ranks/elite.svg"
   },
@@ -145,7 +153,7 @@ const RANK_TABLE = [
     "name": "Legend",
     "tierName": "Legend",
     "division": null,
-    "minElo": 2700,
+    "minElo": 2000,
     "color": "legend",
     "icon": "./assets/ranks/legend.svg"
   }

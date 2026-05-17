@@ -6,6 +6,7 @@ const BACKEND_BASE_URL = (() => {
 })();
 
 const AUTH_RETURN_STORAGE_KEY = 'trust_post_auth_return';
+const API_TIMEOUT_MS = 15000;
 function getSteamAuthUrl() {
   const returnTo = encodeURIComponent(window.location.href);
   return `${BACKEND_BASE_URL}/auth/steam?returnTo=${returnTo}`;
@@ -161,15 +162,22 @@ function applyTranslations() {
 }
 
 async function api(path, options = {}) {
-  const response = await fetch(`${BACKEND_BASE_URL}${path}`, {
-    credentials: 'include',
-    cache: 'no-store',
-    headers: { ...(options.headers || {}) },
-    ...options
-  });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok || data.ok === false) throw new Error(data.error || `request_failed_${response.status}`);
-  return data;
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), Number(options.timeoutMs || API_TIMEOUT_MS));
+  try {
+    const response = await fetch(`${BACKEND_BASE_URL}${path}`, {
+      credentials: 'include',
+      cache: 'no-store',
+      ...options,
+      headers: { ...(options.headers || {}) },
+      signal: options.signal || controller.signal
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || data.ok === false) throw new Error(data.error || `request_failed_${response.status}`);
+    return data;
+  } finally {
+    window.clearTimeout(timeout);
+  }
 }
 
 function applyUser(user) {

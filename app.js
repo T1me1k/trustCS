@@ -48,7 +48,7 @@ const RANK_TABLE = [
     "name": "Bronze",
     "tierName": "Bronze",
     "division": null,
-    "minElo": 300,
+    "minElo": 225,
     "color": "bronze",
     "icon": "./assets/ranks/bronze.svg"
   },
@@ -57,7 +57,7 @@ const RANK_TABLE = [
     "name": "Silver",
     "tierName": "Silver",
     "division": null,
-    "minElo": 600,
+    "minElo": 450,
     "color": "silver",
     "icon": "./assets/ranks/silver.svg"
   },
@@ -66,7 +66,7 @@ const RANK_TABLE = [
     "name": "Gold",
     "tierName": "Gold",
     "division": null,
-    "minElo": 900,
+    "minElo": 675,
     "color": "gold",
     "icon": "./assets/ranks/gold.svg"
   },
@@ -75,7 +75,7 @@ const RANK_TABLE = [
     "name": "Platinum",
     "tierName": "Platinum",
     "division": null,
-    "minElo": 1200,
+    "minElo": 900,
     "color": "platinum",
     "icon": "./assets/ranks/platinum.svg"
   },
@@ -84,7 +84,7 @@ const RANK_TABLE = [
     "name": "Diamond",
     "tierName": "Diamond",
     "division": null,
-    "minElo": 1500,
+    "minElo": 1125,
     "color": "diamond",
     "icon": "./assets/ranks/diamond.svg"
   },
@@ -93,7 +93,7 @@ const RANK_TABLE = [
     "name": "Master",
     "tierName": "Master",
     "division": null,
-    "minElo": 1800,
+    "minElo": 1350,
     "color": "master",
     "icon": "./assets/ranks/master.svg"
   },
@@ -102,7 +102,7 @@ const RANK_TABLE = [
     "name": "Grandmaster",
     "tierName": "Grandmaster",
     "division": null,
-    "minElo": 2100,
+    "minElo": 1575,
     "color": "grandmaster",
     "icon": "./assets/ranks/grandmaster.svg"
   },
@@ -111,7 +111,7 @@ const RANK_TABLE = [
     "name": "Elite",
     "tierName": "Elite",
     "division": null,
-    "minElo": 2400,
+    "minElo": 1800,
     "color": "elite",
     "icon": "./assets/ranks/elite.svg"
   },
@@ -120,7 +120,7 @@ const RANK_TABLE = [
     "name": "Legend",
     "tierName": "Legend",
     "division": null,
-    "minElo": 2700,
+    "minElo": 2000,
     "color": "legend",
     "icon": "./assets/ranks/legend.svg"
   }
@@ -361,19 +361,52 @@ function getAvatarMarkup(avatarUrl, fallback, className = 'avatar sm') {
   return `<div class="avatar-fallback ${className.includes('sm') ? 'sm' : ''}">${esc((fallback || '?').slice(0, 1).toUpperCase())}</div>`;
 }
 
+const API_TIMEOUT_MS = 15000;
+const uiActionLocks = new Set();
+
+function normalizeApiError(error) {
+  if (!error) return 'request_failed';
+  if (error.name === 'AbortError') return 'request_timeout';
+  return error.message || String(error) || 'request_failed';
+}
+
+async function withUiActionLock(key, buttonIds, task) {
+  if (uiActionLocks.has(key)) return null;
+  uiActionLocks.add(key);
+  const buttons = (Array.isArray(buttonIds) ? buttonIds : [buttonIds]).map((id) => $(id)).filter(Boolean);
+  const oldStates = buttons.map((btn) => ({ btn, disabled: btn.disabled, text: btn.textContent }));
+  buttons.forEach((btn) => { btn.disabled = true; btn.classList.add('is-busy'); });
+  try {
+    return await task();
+  } finally {
+    oldStates.forEach(({ btn, disabled }) => { btn.disabled = disabled; btn.classList.remove('is-busy'); });
+    uiActionLocks.delete(key);
+    renderParty();
+    renderRestrictionCard();
+    renderQueue();
+  }
+}
+
 async function api(path, options = {}) {
-  const response = await fetch(`${BACKEND_BASE_URL}${path}`, {
-    credentials: 'include',
-    cache: 'no-store',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.headers || {})
-    },
-    ...options
-  });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok || data.ok === false) throw new Error(data.error || `request_failed_${response.status}`);
-  return data;
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), Number(options.timeoutMs || API_TIMEOUT_MS));
+  const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+  try {
+    const response = await fetch(`${BACKEND_BASE_URL}${path}`, {
+      credentials: 'include',
+      cache: 'no-store',
+      ...options,
+      headers,
+      signal: options.signal || controller.signal
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || data.ok === false) throw new Error(data.error || `request_failed_${response.status}`);
+    return data;
+  } catch (error) {
+    throw new Error(normalizeApiError(error));
+  } finally {
+    window.clearTimeout(timeout);
+  }
 }
 
 function showAlert(message, kind = 'info') {
@@ -662,7 +695,7 @@ function renderQueue() {
   const queue = state.queue;
   const inQueue = !!queue;
   const restrictions = state.restrictions || null;
-  const canQueue = restrictions?.canQueue !== false;
+  const canQueue = !!state.user && restrictions?.canQueue !== false;
   const stats = state.queueStats || {};
   const searchingPlayers = Number(stats.searchingPlayers || 0);
   const activeMatches = Number(stats.activeMatches || 0);
@@ -677,7 +710,8 @@ function renderQueue() {
       : (restrictions?.restriction?.message || 'Поиск временно недоступен.'));
   hide('joinQueueBtn', inQueue);
   hide('cancelQueueBtn', !inQueue);
-  if ($('joinQueueBtn')) $('joinQueueBtn').disabled = !inQueue && !canQueue;
+  if ($('joinQueueBtn')) $('joinQueueBtn').disabled = !state.user || (!inQueue && !canQueue) || uiActionLocks.has('join-queue');
+  if ($('cancelQueueBtn')) $('cancelQueueBtn').disabled = !inQueue || uiActionLocks.has('cancel-queue');
   text('queuePartyLabel', 'Party');
   const partyCount = state.party?.members?.length || state.party?.players?.length || (state.user ? 1 : 0);
   if ($('queuePartyStat')) $('queuePartyStat').textContent = `${partyCount} / 2`;
@@ -755,7 +789,7 @@ function isMatchRoomTimedOut(match) {
 
 function renderCurrentMatch() {
   const match = state.match;
-  const hasMatch = !!match;
+  const hasMatch = shouldDisplayMatchRoom(match) && !isMatchRoomTimedOut(match);
   hide('queueStageCard', hasMatch);
   hide('matchStageCard', !hasMatch);
   $('currentMatchBadge').textContent = hasMatch ? (match.status || 'Матч') : 'Нет матча';
@@ -1047,23 +1081,27 @@ function login() { rememberAuthReturn(); window.location.assign(getSteamAuthUrl(
 async function logout() { try { await api('/auth/logout', { method: 'POST' }); } catch (_) {} window.location.reload(); }
 
 async function createParty() {
-  try {
-    await api('/api/party/create', { method: 'POST' });
-    await refreshAll();
-    showAlert('Party создана.');
-  } catch (err) {
-    showAlert(`Не удалось создать party: ${err.message}`, 'error');
-  }
+  return withUiActionLock('create-party', ['createPartyBtn', 'joinQueueBtn'], async () => {
+    try {
+      await api('/api/party/create', { method: 'POST' });
+      await refreshAll();
+      showAlert('Party создана.');
+    } catch (err) {
+      showAlert(`Не удалось создать party: ${err.message}`, 'error');
+    }
+  });
 }
 
 async function leaveParty() {
-  try {
-    await api('/api/party/leave', { method: 'POST' });
-    await refreshAll();
-    showAlert('Ты покинул party.');
-  } catch (err) {
-    showAlert(`Не удалось выйти из party: ${err.message}`, 'error');
-  }
+  return withUiActionLock('leave-party', ['leavePartyBtn', 'cancelQueueBtn'], async () => {
+    try {
+      await api('/api/party/leave', { method: 'POST' });
+      await refreshAll();
+      showAlert('Ты покинул party.');
+    } catch (err) {
+      showAlert(`Не удалось выйти из party: ${err.message}`, 'error');
+    }
+  });
 }
 
 async function searchUsers() {
@@ -1143,34 +1181,37 @@ async function declineInvite(id) {
 }
 
 async function joinQueue() {
-  try {
-    if (!state.user) {
-      showAlert('Сначала войди через Steam.', 'error');
-      return;
+  return withUiActionLock('join-queue', ['joinQueueBtn', 'cancelQueueBtn', 'createPartyBtn'], async () => {
+    try {
+      if (!state.user) {
+        showAlert('Сначала войди через Steam.', 'error');
+        return;
+      }
+      if (!state.party?.id) {
+        await api('/api/party/create', { method: 'POST' });
+        await refreshParty();
+      }
+      await api('/api/queue/join', { method: 'POST', body: JSON.stringify({ mode: '2x2' }) });
+      await refreshAll();
+      showAlert('Поиск матча запущен.');
+    } catch (err) {
+      await safeRefreshAll();
+      showAlert(`Не удалось запустить поиск: ${err.message}`, 'error');
     }
-    if (!state.party?.id) {
-      await api('/api/party/create', { method: 'POST' });
-      await refreshParty();
-      renderParty();
-      renderRestrictionCard();
-      renderQueue();
-    }
-    await api('/api/queue/join', { method: 'POST', body: JSON.stringify({ mode: '2x2' }) });
-    await refreshAll();
-    showAlert('Поиск матча запущен.');
-  } catch (err) {
-    showAlert(`Не удалось запустить поиск: ${err.message}`, 'error');
-  }
+  });
 }
 
 async function cancelQueue() {
-  try {
-    await api('/api/queue/cancel', { method: 'POST' });
-    await refreshAll();
-    showAlert('Поиск матча отменён.');
-  } catch (err) {
-    showAlert(`Не удалось отменить поиск: ${err.message}`, 'error');
-  }
+  return withUiActionLock('cancel-queue', ['cancelQueueBtn', 'joinQueueBtn'], async () => {
+    try {
+      await api('/api/queue/cancel', { method: 'POST' });
+      await refreshAll();
+      showAlert('Поиск матча отменён.');
+    } catch (err) {
+      await safeRefreshAll();
+      showAlert(`Не удалось отменить поиск: ${err.message}`, 'error');
+    }
+  });
 }
 
 async function copyConnect() {
