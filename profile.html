@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TRUST Profile</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./app.css" />
+  <link rel="stylesheet" href="./profile.css" />
+</head>
+<body class="profile-page">
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a class="brand" href="./index.html" aria-label="TRUST home">
+        <div class="brand-mark">T</div>
+        <div>
+          <div class="brand-name">TRUST</div>
+          <div class="brand-sub" id="profileBrandSub">player profile</div>
+        </div>
+      </a>
+      <nav class="nav">
+        <a href="./index.html" id="profileNavHome">Главная</a>
+        <a href="./app.html" id="profileNavPlay">Играть</a>
+        <a href="./leaderboard.html" id="profileNavLeaderboard">Лидерборд</a>
+        <a class="active" href="./profile.html" id="profileNavProfile">Профиль</a>
+      </nav>
+      <div class="actions">
+        <div class="lang-switch" aria-label="Language switch">
+          <button type="button" class="lang-btn active" id="profileLangRu">RU</button>
+          <button type="button" class="lang-btn" id="profileLangEn">ENG</button>
+        </div>
+        <button class="btn primary" id="profileLoginBtn">Войти через Steam</button>
+        <button class="btn ghost hidden" id="profileLogoutBtn">Выйти</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container mobile-nav mobile-nav-profile" aria-label="Mobile navigation">
+    <a class="mobile-nav-link" href="./index.html" id="profileMobileNavHome">Главная</a>
+    <a class="mobile-nav-link" href="./app.html" id="profileMobileNavPlay">Играть</a>
+    <a class="mobile-nav-link" href="./leaderboard.html" id="profileMobileNavLeaderboard">Лидерборд</a>
+    <a class="mobile-nav-link active" href="./profile.html" id="profileMobileNavProfile">Профиль</a>
+  </div>
+
+  <main class="container profile-shell">
+    <section class="card profile-guest-card" id="profileGuestState">
+      <span class="badge">TRUST PROFILE</span>
+      <h1 id="guestTitle">Войди через Steam, чтобы открыть профиль.</h1>
+      <p class="muted" id="guestText">Профиль показывает твой ранг, рейтинг, прогресс, winrate, серии и историю матчей.</p>
+      <div class="hero-cta"><button class="btn primary" id="guestLoginBtn">Войти через Steam</button><a class="btn ghost" href="./leaderboard.html" id="guestLeaderboardBtn">Смотреть лидерборд</a></div>
+    </section>
+
+    <section class="profile-content hidden" id="profileContent">
+      <section class="card profile-hero-card">
+        <div class="profile-hero-bg"></div>
+        <div class="profile-hero-left">
+          <img id="heroAvatar" class="profile-hero-avatar" alt="avatar">
+          <div class="profile-identity">
+            <span class="badge" id="profileSteamBadge">Steam connected</span>
+            <h1 id="heroNickname">—</h1>
+            <div id="heroSteamId" class="muted">—</div>
+            <div class="profile-hero-actions"><a class="btn secondary" href="./app.html" id="profilePlayBtn">Играть</a><a class="btn ghost" href="./leaderboard.html" id="profileLeaderboardBtn">Лидерборд</a></div>
+          </div>
+        </div>
+        <div class="profile-rank-spotlight">
+          <img id="heroRankIcon" class="profile-rank-medal" src="./assets/ranks/iron.svg" alt="rank">
+          <div>
+            <div class="label" id="currentRankLabel">Текущее звание</div>
+            <div id="heroRankName" class="profile-rank-name">Iron</div>
+            <div id="heroRating" class="profile-rating">100 Rating</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="profile-main-grid">
+        <article class="card profile-progress-card">
+          <div class="section-title"><h3 id="progressTitle">Прогресс звания</h3><span class="pill live" id="rankStatusPill">Season 01</span></div>
+          <div class="profile-progress-top">
+            <div>
+              <div class="label" id="progressCurrentLabel">Сейчас</div>
+              <strong id="progressCurrentRank">Iron</strong>
+            </div>
+            <div class="profile-progress-next">
+              <div class="label" id="progressNextLabel">Следующее</div>
+              <strong id="progressNextRank">Bronze</strong>
+            </div>
+          </div>
+          <div class="rank-progress-bar profile-progress-bar"><div id="profileProgressFill" class="rank-progress-fill"></div></div>
+          <div class="profile-progress-foot"><span id="profileProgressText" class="muted">—</span><strong id="profileProgressPercent">0%</strong></div>
+        </article>
+
+        <article class="card profile-season-card">
+          <div class="section-title"><h3 id="seasonTitle">Season snapshot</h3><span class="pill idle">Beta</span></div>
+          <div class="season-list">
+            <div><span id="seasonPeakLabel">Пик сезона</span><strong id="seasonPeak">—</strong></div>
+            <div><span id="leaderboardPositionLabel">Позиция</span><strong id="leaderboardPosition">—</strong></div>
+            <div><span id="lastMatchLabel">Последний матч</span><strong id="lastMatchAt">—</strong></div>
+          </div>
+        </article>
+      </section>
+
+      <section class="profile-stat-grid">
+        <div class="stat profile-stat"><span id="matchesLabel">Матчи</span><strong id="statMatches">0</strong></div>
+        <div class="stat profile-stat"><span id="winrateLabel">Winrate</span><strong id="statWinrate">0%</strong></div>
+        <div class="stat profile-stat"><span id="recordLabel">W / L</span><strong id="statRecord">0 / 0</strong></div>
+        <div class="stat profile-stat"><span id="currentStreakLabel">Серия</span><strong id="statCurrentStreak">0W</strong></div>
+        <div class="stat profile-stat"><span id="bestStreakLabel">Лучшая серия</span><strong id="statBestStreak">0W</strong></div>
+        <div class="stat profile-stat"><span id="favoriteMapLabel">Лучшая карта</span><strong id="statFavoriteMap">—</strong></div>
+      </section>
+
+      <section class="profile-lower-grid">
+        <article class="card">
+          <div class="section-title"><h3 id="recentMatchesTitle">Последние матчи</h3><span class="pill idle" id="recentCount">0</span></div>
+          <div class="profile-match-list" id="profileMatchList"></div>
+        </article>
+        <article class="card">
+          <div class="section-title"><h3 id="formTitle">Форма игрока</h3><span class="pill live" id="standingPill">Building</span></div>
+          <div class="profile-form-orbs" id="profileFormOrbs"></div>
+          <div class="profile-insight-card">
+            <div class="label" id="insightLabel">Инсайт</div>
+            <p id="profileInsight" class="muted">—</p>
+          </div>
+        </article>
+      </section>
+    </section>
+  </main>
+
+  <script src="./frontend-config.js"></script>
+  <script src="./profile.js"></script>
+</body>
+</html>

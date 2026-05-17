@@ -19,12 +19,12 @@ function rememberAuthReturn() {
 
 const LB_I18N = {
   ru: {
-    login: 'Войти через Steam', brandSub: '2x2 leaderboard', navHome: 'Главная', navPlay: 'Играть', navLeaderboard: 'Лидерборд',
+    login: 'Войти через Steam', brandSub: '2x2 leaderboard', navHome: 'Главная', navPlay: 'Играть', navLeaderboard: 'Лидерборд', navProfile: 'Профиль',
     title: 'Лидерборд TRUST 2x2', subtitle: 'Топ игроков по Elo. Рейтинг считается на backend и одинаков для сайта и launcher.',
     headPlayer: 'Игрок', headRank: 'Звание', loading: 'Загрузка...', empty: 'Лидерборд пока пустой.', loadError: 'Не удалось загрузить лидерборд.'
   },
   en: {
-    login: 'Sign in with Steam', brandSub: '2x2 leaderboard', navHome: 'Home', navPlay: 'Play', navLeaderboard: 'Leaderboard',
+    login: 'Sign in with Steam', brandSub: '2x2 leaderboard', navHome: 'Home', navPlay: 'Play', navLeaderboard: 'Leaderboard', navProfile: 'Profile',
     title: 'TRUST 2v2 Leaderboard', subtitle: 'Top players by Elo. Rating is calculated on the backend and shared between the site and launcher.',
     headPlayer: 'Player', headRank: 'Rank', loading: 'Loading...', empty: 'The leaderboard is empty for now.', loadError: 'Failed to load leaderboard.'
   }
@@ -55,7 +55,7 @@ async function api(path, options = {}) {
 function applyLbLang() {
   document.documentElement.lang = lbLang;
   const map = {
-    lbLoginBtn: 'login', lbBrandSub: 'brandSub', lbNavHome: 'navHome', lbNavPlay: 'navPlay', lbNavLeaderboard: 'navLeaderboard', lbMobileNavHome: 'navHome', lbMobileNavPlay: 'navPlay', lbMobileNavLeaderboard: 'navLeaderboard',
+    lbLoginBtn: 'login', lbBrandSub: 'brandSub', lbNavHome: 'navHome', lbNavPlay: 'navPlay', lbNavLeaderboard: 'navLeaderboard', lbNavProfile: 'navProfile', lbMobileNavHome: 'navHome', lbMobileNavPlay: 'navPlay', lbMobileNavLeaderboard: 'navLeaderboard', lbMobileNavProfile: 'navProfile',
     lbTitle: 'title', lbSubtitle: 'subtitle', lbHeadPlayer: 'headPlayer', lbHeadRank: 'headRank'
   };
   Object.entries(map).forEach(([id, key]) => {
