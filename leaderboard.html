@@ -11,51 +11,9 @@
   <link rel="stylesheet" href="./live-session.css" />
 </head>
 <body>
-  <header class="topbar">
-    <div class="container topbar-inner">
-      <div class="brand">
-        <div class="brand-mark">T</div>
-        <div>
-          <div class="brand-name">TRUST</div>
-          <div class="brand-sub" id="lbBrandSub">2x2 leaderboard</div>
-        </div>
-      </div>
-      <nav class="nav">
-        <a href="./index.html" id="lbNavHome">Главная</a>
-        <a href="./app.html" id="lbNavPlay">Играть</a>
-        <a class="active" href="./leaderboard.html" id="lbNavLeaderboard">Лидерборд</a>
-        <a href="./profile.html" id="lbNavProfile">Профиль</a>
-      </nav>
-      <div class="actions">
-        <div class="lang-switch" aria-label="Language switch">
-          <button type="button" class="lang-btn active" id="lbLangRu">RU</button>
-          <button type="button" class="lang-btn" id="lbLangEn">ENG</button>
-        </div>
-        <button class="btn primary" id="lbLoginBtn">Войти через Steam</button>
-      </div>
-    </div>
-  </header>
-
-  <div class="container mobile-nav mobile-nav-leaderboard" aria-label="Mobile navigation">
-    <a class="mobile-nav-link" href="./index.html" id="lbMobileNavHome">Главная</a>
-    <a class="mobile-nav-link" href="./app.html" id="lbMobileNavPlay">Играть</a>
-    <a class="mobile-nav-link active" href="./leaderboard.html" id="lbMobileNavLeaderboard">Лидерборд</a>
-    <a class="mobile-nav-link" href="./profile.html" id="lbMobileNavProfile">Профиль</a>
-  </div>
-  <main class="container app-shell">
-    <section class="card">
-      <span class="badge">SEASON 1</span>
-      <h1 id="lbTitle" style="margin:16px 0 10px;font-size:48px;letter-spacing:-.06em">Лидерборд TRUST 2x2</h1>
-      <p class="muted" id="lbSubtitle">Топ игроков по Elo. Рейтинг считается на backend и одинаков для сайта и launcher.</p>
-      <p class="muted" style="margin-top:10px">В поиске: <strong data-live-searching-count>0</strong> • LIVE матчей: <strong data-live-active-matches>0</strong></p>
-    </section>
-    <section class="card" style="margin-top:18px">
-      <div class="table-head"><div>#</div><div id="lbHeadPlayer">Игрок</div><div id="lbHeadRank">Звание</div><div>Elo</div></div>
-      <div class="list" id="leaderboardRows"></div>
-    </section>
-  </main>
+  <div id="leaderboard-root"></div>
   <script src="./frontend-config.js"></script>
-  <script src="./leaderboard.js"></script>
+  <script type="module" src="./src/leaderboard/leaderboard-app.js"></script>
   <script src="./live-session.js" defer></script>
 </body>
 </html>
