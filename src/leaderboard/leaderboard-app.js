@@ -8,13 +8,13 @@ const I18N = {
     login: 'Войти через Steam', brandSub: '2x2 leaderboard', navHome: 'Главная', navPlay: 'Играть', navLeaderboard: 'Лидерборд', navProfile: 'Профиль',
     season: 'SEASON 1', title: 'Лидерборд TRUST 2x2', subtitle: 'Топ игроков по Elo. Рейтинг считается на backend и одинаков для сайта и launcher.',
     searching: 'В поиске', liveMatches: 'LIVE матчей', headPlayer: 'Игрок', headRank: 'Звание', loading: 'Загружаем лидерборд...',
-    empty: 'Лидерборд пока пуст.', loadError: 'Не удалось загрузить лидерборд.', retry: 'Повторить', unknown: 'Unknown'
+    empty: 'Лидерборд пока пуст.', loadError: 'Не удалось загрузить лидерборд.', retry: 'Повторить', unknown: 'Unknown', searchPlaceholder: 'Поиск игрока по нику...', noSearchResults: 'Игрок не найден', topThree: 'ТОП-3 игрока'
   },
   en: {
     login: 'Sign in with Steam', brandSub: '2x2 leaderboard', navHome: 'Home', navPlay: 'Play', navLeaderboard: 'Leaderboard', navProfile: 'Profile',
     season: 'SEASON 1', title: 'TRUST 2v2 Leaderboard', subtitle: 'Top players by Elo. Rating is calculated by the backend and shared by the site and launcher.',
     searching: 'Searching', liveMatches: 'LIVE matches', headPlayer: 'Player', headRank: 'Rank', loading: 'Loading leaderboard...',
-    empty: 'The leaderboard is empty for now.', loadError: 'Failed to load leaderboard.', retry: 'Retry', unknown: 'Unknown'
+    empty: 'The leaderboard is empty for now.', loadError: 'Failed to load leaderboard.', retry: 'Retry', unknown: 'Unknown', searchPlaceholder: 'Search player by nickname...', noSearchResults: 'Player not found', topThree: 'TOP 3 players'
   }
 };
 
@@ -118,16 +118,56 @@ function TrustHeader({ authed, lang, setLang }) {
   );
 }
 
-function LeaderboardRows({ items, lang }) {
+
+function PlayerAvatar({ item, className = 'avatar sm' }) {
+  const name = item.nickname || 'Unknown';
+  return item.avatarUrl
+    ? h('img', { className, src: item.avatarUrl, alt: name })
+    : h('div', { className: `${className} avatar-fallback` }, name.slice(0, 1).toUpperCase());
+}
+
+function getPlayerPosition(item, index) {
+  return item.rankPosition ?? (typeof item.rank === 'number' ? item.rank : undefined) ?? index + 1;
+}
+
+function TopThreePodium({ items, lang }) {
   const t = I18N[lang];
-  if (!items.length) return h('div', { className: 'empty' }, t.empty);
+  const topThree = items.slice(0, 3);
+  if (!topThree.length) return null;
+  const podiumOrder = [topThree[1], topThree[0], topThree[2]].filter(Boolean);
+
+  return h('div', { className: 'leaderboard-podium-wrap' },
+    h('div', { className: 'leaderboard-section-kicker' }, t.topThree),
+    h('div', { className: 'leaderboard-podium' },
+      podiumOrder.map((item) => {
+        const originalIndex = items.indexOf(item);
+        const position = getPlayerPosition(item, originalIndex);
+        const elo = item.elo2v2 ?? 100;
+        const rank = normalizeRank(typeof item.rank === 'object' ? item.rank : undefined, elo);
+        const placeClass = position === 1 ? 'first' : position === 2 ? 'second' : 'third';
+        return h('article', { className: `podium-card ${placeClass}`, key: `podium-${position}-${item.nickname || 'player'}` },
+          h('div', { className: 'podium-place' }, `#${position}`),
+          h(PlayerAvatar, { item, className: 'avatar podium-avatar' }),
+          h('div', { className: 'podium-name' }, item.nickname || t.unknown),
+          h('div', { className: 'podium-elo' }, elo, ' Elo'),
+          h('span', { className: `rank-pill ${rank.color || 'silver'}` }, rank.icon && h('img', { className: 'rank-medal-img', src: rank.icon, alt: '', loading: 'lazy' }), h('span', null, rank.name || 'Iron')),
+          h('div', { className: 'podium-block', 'aria-hidden': true })
+        );
+      })
+    )
+  );
+}
+
+function LeaderboardRows({ items, lang, emptyText }) {
+  const t = I18N[lang];
+  if (!items.length) return h('div', { className: 'empty' }, emptyText || t.empty);
   return items.map((item, index) => {
     const elo = item.elo2v2 ?? 100;
     const rank = normalizeRank(typeof item.rank === 'object' ? item.rank : undefined, elo);
     const position = item.rankPosition ?? (typeof item.rank === 'number' ? item.rank : undefined) ?? index + 1;
     return h('div', { className: 'table-row', key: `${item.nickname || 'player'}-${position}` },
       h('div', null, h('strong', null, `#${position}`)),
-      h('div', { className: 'table-player' }, h('img', { className: 'avatar sm', src: item.avatarUrl || '', alt: 'avatar' }), h('span', null, item.nickname || t.unknown)),
+      h('div', { className: 'table-player' }, h(PlayerAvatar, { item }), h('span', null, item.nickname || t.unknown)),
       h('div', null, h('span', { className: `rank-pill ${rank.color || 'silver'}` }, rank.icon && h('img', { className: 'rank-medal-img', src: rank.icon, alt: '', loading: 'lazy' }), h('span', null, rank.name || 'Iron'))),
       h('div', null, h('strong', null, elo))
     );
@@ -140,6 +180,7 @@ function LeaderboardApp() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [authed, setAuthed] = useState(false);
+  const [search, setSearch] = useState('');
   const t = I18N[lang];
 
   const setLang = (nextLang) => {
@@ -163,6 +204,12 @@ function LeaderboardApp() {
   useEffect(() => { document.documentElement.lang = lang; }, [lang]);
   useEffect(() => { void loadLeaderboard(); }, []);
 
+  const filteredItems = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return items;
+    return items.filter((item) => String(item.nickname || '').toLowerCase().includes(query));
+  }, [items, search]);
+
   const liveStats = useMemo(() => h('p', { className: 'muted', style: { marginTop: 10 } },
     `${t.searching}: `, h('strong', { 'data-live-searching-count': true }, '0'), ` • ${t.liveMatches}: `, h('strong', { 'data-live-active-matches': true }, '0')
   ), [t.liveMatches, t.searching]);
@@ -177,11 +224,15 @@ function LeaderboardApp() {
         liveStats
       ),
       h('section', { className: 'card', style: { marginTop: 18 } },
+        h(TopThreePodium, { items, lang }),
+        h('div', { className: 'leaderboard-tools' },
+          h('input', { className: 'input leaderboard-search', type: 'search', value: search, placeholder: t.searchPlaceholder, onChange: (event) => setSearch(event.target.value), 'aria-label': t.searchPlaceholder })
+        ),
         h('div', { className: 'table-head' }, h('div', null, '#'), h('div', null, t.headPlayer), h('div', null, t.headRank), h('div', null, 'Elo')),
         h('div', { className: 'list' },
           loading && h('div', { className: 'empty' }, t.loading),
           !loading && error && h('div', { className: 'empty' }, t.loadError, h('div', { style: { marginTop: 12 } }, h('button', { className: 'btn secondary', type: 'button', onClick: loadLeaderboard }, t.retry))),
-          !loading && !error && h(LeaderboardRows, { items, lang })
+          !loading && !error && h(LeaderboardRows, { items: filteredItems, lang, emptyText: search.trim() ? t.noSearchResults : t.empty })
         )
       )
     )
