@@ -110,6 +110,13 @@
         <div class="stat profile-stat"><span id="favoriteMapLabel">Лучшая карта</span><strong id="statFavoriteMap">—</strong></div>
       </section>
 
+      <section class="card profile-extended-card">
+        <div class="section-title"><h3 id="detailedStatsTitle">Расширенная статистика</h3><span class="pill idle" id="detailedStatsPill">Beta</span></div>
+        <div class="profile-stat-grid extended" id="profileDetailedStats"></div>
+        <div class="section-title map-stats-title"><h3 id="mapStatsTitle">Статистика по картам</h3></div>
+        <div class="map-stats-list" id="profileMapStats"></div>
+      </section>
+
       <section class="profile-lower-grid">
         <article class="card">
           <div class="section-title"><h3 id="recentMatchesTitle">Последние матчи</h3><span class="pill idle" id="recentCount">0</span></div>
@@ -128,6 +135,7 @@
   </main>
 
   <script src="./frontend-config.js"></script>
+  <script src="./trust-utils.js"></script>
   <script src="./profile.js"></script>
 </body>
 </html>

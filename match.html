@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TRUST Match Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./app.css" />
+  <link rel="stylesheet" href="./profile.css" />
+  <link rel="stylesheet" href="./match.css" />
+</head>
+<body class="match-page">
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a class="brand" href="./index.html" aria-label="TRUST home"><div class="brand-mark">T</div><div><div class="brand-name">TRUST</div><div class="brand-sub" id="matchBrandSub">Match Center</div></div></a>
+      <nav class="nav"><a href="./index.html" id="matchNavHome">Главная</a><a href="./app.html" id="matchNavPlay">Играть</a><a href="./leaderboard.html" id="matchNavLeaderboard">Лидерборд</a><a href="./profile.html" id="matchNavProfile">Профиль</a></nav>
+      <div class="actions"><div class="lang-switch" aria-label="Language switch"><button type="button" class="lang-btn active" id="matchLangRu">RU</button><button type="button" class="lang-btn" id="matchLangEn">ENG</button></div></div>
+    </div>
+  </header>
+  <div class="container mobile-nav" aria-label="Mobile navigation"><a class="mobile-nav-link" href="./index.html" id="matchMobileNavHome">Главная</a><a class="mobile-nav-link" href="./app.html" id="matchMobileNavPlay">Играть</a><a class="mobile-nav-link" href="./leaderboard.html" id="matchMobileNavLeaderboard">Лидерборд</a><a class="mobile-nav-link" href="./profile.html" id="matchMobileNavProfile">Профиль</a></div>
+  <main class="container match-shell">
+    <section class="match-loading" id="matchLoading" aria-live="polite"><div class="skeleton card"></div><div class="skeleton card"></div><div class="skeleton card"></div></section>
+    <section class="card hidden" id="matchError"><span class="badge" id="matchErrorBadge">Match not found</span><h1 id="matchErrorTitle">Матч не найден</h1><p class="muted" id="matchErrorText">Проверь id матча и попробуй ещё раз.</p><button class="btn primary" id="matchRetryBtn">Повторить</button></section>
+    <section class="match-content hidden" id="matchContent">
+      <section class="card match-result-card"><div class="section-title"><div><span class="badge" id="matchCenterBadge">Match Center</span><h1 id="matchResultTitle">Match result</h1></div><span class="pill live" id="matchStatusPill">—</span></div><div class="match-meta" id="matchMeta"></div><div class="scoreboard" id="scoreboard"></div><div class="alert hidden" id="matchIncompleteAlert"></div></section>
+      <section class="card hidden" id="matchMvpCard"></section>
+      <section class="match-teams" id="matchTeams"></section>
+      <section class="card" id="roundHistoryCard"><div class="section-title"><h3 id="roundHistoryTitle">История раундов</h3><div class="round-filter" role="group" aria-label="Round filter"><button class="btn ghost active" data-round-filter="all" id="roundFilterAll">Все</button><button class="btn ghost" data-round-filter="A" id="roundFilterA">Team A</button><button class="btn ghost" data-round-filter="B" id="roundFilterB">Team B</button></div></div><div class="round-strip" id="roundStrip"></div></section>
+    </section>
+  </main>
+  <script src="./frontend-config.js"></script><script src="./trust-utils.js"></script><script src="./match.js"></script>
+</body>
+</html>
